@@ -227,12 +227,7 @@ function PurchaseOrderForm() {
     setVendorSearchResults([]);
   };
 
-  // Updated recalculateTotal function - REPLACE your existing one
 
-  // Also update your tax change handlers - ADD these functions
-  // Replace your existing tax change handlers with these immediate ones:
-
-  // Updated recalculateTotal function - accepts tax values directly
   const recalculateTotal = (
     updatedItems,
     cgstVal,
@@ -403,7 +398,6 @@ function PurchaseOrderForm() {
   const [pendingSubmitData, setPendingSubmitData] = useState(null);
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!selectedCategory || !selectedQuotationNumber) {
       return alert("Please select both category and quotation");
     }
@@ -1074,6 +1068,7 @@ function PurchaseOrderForm() {
       </div>
     </div>
   );
+
   return (
     <>
       <div className="content">
@@ -1755,7 +1750,7 @@ function PurchaseOrderForm() {
                                   <div className="col-md-6 mb-3 row">
                                     <div className="col-xl-6">
                                       <label className="form-label">
-                                        Tax Discount:
+                                        Discount:
                                       </label></div>
                                     <div className="col-xl-6">
                                       <input
@@ -1765,7 +1760,7 @@ function PurchaseOrderForm() {
                                         onChange={(e) =>
                                           handleTaxDiscountChange(e.target.value)
                                         }
-                                        step="0.01"
+                               
                                       /></div>
                                   </div>
                                 </div>
@@ -1825,6 +1820,7 @@ function PurchaseOrderForm() {
             {showModal && <MaterialModal />}
             {showQuotationModal && <QuotationSearchModal />}
             {showVendorModal && <VendorSearchModal />}
+            {showPOModal && <POGenerationModal />}
           </div>
         </div>
       </div>

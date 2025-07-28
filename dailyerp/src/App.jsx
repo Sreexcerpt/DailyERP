@@ -48,7 +48,33 @@ import PurchaseContractDisplay from './pages/Purchase/purchaseContract/PurchaseC
 import PurchaseContractForm from './pages/Purchase/purchaseContract/PurchaseContractForm';
 import SalesContractForm from './pages/sales/salesContract/SalesContractForm';
 import ContractListPage from './pages/sales/salesContract/SalesContractList';
+import PaymentDisplay from './pages/Payments/PaymentDisplay';
+import Ledger from './pages/Ledger/Ledger';
+import MRP from './pages/masterdata/MRP';
+import Payments from './pages/Payments/Payments';
+
+
+
+
+import BillingCategory from './pages/category/BillingCategory';
+import CustomerCategoryForm from './pages/category/CustomerCategoryForm';
+import GoodsIssueCategory from './pages/category/GoodsIssueCategory';
+import GoodsReceiptCategory from './pages/category/GoodsReceiptCategory';
+import InvoiceCategory from './pages/category/InvoiceCategory';
+import MaterialCategory from './pages/category/MaterialCategory';
+import POCategoryForm from './pages/category/POCategoryForm';
+import Purchaserequestcat from './pages/category/Purchaserequestcat';
+import RFQCategoryForm from './pages/category/RFQCategoryForm';
 import SaleContractCategoryForm from './pages/category/SaleContractCategoryForm';
+import SaleQuotationCategoryForm from './pages/category/SaleQuotationCategoryForm';
+import SalesCategory from './pages/category/SalesCategory';
+import SalesOrderCategoryForm from './pages/category/SalesOrderCategoryForm';
+import TransferCategory from './pages/category/TransferCategory';
+import VendorCategoryForm from './pages/category/VendorCategory';
+
+
+
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const LoginScreenWrapper = () => {
@@ -83,6 +109,11 @@ function App() {
           <Route path='/' element={
             <ProtectedLayout>
               <Dashboard />
+            </ProtectedLayout>
+          } />
+          <Route path='/MaterialCategory' element={
+            <ProtectedLayout>
+              <MaterialCategory />
             </ProtectedLayout>
           } />
           <Route path='/PurchaseIndentsummary' element={
@@ -360,6 +391,113 @@ function App() {
               </ProtectedLayout>
             }
           />
+          <Route
+            path="/Ledger"
+            element={
+              <ProtectedLayout>
+                <Ledger />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/Payments"
+            element={
+              <ProtectedLayout>
+                <Payments />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/MRP"
+            element={
+              <ProtectedLayout>
+                <MRP />
+              </ProtectedLayout>
+            }
+          />
+          <Route
+            path="/PaymentDisplay"
+            element={
+              <ProtectedLayout>
+                <PaymentDisplay />
+              </ProtectedLayout>
+            }
+          />
+          <Route path='/MaterialCategory' element={
+            <ProtectedLayout>
+              <MaterialCategory />
+            </ProtectedLayout>
+          } />
+          <Route path='/customer-category-form' element={
+            <ProtectedLayout>
+              <CustomerCategoryForm />
+            </ProtectedLayout>
+          } />
+          <Route path='/GoodsIssueCategory' element={
+            <ProtectedLayout>
+              <GoodsIssueCategory />
+            </ProtectedLayout>
+          } />
+          <Route path='/GoodsReceiptCategory' element={
+            <ProtectedLayout>
+              <GoodsReceiptCategory />
+            </ProtectedLayout>
+          } />
+          <Route path='/InvoiceCategory' element={
+            <ProtectedLayout>
+              <InvoiceCategory />
+            </ProtectedLayout>
+          } />
+          <Route path='/BillingCategory' element={
+            <ProtectedLayout>
+              <BillingCategory />
+            </ProtectedLayout>
+          } />
+          <Route path='/POCategory' element={
+            <ProtectedLayout>
+              <POCategoryForm />
+            </ProtectedLayout>
+          } />
+          <Route path='/Purchaserequestcat' element={
+            <ProtectedLayout>
+              <Purchaserequestcat />
+            </ProtectedLayout>
+          } />
+          <Route path='/sale-quotation-category-form' element={
+            <ProtectedLayout>
+              <SaleQuotationCategoryForm />
+            </ProtectedLayout>
+          } />
+          <Route path='/SalesCategory' element={
+            <ProtectedLayout>
+              <SalesCategory />
+            </ProtectedLayout>
+          } />
+          <Route path='/SalesOrderCategoryForm' element={
+            <ProtectedLayout>
+              <SalesOrderCategoryForm />
+            </ProtectedLayout>
+          } />
+          <Route path='/SaleContractCategoryForm' element={
+            <ProtectedLayout>
+              <SaleContractCategoryForm />
+            </ProtectedLayout>
+          } />
+          <Route path='/TransferCategory' element={
+            <ProtectedLayout>
+              <TransferCategory />
+            </ProtectedLayout>
+          } />
+          <Route path='/vendor-category' element={
+            <ProtectedLayout>
+              <VendorCategoryForm />
+            </ProtectedLayout>
+          } />
+          <Route path='/RFQCategoryForm' element={
+            <ProtectedLayout>
+              <RFQCategoryForm />
+            </ProtectedLayout>
+          } />
         </Routes>
       </Router>
     </>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -95,6 +95,7 @@ const LoginForm = () => {
                 </div>
                 <div className="mt-5 pb-4 text-center">
                   <p className="mb-0 text-gray-9">Copyright &copy; 2024 - Jyothi Cloud ERP</p>
+                   <p className="mb-0 text-gray-9">Designed & Devloped By <Link to="https://excerptech.com/">Excerpt Technologies Private Limited</Link></p>
                 </div>
               </div>
             </form>

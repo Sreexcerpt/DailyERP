@@ -9,7 +9,11 @@ const materialSchema = new mongoose.Schema({
   conversionValue: { type: Number }, // optional when base = order
   dimension: { type: String },
   hsn: { type: String },
-  mnp:String,
+  mpn:String,
+  minstock:String,
+  safetyStock:String,
+  maxstock:String,
+  pdt:String,
   materialgroup: String, // New field for Material Group
   location:String,
    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },

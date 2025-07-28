@@ -7,6 +7,7 @@ function Header({ toggleSidebar }) {
     const [showProfile, setShowProfile] = useState(false);
 
     const user = JSON.parse(localStorage.getItem('user'));
+    console.log("user",user)
     const userRoles = user?.roles?.map(role => role.roleName) || [];
 
     // Get from localStorage or default to first role

@@ -25,32 +25,7 @@ const createInvoice = async (req, res) => {
 
     const docnumber = `${category.prefix}-${nextNumber}`;
 
-//     // Calculate totalAmount & finalTotal
-//     const totalAmount = data.items?.reduce((sum, item) => {
-//       return sum + ((item.quantity || 0) * (item.price || 0));
-//     }, 0);
-
-//     const cgstPercent = parseFloat(data.cgst || 0);
-// const sgstPercent = parseFloat(data.sgst || 0);
-// const igstPercent = parseFloat(data.igst || 0);
-// const discount = parseFloat(data.discount || 0);
-
-// const cgstAmt = (cgstPercent / 100) * totalAmount;
-// const sgstAmt = (sgstPercent / 100) * totalAmount;
-// const igstAmt = (igstPercent / 100) * totalAmount;
-
-// const finalTotal = parseFloat((totalAmount + cgstAmt + sgstAmt + igstAmt - discount).toFixed(2));
-
-
-
-//     const newInvoice = new Invoice({
-//       ...data,
-//       docnumber,
-//       finalTotal
-//     });
-
-// ✅ 1. Calculate totalAmount
-    const totalAmount = data.items?.reduce((sum, item) => {
+  const totalAmount = data.items?.reduce((sum, item) => {
       return sum + ((item.quantity || 0) * (item.price || 0));
     }, 0);
 
@@ -58,18 +33,6 @@ const createInvoice = async (req, res) => {
 
     // ✅ 2. Net amount after discount
     const netAmount = totalAmount - discount;
-
-    // const cgstPercent = parseFloat(data.cgst || 0);
-    // const sgstPercent = parseFloat(data.sgst || 0);
-    // const igstPercent = parseFloat(data.igst || 0);
-
-    // // ✅ 3. Calculate tax on discounted amount
-    // const cgstAmt = (cgstPercent / 100) * netAmount;
-    // const sgstAmt = (sgstPercent / 100) * netAmount;
-    // const igstAmt = (igstPercent / 100) * netAmount;
-
-    // // ✅ 4. Final total
-    // const finalTotal = netAmount + cgstAmt + sgstAmt + igstAmt;
 
     const newInvoice = new Invoice({
       ...data,
@@ -102,7 +65,58 @@ const getAllInvoices = async (req, res) => {
   }
 };
 
+// PUT /api/invoiceform/:id - Update invoice record (for payments)
+const updateInvoice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Find the existing invoice record
+    const existingInvoice = await Invoice.findById(id);
+    if (!existingInvoice) {
+      return res.status(404).json({ message: "Invoice record not found" });
+    }
+
+    // Update the invoice record
+    const updatedInvoice = await Invoice.findByIdAndUpdate(
+      id,
+      {
+        ...updateData,
+        updatedAt: new Date()
+      },
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      message: "Invoice updated successfully",
+      invoice: updatedInvoice
+    });
+  } catch (err) {
+    console.error("Error updating invoice:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+};
+
+// GET /api/invoiceform/:id - Get single invoice record
+const getInvoiceById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const invoice = await Invoice.findById(id);
+    
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice record not found" });
+    }
+
+    res.json(invoice);
+  } catch (err) {
+    console.error("Error fetching invoice:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+};
+
 module.exports = {
   createInvoice,
-  getAllInvoices
+  getAllInvoices,
+  updateInvoice,
+  getInvoiceById
 };

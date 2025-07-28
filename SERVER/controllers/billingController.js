@@ -67,12 +67,12 @@ const createBilling = async (req, res) => {
     const igstAmt = (igstPercent / 100) * netAmount;
 
     // ✅ 4. Final total
-    const finalTotal = netAmount + cgstAmt + sgstAmt + igstAmt;
+    // const finalTotal = netAmount + cgstAmt + sgstAmt + igstAmt;
 
     const newBilling = new Billing({
       ...data,
       docnumber,
-      finalTotal: parseFloat(finalTotal.toFixed(2))  // Optional rounding
+      
     })
 
     await newBilling.save();
@@ -87,15 +87,63 @@ const createBilling = async (req, res) => {
 // GET /api/Billingform
 const getAllBillings = async (req, res) => {
   try {
-    const Billings = await Billing.find().sort({ createdAt: -1 });
+    const Billings = await Billing.find().sort({ createdAt: -1 }).populate("salesOrderId");
     res.json(Billings);
   } catch (err) {
     console.error("Error fetching Billings:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+const updateBilling = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
 
+    // Find the existing billing record
+    const existingBilling = await Billing.findById(id);
+    if (!existingBilling) {
+      return res.status(404).json({ message: "Billing record not found" });
+    }
+
+    // Update the billing record
+    const updatedBilling = await Billing.findByIdAndUpdate(
+      id,
+      {
+        ...updateData,
+        updatedAt: new Date()
+      },
+      { new: true, runValidators: true }
+    ).populate("salesOrderId");
+
+    res.json({
+      message: "Billing updated successfully",
+      billing: updatedBilling
+    });
+  } catch (err) {
+    console.error("Error updating billing:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+};
+
+// GET /api/Billingform/:id - Get single billing record
+const getBillingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const billing = await Billing.findById(id).populate("salesOrderId");
+    
+    if (!billing) {
+      return res.status(404).json({ message: "Billing record not found" });
+    }
+
+    res.json(billing);
+  } catch (err) {
+    console.error("Error fetching billing:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+};
 module.exports = {
   createBilling,
-  getAllBillings
+  getAllBillings,
+  updateBilling,
+  getBillingById
 };

@@ -31,6 +31,7 @@ function BillingForm() {
     location: "",
     hsnNo: "",
     priceUnit: "",
+    balance:"",
   });
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -165,6 +166,7 @@ function BillingForm() {
       discount,
       netAmount,
       finalTotal:finalTotal,
+      balance:finalTotal
     };
 console.log(billing.finalTotal)
     try {
@@ -183,6 +185,7 @@ console.log(billing.finalTotal)
         customer: "",
         location: "",
         priceUnit: "",
+        balance:""
       });
       setSelectedSO(null);
       setSelectedTax({});

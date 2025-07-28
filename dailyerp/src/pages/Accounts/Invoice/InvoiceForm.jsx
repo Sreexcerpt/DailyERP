@@ -31,6 +31,7 @@ function InvoiceForm() {
     location: "",
     hsnNo: "",
     priceUnit: "",
+    balance: ""
   });
 
   const [poSearch, setPoSearch] = useState("");
@@ -198,6 +199,7 @@ function InvoiceForm() {
       discount,
       netAmount,
       finalTotal,
+      balance: finalTotal
     };
 
     try {
@@ -217,6 +219,7 @@ function InvoiceForm() {
         vendor: "",
         location: "",
         priceUnit: "",
+        balance: ""
       });
       setSelectedPO(null);
       setSelectedTax({});
@@ -265,10 +268,10 @@ function InvoiceForm() {
   const sgstPercent = parseFloat(selectedTax.sgst || 0);
   const igstPercent = parseFloat(selectedTax.igst || 0);
 
-const cgstAmt = parseFloat(((cgstPercent / 100) * netAmount).toFixed(2));
-const sgstAmt = parseFloat(((sgstPercent / 100) * netAmount).toFixed(2));
-const igstAmt = parseFloat(((igstPercent / 100) * netAmount).toFixed(2));
-console.log(cgstAmt,sgstAmt,igstAmt)
+  const cgstAmt = parseFloat(((cgstPercent / 100) * netAmount).toFixed(2));
+  const sgstAmt = parseFloat(((sgstPercent / 100) * netAmount).toFixed(2));
+  const igstAmt = parseFloat(((igstPercent / 100) * netAmount).toFixed(2));
+  console.log(cgstAmt, sgstAmt, igstAmt)
   const finalTotal = parseFloat(
     (netAmount + cgstAmt + sgstAmt + igstAmt).toFixed(2)
   );
@@ -562,7 +565,7 @@ console.log(cgstAmt,sgstAmt,igstAmt)
                         </td>
                         <td>
                           <input
-                            type="number"
+                            type="text"
                             className="form-control"
                             value={item.hsnNo || ""}
                             onChange={(e) =>

@@ -18,6 +18,7 @@ const rfqCategoryRoutes = require('./routes/quotationCategoryRoutes');
 const quotationRoutes = require('./routes/quotationRoutes');
 const contractRoutes = require("./routes/contractRoutes");
 const salecategoryRoutes = require('./routes/Salecategory');
+const paymentRoutes = require('./routes/paymentRoutes');
 const salesRequestRoutes = require('./routes/Salesrequest');  
 const saleQuotationCategoryRoutes = require('./routes/saleQuotationCategoryRoutes'); 
 const salesQuotationRoutes = require('./routes/salesQuotationRoutes');
@@ -94,7 +95,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/tax', taxRoutes);
 
 app.use('/api/vendor-price-lists', vendorPriceRoutes);
-
+app.use('/api',paymentRoutes);
 app.use('/api/customer-price-lists', customerPriceRoutes);
 app.use('/api/purchasecategory',purchaserequest);
 app.use('/api/rfq-categories', rfqCategoryRoutes);
@@ -117,7 +118,7 @@ app.use('/api/goodsissue', goodsIssueRoutes);
 app.use('/api/goodsTransferCategory', goodsTransferCategoryRoutes);
 app.use('/api/goodstransfer', goodsTransferRoutes);
 app.use('/api', goodsReceiptRoutes);
-app.use('/api/goodsreceiptcategory', goodsReceiptCategoryRoutes);
+app.use('/api/goodsreceiptcategory', goodsReceiptCategoryRoutes);  
 app.use('/api/locations', locationRoutes);
 app.use('/api/invoicecategory', invoiceCategoryRoutes);
 app.use('/api/billingcategory', billingCategoryRoutes);

@@ -15,6 +15,10 @@ const MaterialPage = () => {
     orderUnit: '',
     conversionValue: '',
     dimension: '',
+    minstock: '',
+    safetyStock: "",
+    maxstock: "",
+    pdt: "",
     mpn: "",
     location: "",
     materialgroup: "",
@@ -104,7 +108,11 @@ const MaterialPage = () => {
       mpn: material.mpn || '',
       location: material.location || '',
       materialgroup: material.materialgroup || '',
-      hsn: material.hsn || ''
+      hsn: material.hsn || '',
+      minstock: material.minstock || '',
+      safetyStock: material.safetyStock || "",
+      maxstock: material.maxstock || "",
+      pdt: material.pdt || "",
     });
   };
 
@@ -120,7 +128,11 @@ const MaterialPage = () => {
       hsn: "",
       mpn: "",
       location: "",
-      materialgroup: ""
+      materialgroup: "",
+      minstock: '',
+      safetyStock: "",
+      maxstock: "",
+      pdt: "",
     });
     setMaterialIdType('');
     setExternalMaterialId('');
@@ -343,27 +355,8 @@ const MaterialPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Search Bar */}
-      {/* <div className="row mb-3">
-            <div className="col-md-4">
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="isax isax-search-normal-1"></i>
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search materials..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                />
-              </div>
-            </div>
-          </div> */}
-
       <div className="table-responsive">
-        <table className="table table-bordered">
+        <table className="table table-sm table-bordered">
           <thead>
             <tr>
               <th>Material ID</th>
@@ -374,6 +367,10 @@ const MaterialPage = () => {
               <th>Dimension</th>
               <th>MPN</th>
               <th>HSN</th>
+              <th>Min Stock</th>
+              <th>safety Stock</th>
+              <th>Max Stock</th>
+              <th>PDT</th>
               <th>Location</th>
               <th>Delete</th>
               <th>Block</th>
@@ -400,6 +397,10 @@ const MaterialPage = () => {
                   <td>{mat.dimension || "-"}</td>
                   <td>{mat.mpn || "_"}</td>
                   <td>{mat.hsn || "_"}</td>
+                  <td>{mat.minstock||"_"}</td>
+                  <td>{mat.safetyStock||"_"}</td>
+                  <td>{mat.maxstock||"_"}</td>
+                  <td>{mat.pdt||"_"}</td>
                   <td>{mat.location || "_"}</td>
                   <td>
                     <div className="form-check">
@@ -638,198 +639,6 @@ const MaterialPage = () => {
                   ></button>
                 </div>
                 <div className="modal-body">
-                  {/* <form onSubmit={handleSubmit}>
-                    <div className="row">
-                      
-                      <div className="col-xl-3">
-                        <div className="mb-3 d-flex gap-2 align-items-center align-items-center">
-                          <label>
-                            <span style={{ color: "red" }}>*</span>Category
-                          </label>
-                          <select
-                            name="categoryId"
-                            value={formData.categoryId}
-                            onChange={handleChange}
-                            className="form-select"
-                            placeholder="Select Category"
-                            required
-                          >
-                            <option value="">-- Select --</option>
-                            {categories.map((cat) => (
-                              <option key={cat._id} value={cat._id}>
-                                {cat.categoryName}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="col-xl-9">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>
-                            <span style={{ color: "red" }}>*</span>Description:
-                          </label>
-                          <textarea
-                            rows="1"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            className="form-control "
-                            placeholder="Enter Description"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="col-xl-2">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>
-                            <span style={{ color: "red" }}>*</span>Base Unit:{" "}
-                          </label>
-                          <select
-                            name="baseUnit"
-                            value={formData.baseUnit}
-                            onChange={handleChange}
-                            className="form-select"
-                            placeholder="Select Base Unit"
-                            required
-                          >
-                            <option value="">-- Select --</option>
-                            {baseUnits.map((unit) => (
-                              <option key={unit} value={unit}>
-                                {unit}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="col-xl-2">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>
-                            <span style={{ color: "red" }}>*</span>Order Unit:{" "}
-                          </label>
-                          <select
-                            name="orderUnit"
-                            value={formData.orderUnit}
-                            onChange={handleChange}
-                            className="form-select"
-                            placeholder="Select Order Unit"
-                            required
-                          >
-                            <option value="">-- Select --</option>
-                            {baseUnits.map((unit) => (
-                              <option key={unit} value={unit}>
-                                {unit}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                     
-
-                      {formData.baseUnit &&
-                        formData.orderUnit &&
-                        formData.baseUnit !== formData.orderUnit && (
-                          <div className="col-xl-4">
-                            <div className="mb-3 d-flex gap-2 align-items-center">
-                              <label>
-                                1 {formData.orderUnit} = how many{" "}
-                                {formData.baseUnit}?
-                              </label>
-                              <input
-                                name="conversionValue"
-                                value={formData.conversionValue}
-                                onChange={handleChange}
-                                className="form-control"
-                                placeholder="Enter Conversion Value"
-                                required
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                      <div className="col-xl-4">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>Dimension:</label>
-                          <input
-                            name="dimension"
-                            value={formData.dimension}
-                            onChange={handleChange}
-                            className="form-control"
-                            placeholder="Enter Dimension"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-xl-3">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>MPN:</label>
-                          <input
-                            name="mpn"
-                            value={formData.mpn}
-                            onChange={handleChange}
-                            className="form-control"
-                            placeholder="Enter MPN"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-xl-3">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>HSN:</label>
-                          <input
-                            name="hsn"
-                            value={formData.hsn}
-                            onChange={handleChange}
-                            className="form-control"
-                            placeholder="Enter HSN"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="col-xl-3">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>MaterialGroup:</label>
-                          <input
-                            name="materialgroup"
-                            value={formData.materialgroup}
-                            onChange={handleChange}
-                            className="form-control"
-                            placeholder="Enter Material Group"
-                          />
-                        </div>
-                      </div>
-                      <div className="col-xl-3">
-                        <div className="mb-3 d-flex gap-2 align-items-center">
-                          <label>Location:</label>
-                          <input
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            className="form-control"
-                            placeholder="Enter Location"
-                          />
-                        </div>
-                      </div>
-                  
-                    </div>
-                  
-                    
-
-                    <button type="submit" className="btn btn-primary">
-                      {editingMaterial ? "Update Material" : "Save Material"}
-                    </button>
-
-                    {editingMaterial && (
-                      <button
-                        type="button"
-                        onClick={cancelEdit}
-                        className="btn btn-secondary ms-2"
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </form> */}
-
                   <form onSubmit={handleSubmit}>
                     <div className="modal-body">
                       <div className="row">
@@ -1001,6 +810,70 @@ const MaterialPage = () => {
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
+                              <label>MIN Stock</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                type="number"
+                                name="minstock"
+                                value={formData.minstock}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
+                              <label>safety Stock</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                type="number"
+                                name="safetyStock"
+                                value={formData.safetyStock}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
+                              <label>Max Stock</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                type="number"
+                                name="maxstock"
+                                value={formData.maxstock}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
+                              <label>Plan Delivery Time</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                name="pdt"
+                                type="number"
+                                value={formData.pdt}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
                               <label>Location</label>
                             </div>
                             <div className="col-8">
@@ -1040,7 +913,7 @@ const MaterialPage = () => {
                         className="btn btn-secondary"
                         onClick={cancelEdit}
                       >
-                        Cancel
+                        clear
                       </button>
                       <button type="submit" className="btn btn-primary">
                         {editingMaterial ? "Update Material" : "Save Material"}

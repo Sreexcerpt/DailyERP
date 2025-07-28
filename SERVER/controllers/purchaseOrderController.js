@@ -102,6 +102,7 @@ exports.createPO = async (req, res) => {
       preparedby,
       approvedby,
       processes,
+      items,
       generalConditions,
       taxDiscount,
       finalTotal,
@@ -115,8 +116,8 @@ exports.createPO = async (req, res) => {
     console.log("Purchase order request:", req.body);
 
     // ✅ Step 1: Find quotation by quotationNumber
-    const quotation = await Quotation.findOne({ quotationNumber });
-    if (!quotation) return res.status(404).json({ error: 'Quotation not found' });
+    // const quotation = await Quotation.findOne({ quotationNumber });
+    // if (!quotation) return res.status(404).json({ error: 'Quotation not found' });
 
     // ✅ Step 2: Generate or use PO number based on type
     let poNumber;
@@ -149,20 +150,7 @@ exports.createPO = async (req, res) => {
       }
     }
 
-    // ✅ Step 3: Extract data from quotation
-    const items = quotation.items.map(item => ({
-      materialId: item.materialId,
-      description: item.description,
-      quantity: item.qty,
-      unit: item.unit,
-      baseUnit: item.baseUnit,
-      orderUnit: item.orderUnit,
-      price: item.price,
-      priceUnit: item.priceUnit,
-      buyerGroup: item.buyerGroup,
-      materialgroup: item.materialgroup,
-      deliveryDate: item.deliveryDate ? String(item.deliveryDate).slice(0, 10) : null,
-    }));
+
 
     const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
@@ -174,9 +162,9 @@ exports.createPO = async (req, res) => {
       date,
       vendor,
       notes,
-      deliveryLocation: deliveryLocation || quotation.items[0]?.location || '',
+      deliveryLocation: deliveryLocation  || '',
       deliveryAddress,
-      quotationId: quotation._id,
+      // quotationId: quotation._id,
       quotationNumber,
       items,
       total,

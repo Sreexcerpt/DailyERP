@@ -34,7 +34,8 @@ const BillingSchema = new mongoose.Schema({
   totalAmount: Number,
   discount: Number,
   netAmount: Number,
-   finalTotal: Number
+   finalTotal: Number,
+   balance:Number
 }, { timestamps: true });
 
 module.exports = mongoose.model('Billing', BillingSchema);

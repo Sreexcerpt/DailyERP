@@ -1402,843 +1402,421 @@ function PurchaseOrderDisplay() {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-// const handlePrint = async (po) => {
-//   try {
-//     // Fetch vendor details
-//     const companyId = localStorage.getItem("selectedCompanyId");
-//     const financialYear = localStorage.getItem("financialYear");
-
-//     const [vendorResponse, companyResponse] = await Promise.all([
-//       axios.get(`http://localhost:8080/api/vendors/${po.vendor}`, {
-//         params: { companyId, financialYear },
-//       }),
-//       axios.get(`http://localhost:8080/api/companies/${companyId}`),
-//     ]);
-
-//     const vendor = vendorResponse.data;
-//     const company = companyResponse.data;
-
-//     // Generate item rows
-//     const itemRows = po.items
-//       .map(
-//         (item, idx) => `
-//     <tr>
-//       <td style="text-align: center; border: 1px solid #000; padding: 4px;">${idx + 1}</td>
-//       <td style="border: 1px solid #000; padding: 4px;">${item.materialId || ""}</td>
-//       <td style="border: 1px solid #000; padding: 4px;">${item.description || ""}</td>
-//       <td style="text-align: center; border: 1px solid #000; padding: 4px;">${item.deliveryDate || ""}</td>
-//       <td style="text-align: center; border: 1px solid #000; padding: 4px;">${item.quantity || ""} ${item.unit || ""}</td>
-//       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${item.price || 0}</td>
-//       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
-//       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${item.price || 0}</td>
-//       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
-//     </tr>
-//   `
-//       )
-//       .join("");
-
-//     // Generate notes from po.notes field
-//     const notesRows = po.notes && po.notes.length > 0
-//       ? po.notes.map((note, idx) => `
-//           <tr>
-//             <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">${idx + 1}.</td>
-//             <td style="border: 1px solid #000; padding: 4px;">${note}</td>
-//           </tr>
-//         `).join("")
-//       : `
-//         <tr>
-//           <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">1.</td>
-//           <td style="border: 1px solid #000; padding: 4px;">All required parameters shall adhere to company specifications.</td>
-//         </tr>
-//         <tr>
-//           <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">2.</td>
-//           <td style="border: 1px solid #000; padding: 4px;">No Deviations will be accepted, for any deviations Supplier has to take company approval before supplies are made.</td>
-//         </tr>
-//         <tr>
-//           <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">3.</td>
-//           <td style="border: 1px solid #000; padding: 4px;">The value of Rejection will be debited to supplier account including cost of Invoice and freight cost of schedule.</td>
-//         </tr>
-//         <tr>
-//           <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">4.</td>
-//           <td style="border: 1px solid #000; padding: 4px;">Please mention our Purchase order No. component Part No. in your Dispatch document without fail.</td>
-//         </tr>
-//         <tr>
-//           <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">5.</td>
-//           <td style="border: 1px solid #000; padding: 4px;">Supply tolerance should not be more than 5%. If so will not be accepted.</td>
-//         </tr>
-//       `;
-
-//     // Number to words function
-//     const numberToWords = (num) => {
-//       const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-//       const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-//       const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-      
-//       if (num === 0) return 'Zero';
-//       if (num < 10) return ones[num];
-//       if (num < 20) return teens[num - 10];
-//       if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + ones[num % 10] : '');
-//       if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 ? ' ' + numberToWords(num % 100) : '');
-//       if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 ? ' ' + numberToWords(num % 1000) : '');
-//       if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 ? ' ' + numberToWords(num % 100000) : '');
-//       return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 ? ' ' + numberToWords(num % 10000000) : '');
-//     };
-
-//     const html = `
-//     <!DOCTYPE html>
-//     <html>
-//     <head>
-//       <title>Purchase Order - ${po.poNumber}</title>
-//       <style>
-//         @page {
-//           size: A4;
-//           margin: 0.5in;
-//         }
-//         body {
-//           font-family: Arial, sans-serif;
-//           font-size: 11px;
-//           line-height: 1.2;
-//           margin: 0;
-//           padding: 0;
-//           color: #000;
-//         }
-//         .header-table {
-//           width: 100%;
-//           border-collapse: collapse;
-//           border: 2px solid #000;
-//           margin-bottom: 0;
-//         }
-//         .header-table td {
-//           border: 1px solid #000;
-//           padding: 4px;
-//           vertical-align: top;
-//         }
-//         .main-table {
-//           width: 100%;
-//           border-collapse: collapse;
-//           border: 2px solid #000;
-//           margin-top: 0;
-//         }
-//         .main-table td, .main-table th {
-//           border: 1px solid #000;
-//           padding: 4px;
-//           vertical-align: top;
-//         }
-//         .center {
-//           text-align: center;
-//         }
-//         .bold {
-//           font-weight: bold;
-//         }
-//         .section-header {
-//           background-color: #f0f0f0;
-//           font-weight: bold;
-//           text-align: center;
-//           padding: 6px;
-//         }
-//         .amount-cell {
-//           text-align: right;
-//           padding-right: 8px;
-//         }
-//         .signature-section {
-//           margin-top: 20px;
-//           text-align: center;
-//         }
-//         .print-note {
-//           font-size: 10px;
-//           color: #666;
-//           text-align: center;
-//           margin-top: 10px;
-//         }
-//         .no-border {
-//           border: none !important;
-//         }
-//         .logo-img {
-//           max-width: 100px;
-//           max-height: 80px;
-//           object-fit: contain;
-//         }
-//       </style>
-//     </head>
-//     <body>
-//       <!-- Header Section -->
-//       <table className="header-table">
-//         <tr>
-//           <td colspan="6" className="section-header">PURCHASE ORDER</td>
-//         </tr>
-//         <tr>
-//           <td className="bold" style="width: 120px;">PO No.:</td>
-//           <td style="width: 150px;">${po.poNumber}</td>
-//           <td rowspan="6" style="text-align: center; vertical-align: middle; width: 200px;">
-//             ${company.logo ? `<img src="http://localhost:8080/uploads/${company.logo}" alt="Company Logo" className="logo-img">` : ""}
-//           </td>
-//         </tr>
-//         <tr>
-//           <td className="bold">PO Date:</td>
-//           <td>${po.date}</td>
-//         </tr>
-//         <tr>
-//           <td className="bold">Rev. No.:</td>
-//           <td>${po.revisionNumber || "1.0"}</td>
-//         </tr>
-//         <tr>
-//           <td className="bold">Rev. Date:</td>
-//           <td>${po.revisionDate || po.date}</td>
-//         </tr>
-//         <tr>
-//           <td className="bold">Ref No.:</td>
-//           <td>${po.refNumber || ""}</td>
-//         </tr>
-//         <tr>
-//           <td className="bold">Ref Date:</td>
-//           <td>${po.refDate || po.date}</td>
-//         </tr>
-//         <tr>
-//           <td className="bold">Supplier Details:</td>
-//           <td colspan="2">
-//             <strong>M/s. ${vendor.name1 || vendor.name}</strong><br>
-//             ${vendor.address1 || ""}<br>
-//             ${vendor.address2 || ""}<br>
-//             ${vendor.city || ""}, ${vendor.region || ""}<br>
-//             ${vendor.country || ""}<br>
-//             ${vendor.pincode || ""}<br>
-//             Contact Details: ${vendor.contactNo || ""}<br>
-//             ${vendor.email || ""}
-//           </td>
-//         </tr>
-//         <tr>
-//           <td className="bold">GSTIN:</td>
-//           <td>${company.gstin || ""}</td>
-//           <td></td>
-//         </tr>
-//       </table>
-
-//       <!-- Bill To and Ship To -->
-//       <table className="main-table">
-//         <tr>
-//           <td className="bold section-header">BILL TO:</td>
-//           <td className="bold section-header">SHIP TO:</td>
-//         </tr>
-//         <tr>
-//           <td style="width: 50%; padding: 8px;">
-//             <strong>M/s. ${company.name || ""}</strong><br>
-//             ${company.address1 || ""}<br>
-//             ${company.address2 || ""}<br>
-//             ${company.city || ""}, ${company.state || ""}<br>
-//             ${company.country || ""}<br>
-//             ${company.pincode || ""}<br>
-//             <strong>Tel:</strong> ${company.phone || ""}<br>
-//             <strong>Email:</strong> ${company.email || ""}
-//           </td>
-//           <td style="width: 50%; padding: 8px;">
-//             <strong>M/s. ${company.name || ""}</strong><br>
-//             ${company.address1 || ""}<br>
-//             ${company.address2 || ""}<br>
-//             ${company.city || ""}, ${company.state || ""}<br>
-//             ${company.country || ""}<br>
-//             ${company.pincode || ""}<br>
-//             <strong>Tel:</strong> ${company.phone || ""}<br>
-//             <strong>Email:</strong> ${company.email || ""}
-//           </td>
-//         </tr>
-//       </table>
-
-//       <!-- Items Section -->
-//       <table className="main-table">
-//         <tr>
-//           <td colspan="9" className="section-header">PLEASE SUPPLY THE FOLLOWING ITEMS AS PER THE DETAILS MENTIONED BELOW:</td>
-//         </tr>
-//         <tr className="bold" style="background-color: #f0f0f0;">
-//           <td className="center">SI No</td>
-//           <td className="center">Part No</td>
-//           <td className="center">Description</td>
-//           <td className="center">Schedule</td>
-//           <td className="center">Quantity & Unit</td>
-//           <td className="center">Unit Price</td>
-//           <td className="center">Total</td>
-//           <td className="center">Unit Price (₹)</td>
-//           <td className="center">Int (₹)</td>
-//         </tr>
-//         ${itemRows}
-//         <tr>
-//           <td colspan="6" className="bold">Basic Total:</td>
-//           <td className="amount-cell bold">₹${po.total || 0}</td>
-//           <td colspan="2"></td>
-//         </tr>
-//       </table>
-
-//       <!-- Notes Section -->
-//       <table className="main-table">
-//         <tr>
-//           <td colspan="2" className="section-header">NOTES:</td>
-//         </tr>
-//         ${notesRows}
-//       </table>
-
-//       <!-- Tax Summary -->
-//       <table className="main-table">
-//         <tr>
-//           <td style="width: 60%;">
-//             <strong>Total Amount (In Words):</strong><br>
-//             Rupees ${numberToWords(Math.floor(po.finalTotal || po.total || 0))} Only
-//           </td>
-//           <td style="width: 40%;">
-//             <table style="width: 100%; border-collapse: collapse;">
-//               <tr>
-//                 <td className="no-border" style="padding: 2px;"><strong>SGST(${po.sgst || 0}%):</strong></td>
-//                 <td className="no-border" style="padding: 2px; text-align: right;">₹${((po.total * (po.sgst || 0)) / 100).toFixed(2)}</td>
-//               </tr>
-//               <tr>
-//                 <td className="no-border" style="padding: 2px;"><strong>CGST(${po.cgst || 0}%):</strong></td>
-//                 <td className="no-border" style="padding: 2px; text-align: right;">₹${((po.total * (po.cgst || 0)) / 100).toFixed(2)}</td>
-//               </tr>
-//               <tr style="border-top: 1px solid #000;">
-//                 <td className="no-border" style="padding: 2px;"><strong>Net Total:</strong></td>
-//                 <td className="no-border" style="padding: 2px; text-align: right;"><strong>₹${po.finalTotal || po.total || 0}</strong></td>
-//               </tr>
-//             </table>
-//           </td>
-//         </tr>
-//       </table>
-
-//       <!-- Remarks -->
-//       <table className="main-table">
-//         <tr>
-//           <td className="bold" style="width: 100px;">REMARKS:</td>
-//           <td>${po.remarks || ""}</td>
-//         </tr>
-//       </table>
-
-//       <!-- Terms and Conditions -->
-//       <table className="main-table">
-//         <tr>
-//           <td style="width: 50%;">
-//             <strong>TERMS & CONDITIONS:</strong><br>
-//             ${po.termsAndConditions || ""}
-//           </td>
-//           <td style="width: 50%;">
-//             <strong>PREPARED BY:</strong> ${po.preparedby || ""}<br><br>
-//             <strong>APPROVED BY:</strong> ${po.approvedby || ""}
-//           </td>
-//         </tr>
-//       </table>
-
-//       <!-- Footer -->
-//       <div className="signature-section">
-//         <p><strong>APPROVED BY:</strong> ___________________</p>
-//       </div>
-
-//       <div className="print-note">
-//         This is an electronically generated document and does not require signature.
-//       </div>
-//     </body>
-//     </html>
-//   `;
-
-//     // Open print window
-//     const printWindow = window.open("", "_blank", "width=800,height=600");
-//     printWindow.document.write(html);
-//     printWindow.document.close();
-//     printWindow.focus();
-
-//     // Print after content loads
-//     printWindow.onload = function () {
-//       printWindow.print();
-//     };
-//   } catch (error) {
-//     console.error("Error generating print:", error);
-//     alert("Error generating print. Please try again.");
-//   }
-// };
-
-  // Helper function to convert number to words (basic implementation)
-  
-  const handlePrint = async (po) => {
-  try {
-    // Fetch vendor details
-    const companyId = localStorage.getItem("selectedCompanyId");
-    const financialYear = localStorage.getItem("financialYear");
-// Add this function before the main handlePrint function
-
-// And in the HTML:
-   const [vendorResponse, companyResponse] = await Promise.all([
-      axios.get(`http://localhost:8080/api/vendors/${po.vendor}`, {
-        params: { companyId, financialYear },
-      }),
-      axios.get(`http://localhost:8080/api/companies/${companyId}`),
-    ]);
-
-    const vendor = vendorResponse.data;
-    const company = companyResponse.data;
-// Client side - add logging to your function
-const getImageAsBase64 = async (imagePath) => {
-  try {
-    console.log('=== getImageAsBase64 called ===');
-    console.log('Input imagePath:', imagePath);
-    
-    const filename = imagePath.includes('/') 
-      ? imagePath.split('/').pop()
-      : imagePath;
-    
-    console.log('Extracted filename:', filename);
-    
-    const url = `http://localhost:8080/api/image/${filename}`;
-    console.log('Request URL:', url);
-
-    const response = await axios.get(url, {
-      responseType: 'arraybuffer'
-    });
-
-    console.log('Response status:', response.status);
-    console.log('Response data length:', response.data.byteLength);
-
-    const base64 = btoa(
-      new Uint8Array(response.data)
-        .reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
-
-    return `data:image/jpeg;base64,${base64}`;
-  } catch (error) {
-    console.error('Error fetching image:', error.message);
-    console.error('Error status:', error.response?.status);
-    console.error('Error URL:', error.config?.url);
-    return null;
-  }
-};
-
-// Then in your handlePrint function, after getting company data:
-let logoBase64 = null;
-if (company.logo) {
-  logoBase64 = await getImageAsBase64(company.logo);
-}
-
-    // Generate item rows
-    const itemRows = po.items
-      .map(
-        (item, idx) => `
-    <tr>
-      <td style="text-align: center; border: 1px solid #000; padding: 4px;">${idx + 1}</td>
-      <td style="border: 1px solid #000; padding: 4px;">${item.materialId || ""}</td>
-      <td style="border: 1px solid #000; padding: 4px;">${item.description || ""}</td>
-      <td style="text-align: center; border: 1px solid #000; padding: 4px;">${item.deliveryDate || ""}</td>
-      <td style="text-align: center; border: 1px solid #000; padding: 4px;">${item.quantity || ""} ${item.unit || ""}</td>
-      <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${item.price || 0}</td>
-      
-      <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${item.price || 0}</td>
-      <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
-      <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
-    </tr>
-  `
-      )
-      .join("");
-
-    // Generate notes from po.notes field - completely dynamic
-const notesRows = (() => {
-  if (po.notes) {
-    // Check if notes is a string or array
-    if (typeof po.notes === 'string') {
-      // Split string by newlines and create rows
-      const noteLines = po.notes.split('\n').filter(line => line.trim() !== '');
-      if (noteLines.length > 0) {
-        return noteLines.map((note, idx) => `
-          <tr>
-            <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">${idx + 1}.</td>
-            <td style="border: 1px solid #000; padding: 4px;">${note.trim()}</td>
-          </tr>
-        `).join("");
-      }
-    } else if (Array.isArray(po.notes) && po.notes.length > 0) {
-      // Handle array of notes
-      return po.notes.map((note, idx) => `
-        <tr>
-          <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">${idx + 1}.</td>
-          <td style="border: 1px solid #000; padding: 4px;">${note}</td>
-        </tr>
-      `).join("");
-    }
-  }
-  
-  // Return empty row if no notes
-  return `
-    <tr>
-      <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">-</td>
-      <td style="border: 1px solid #000; padding: 4px; color: #666; font-style: italic;">No notes available</td>
-    </tr>
-  `;
-})();
-
-    // Generate general conditions display
-    const generalConditionsDisplay = po.generalConditions && po.generalConditions.length > 0
-      ? po.generalConditions.map((condition, idx) => `
-          <div style="margin-bottom: 8px;">
-            <strong>${idx + 1}. ${condition.name}:</strong><br>
-            ${condition.description}
-          </div>
-        `).join("")
-      : "";
-
-    // Number to words function
-    const numberToWords = (num) => {
-      const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-      const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-      const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-      
-      if (num === 0) return 'Zero';
-      if (num < 10) return ones[num];
-      if (num < 20) return teens[num - 10];
-      if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + ones[num % 10] : '');
-      if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 ? ' ' + numberToWords(num % 100) : '');
-      if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 ? ' ' + numberToWords(num % 1000) : '');
-      if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 ? ' ' + numberToWords(num % 100000) : '');
-      return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 ? ' ' + numberToWords(num % 10000000) : '');
-    };
-
-    const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Purchase Order - ${po.poNumber}</title>
-      <style>
-        @page {
-          size: A4;
-          margin: 0.5in;
-        }
-        body {
-          font-family: Arial, sans-serif;
-          font-size: 11px;
-          line-height: 1.2;
-          margin: 0;
-          padding: 0;
-          color: #000;
-        }
-        .header-table {
-          width: 100%;
-          border-collapse: collapse;
-          border: 2px solid #000;
-          margin-bottom: 0;
-        }
-        .header-table td {
-          border: 1px solid #000;
-          padding: 4px;
-          vertical-align: top;
-        }
-        .main-table {
-          width: 100%;
-          border-collapse: collapse;
-          border: 2px solid #000;
-          margin-top: 0;
-        }
-        .main-table td, .main-table th {
-          border: 1px solid #000;
-          padding: 4px;
-          vertical-align: top;
-        }
-        .center {
-          text-align: center;
-        }
-        .bold {
-          font-weight: bold;
-        }
-        .section-header {
-          background-color: #f0f0f0;
-          font-weight: bold;
-          text-align: center;
-          padding: 6px;
-        }
-        .amount-cell {
-          text-align: right;
-          padding-right: 8px;
-        }
-        .signature-section {
-          margin-top: 20px;
-          text-align: center;
-        }
-        .print-note {
-          font-size: 10px;
-          color: #666;
-          text-align: center;
-          margin-top: 10px;
-        }
-        .no-border {
-          border: none !important;
-        }
-        .logo-img {
-          max-width: 100px;
-          max-height: 80px;
-          object-fit: contain;
-        }
-        .general-conditions {
-          padding: 8px;
-          font-size: 10px;
-          line-height: 1.3;
-        }
-      </style>
-    </head>
-    <body>
-      <!-- Header Section -->
-      <table className="header-table">
-        <tr>
-          <td colspan="6" className="section-header">PURCHASE ORDER</td>
-        </tr>
-        <tr>
-          <td className="bold" style="width: 120px;">PO No.:</td>
-          <td style="width: 150px;">${po.poNumber}</td>
-          <td rowspan="6" style="text-align: center; vertical-align: middle; width: 200px;">
-          ${logoBase64 ? `<img src="${logoBase64}" alt="Company Logo" className="logo-img">` : `<div style="border: 1px dashed #ccc; padding: 20px; color: #999;">No Logo</div>`}
  
-          </td>
-        </tr>
-        <tr>
-          <td className="bold">PO Date:</td>
-          <td>${po.date}</td>
-        </tr>
-        <tr>
-          <td className="bold">Rev. No.:</td>
-          <td>${po.revisionNumber || "1.0"}</td>
-        </tr>
-        <tr>
-          <td className="bold">Rev. Date:</td>
-          <td>${po.revisionDate || po.date}</td>
-        </tr>
-        <tr>
-          <td className="bold">Ref No.:</td>
-          <td>${po.refNumber || ""}</td>
-        </tr>
-        <tr>
-          <td className="bold">Ref Date:</td>
-          <td>${po.refDate || po.date}</td>
-        </tr>
-        <tr>
-          <td className="bold">Supplier Details:</td>
-          <td colspan="2">
-            <strong>M/s. ${vendor.name1 || vendor.name}</strong><br>
-            ${vendor.address1 || ""}<br>
-            ${vendor.address2 || ""}<br>
-            ${vendor.city || ""}, ${vendor.region || ""}<br>
-            ${vendor.country || ""}<br>
-            ${vendor.pincode || ""}<br>
-            Contact Details: ${vendor.contactNo || ""}<br>
-            ${vendor.email || ""}
-          </td>
-        </tr>
-        <tr>
-          <td className="bold">GSTIN:</td>
-          <td>${company.gstin || ""}</td>
-          <td></td>
-        </tr>
-      </table>
 
-      <!-- Bill To and Ship To -->
-      <table className="main-table">
-        <tr>
-          <td className="bold section-header">BILL TO:</td>
-          <td className="bold section-header">SHIP TO:</td>
-        </tr>
-        <tr>
-          <td style="width: 50%; padding: 8px;">
-            <strong>M/s. ${company.name || ""}</strong><br>
-            ${company.address1 || ""}<br>
-            ${company.address || ""}<br>
-            ${company.city || ""} ${company.state || ""}<br>
-       
-            <strong>Tel:</strong> ${company.phone || ""}<br>
-            <strong>Email:</strong> ${company.email || ""}
-          </td>
-          <td style="width: 50%; padding: 8px;">
-            <strong>M/s. ${company.name || ""}</strong><br>
-            ${company.address1 || ""}<br>
-            ${company.address || ""}<br>
-            ${company.city || ""} ${company.state || ""}<br>
-           
-            <strong>Tel:</strong> ${company.phone || ""}<br>
-            <strong>Email:</strong> ${company.email || ""}
-          </td>
-        </tr>
-      </table>
-
-      <!-- Items Section -->
-      <table className="main-table">
-        <tr>
-          <td colspan="9" className="section-header">PLEASE SUPPLY THE FOLLOWING ITEMS AS PER THE DETAILS MENTIONED BELOW:</td>
-        </tr>
-        <tr className="bold" style="background-color: #f0f0f0;">
-          <td className="center">SI No</td>
-          <td className="center">Part No</td>
-          <td className="center">Description</td>
-          <td className="center">Schedule</td>
-          <td className="center">Quantity & Unit</td>
-          <td className="center">Unit Price</td>
-         
-          <td className="center">Unit Price (₹)</td>
-          <td className="center">Int (₹)</td>
-           <td className="center">Total</td>
-        </tr>
-        ${itemRows}
-        <tr>
-          <td colspan="6" className="bold">Basic Total:</td>
-          <td className="amount-cell bold">₹${po.total || 0}</td>
-          <td colspan="2"></td>
-        </tr>
-      </table>
-
-      <!-- Notes Section -->
-      <table className="main-table">
-        <tr>
-          <td colspan="2" className="section-header">NOTES:</td>
-        </tr>
-        ${notesRows}
-      </table>
-
-      <!-- Tax Summary -->
-      <table className="main-table">
-        <tr>
-          <td style="width: 60%;">
-            <strong>Total Amount (In Words):</strong><br>
-            Rupees ${numberToWords(Math.floor(po.finalTotal || po.total || 0))} Only
-          </td>
-          <td style="width: 40%;">
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td className="no-border" style="padding: 2px;"><strong>SGST(${po.sgst || 0}%):</strong></td>
-                <td className="no-border" style="padding: 2px; text-align: right;">₹${((po.total * (po.sgst || 0)) / 100).toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td className="no-border" style="padding: 2px;"><strong>CGST(${po.cgst || 0}%):</strong></td>
-                <td className="no-border" style="padding: 2px; text-align: right;">₹${((po.total * (po.cgst || 0)) / 100).toFixed(2)}</td>
-              </tr>
-              <tr style="border-top: 1px solid #000;">
-                <td className="no-border" style="padding: 2px;"><strong>Net Total:</strong></td>
-                <td className="no-border" style="padding: 2px; text-align: right;"><strong>₹${po.finalTotal || po.total || 0}</strong></td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-
-      <!-- Remarks -->
-      <table className="main-table">
-        <tr>
-          <td className="bold" style="width: 100px;">REMARKS:</td>
-          <td>${po.remarks || ""}</td>
-        </tr>
-      </table>
-
-      <!-- Terms and Conditions -->
-      <table className="main-table">
-        <tr>
-          <td style="width: 50%;">
-            <strong>TERMS & CONDITIONS:</strong><br>
-            <div className="general-conditions">
-              ${generalConditionsDisplay || po.termsAndConditions || ""}
-            </div>
-          </td>
-          <td style="width: 50%;">
-            <strong>PREPARED BY:</strong> ${po.preparedby || ""}<br><br>
-            <strong>APPROVED BY:</strong> ${po.approvedby || ""}
-          </td>
-        </tr>
-      </table>
-
-      <!-- Footer -->
+   const handlePrint = async (po) => {
+   try {
+     // Fetch vendor details
+     const companyId = localStorage.getItem("selectedCompanyId");
+     const financialYear = localStorage.getItem("financialYear");
+ // Add this function before the main handlePrint function
+ 
+ // And in the HTML:
+    const [vendorResponse, companyResponse] = await Promise.all([
+       axios.get(`http://localhost:8080/api/vendors/${po.vendor}`, {
+         params: { companyId, financialYear },
+       }),
+       axios.get(`http://localhost:8080/api/companies/${companyId}`),
+     ]);
+ 
+     const vendor = vendorResponse.data;
+     const company = companyResponse.data;
+ // Client side - add logging to your function
+ const getImageAsBase64 = async (imagePath) => {
+   try {
+     console.log('=== getImageAsBase64 called ===');
+     console.log('Input imagePath:', imagePath);
      
-
-      <div className="print-note">
-        This is an electronically generated document and does not require signature.
-      </div>
-    </body>
-    </html>
-  `;
-
-    // Open print window
-    const printWindow = window.open("", "_blank", "width=800,height=600");
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-
-    // Print after content loads
-    printWindow.onload = function () {
-      printWindow.print();
-    };
-  } catch (error) {
-    console.error("Error generating print:", error);
-    alert("Error generating print. Please try again.");
-  }
-};
+     const filename = imagePath.includes('/') 
+       ? imagePath.split('/').pop()
+       : imagePath;
+     
+     console.log('Extracted filename:', filename);
+     
+     const url = `http://localhost:8080/api/image/${filename}`;
+     console.log('Request URL:', url);
+ 
+     const response = await axios.get(url, {
+       responseType: 'arraybuffer'
+     });
+ 
+     console.log('Response status:', response.status);
+     console.log('Response data length:', response.data.byteLength);
+ 
+     const base64 = btoa(
+       new Uint8Array(response.data)
+         .reduce((data, byte) => data + String.fromCharCode(byte), '')
+     );
+ 
+     return `data:image/jpeg;base64,${base64}`;
+   } catch (error) {
+     console.error('Error fetching image:', error.message);
+     console.error('Error status:', error.response?.status);
+     console.error('Error URL:', error.config?.url);
+     return null;
+   }
+ };
+ 
+ // Then in your handlePrint function, after getting company data:
+ let logoBase64 = null;
+ if (company.logo) {
+   logoBase64 = await getImageAsBase64(company.logo);
+ }
+ 
+     // Generate item rows
+     const itemRows = po.items
+       .map(
+         (item, idx) => `
+     <tr>
+       <td style="text-align: center; border: 1px solid #000; padding: 4px;">${idx + 1}</td>
+       <td style="border: 1px solid #000; padding: 4px;">${item.materialId || ""}</td>
+       <td style="border: 1px solid #000; padding: 4px;">${item.description || ""}</td>
+       <td style="text-align: center; border: 1px solid #000; padding: 4px;">${item.deliveryDate || ""}</td>
+       <td style="text-align: center; border: 1px solid #000; padding: 4px;">${item.quantity || ""} ${item.unit || ""}</td>
+       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${item.price || 0}</td>
+       
+       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${item.price || 0}</td>
+       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
+       <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
+     </tr>
+   `
+       )
+       .join("");
+ 
+     // Generate notes from po.notes field - completely dynamic
+ const notesRows = (() => {
+   if (po.notes) {
+     // Check if notes is a string or array
+     if (typeof po.notes === 'string') {
+       // Split string by newlines and create rows
+       const noteLines = po.notes.split('\n').filter(line => line.trim() !== '');
+       if (noteLines.length > 0) {
+         return noteLines.map((note, idx) => `
+           <tr>
+             <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">${idx + 1}.</td>
+             <td style="border: 1px solid #000; padding: 4px;">${note.trim()}</td>
+           </tr>
+         `).join("");
+       }
+     } else if (Array.isArray(po.notes) && po.notes.length > 0) {
+       // Handle array of notes
+       return po.notes.map((note, idx) => `
+         <tr>
+           <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">${idx + 1}.</td>
+           <td style="border: 1px solid #000; padding: 4px;">${note}</td>
+         </tr>
+       `).join("");
+     }
+   }
+   
+   // Return empty row if no notes
+   return `
+     <tr>
+       <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">-</td>
+       <td style="border: 1px solid #000; padding: 4px; color: #666; font-style: italic;">No notes available</td>
+     </tr>
+   `;
+ })();
+ 
+     // Generate general conditions display
+     const generalConditionsDisplay = po.generalConditions && po.generalConditions.length > 0
+       ? po.generalConditions.map((condition, idx) => `
+           <div style="margin-bottom: 8px;">
+             <strong>${idx + 1}. ${condition.name}:</strong><br>
+             ${condition.description}
+           </div>
+         `).join("")
+       : "";
+ 
+     // Number to words function
+     const numberToWords = (num) => {
+       const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+       const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+       const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+       
+       if (num === 0) return 'Zero';
+       if (num < 10) return ones[num];
+       if (num < 20) return teens[num - 10];
+       if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + ones[num % 10] : '');
+       if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 ? ' ' + numberToWords(num % 100) : '');
+       if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 ? ' ' + numberToWords(num % 1000) : '');
+       if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 ? ' ' + numberToWords(num % 100000) : '');
+       return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 ? ' ' + numberToWords(num % 10000000) : '');
+     };
+ 
+     const html = `
+     <!DOCTYPE html>
+     <html>
+     <head>
+       <title>Purchase Order - ${po.poNumber}</title>
+       <style>
+         @page {
+           size: A4;
+           margin: 0.5in;
+         }
+         body {
+           font-family: Arial, sans-serif;
+           font-size: 11px;
+           line-height: 1.2;
+           margin: 0;
+           padding: 0;
+           color: #000;
+         }
+         .header-table {
+           width: 100%;
+           border-collapse: collapse;
+           border: 2px solid #000;
+           margin-bottom: 0;
+         }
+         .header-table td {
+           border: 1px solid #000;
+           padding: 4px;
+           vertical-align: top;
+         }
+         .main-table {
+           width: 100%;
+           border-collapse: collapse;
+           border: 2px solid #000;
+           margin-top: 0;
+         }
+         .main-table td, .main-table th {
+           border: 1px solid #000;
+           padding: 4px;
+           vertical-align: top;
+         }
+         .center {
+           text-align: center;
+         }
+         .bold {
+           font-weight: bold;
+         }
+         .section-header {
+           background-color: #f0f0f0;
+           font-weight: bold;
+           text-align: center;
+           padding: 6px;
+         }
+         .amount-cell {
+           text-align: right;
+           padding-right: 8px;
+         }
+         .signature-section {
+           margin-top: 20px;
+           text-align: center;
+         }
+         .print-note {
+           font-size: 10px;
+           color: #666;
+           text-align: center;
+           margin-top: 10px;
+         }
+         .no-border {
+           border: none !important;
+         }
+         .logo-img {
+           max-width: 100px;
+           max-height: 80px;
+           object-fit: contain;
+         }
+         .general-conditions {
+           padding: 8px;
+           font-size: 10px;
+           line-height: 1.3;
+         }
+       </style>
+     </head>
+     <body>
+       <!-- Header Section -->
+       <table class="header-table">
+         <tr>
+           <td colspan="6" class="section-header">PURCHASE ORDER</td>
+         </tr>
+         <tr>
+           <td class="bold" style="width: 120px;">PO No.:</td>
+           <td style="width: 150px;">${po.poNumber}</td>
+           <td rowspan="6" style="text-align: center; vertical-align: middle; width: 200px;">
+           ${logoBase64 ? `<img src="${logoBase64}" alt="Company Logo" class="logo-img">` : `<div style="border: 1px dashed #ccc; padding: 20px; color: #999;">No Logo</div>`}
   
-  function numberToWords(num) {
-    const ones = [
-      "",
-      "One",
-      "Two",
-      "Three",
-      "Four",
-      "Five",
-      "Six",
-      "Seven",
-      "Eight",
-      "Nine",
-    ];
-    const teens = [
-      "Ten",
-      "Eleven",
-      "Twelve",
-      "Thirteen",
-      "Fourteen",
-      "Fifteen",
-      "Sixteen",
-      "Seventeen",
-      "Eighteen",
-      "Nineteen",
-    ];
-    const tens = [
-      "",
-      "",
-      "Twenty",
-      "Thirty",
-      "Forty",
-      "Fifty",
-      "Sixty",
-      "Seventy",
-      "Eighty",
-      "Ninety",
-    ];
-    const thousands = ["", "Thousand", "Lakh", "Crore"];
+           </td>
+         </tr>
+         <tr>
+           <td class="bold">PO Date:</td>
+           <td>${po.date}</td>
+         </tr>
+         <tr>
+           <td class="bold">Rev. No.:</td>
+           <td>${po.revisionNumber || "1.0"}</td>
+         </tr>
+         <tr>
+           <td class="bold">Rev. Date:</td>
+           <td>${po.revisionDate || po.date}</td>
+         </tr>
+         <tr>
+           <td class="bold">Ref No.:</td>
+           <td>${po.refNumber || ""}</td>
+         </tr>
+         <tr>
+           <td class="bold">Ref Date:</td>
+           <td>${po.refDate || po.date}</td>
+         </tr>
+         <tr>
+           <td class="bold">Supplier Details:</td>
+           <td colspan="2">
+             <strong>M/s. ${vendor.name1 || vendor.name}</strong><br>
+             ${vendor.address1 || ""}<br>
+             ${vendor.address2 || ""}<br>
+             ${vendor.city || ""}, ${vendor.region || ""}<br>
+             ${vendor.country || ""}<br>
+             ${vendor.pincode || ""}<br>
+             Contact Details: ${vendor.contactNo || ""}<br>
+             ${vendor.email || ""}
+           </td>
+         </tr>
+         <tr>
+           <td class="bold">GSTIN:</td>
+           <td>${company.gstin || ""}</td>
+           <td></td>
+         </tr>
+       </table>
+ 
+       <!-- Bill To and Ship To -->
+       <table class="main-table">
+         <tr>
+           <td class="bold section-header">BILL TO:</td>
+           <td class="bold section-header">SHIP TO:</td>
+         </tr>
+         <tr>
+           <td style="width: 50%; padding: 8px;">
+             <strong>M/s. ${company.name || ""}</strong><br>
+             ${company.address1 || ""}<br>
+             ${company.address || ""}<br>
+             ${company.city || ""} ${company.state || ""}<br>
+        
+             <strong>Tel:</strong> ${company.phone || ""}<br>
+             <strong>Email:</strong> ${company.email || ""}
+           </td>
+           <td style="width: 50%; padding: 8px;">
+             <strong>M/s. ${company.name || ""}</strong><br>
+             ${company.address1 || ""}<br>
+             ${company.address || ""}<br>
+             ${company.city || ""} ${company.state || ""}<br>
+            
+             <strong>Tel:</strong> ${company.phone || ""}<br>
+             <strong>Email:</strong> ${company.email || ""}
+           </td>
+         </tr>
+       </table>
+ 
+       <!-- Items Section -->
+       <table class="main-table">
+         <tr>
+           <td colspan="9" class="section-header">PLEASE SUPPLY THE FOLLOWING ITEMS AS PER THE DETAILS MENTIONED BELOW:</td>
+         </tr>
+         <tr class="bold" style="background-color: #f0f0f0;">
+           <td class="center">SI No</td>
+           <td class="center">Part No</td>
+           <td class="center">Description</td>
+           <td class="center">Schedule</td>
+           <td class="center">Quantity & Unit</td>
+           <td class="center">Unit Price</td>
+          
+           <td class="center">Unit Price (₹)</td>
+           <td class="center">Int (₹)</td>
+            <td class="center">Total</td>
+         </tr>
+         ${itemRows}
+         <tr>
+           <td colspan="6" class="bold">Basic Total:</td>
+           <td class="amount-cell bold">₹${po.total || 0}</td>
+           <td colspan="2"></td>
+         </tr>
+       </table>
+ 
+       <!-- Notes Section -->
+       <table class="main-table">
+         <tr>
+           <td colspan="2" class="section-header">NOTES:</td>
+         </tr>
+         ${notesRows}
+       </table>
+ 
+       <!-- Tax Summary -->
+       <table class="main-table">
+         <tr>
+           <td style="width: 60%;">
+             <strong>Total Amount (In Words):</strong><br>
+             Rupees ${numberToWords(Math.floor(po.finalTotal || po.total || 0))} Only
+           </td>
+           <td style="width: 40%;">
+             <table style="width: 100%; border-collapse: collapse;">
+               <tr>
+                 <td class="no-border" style="padding: 2px;"><strong>SGST(${po.sgst || 0}%):</strong></td>
+                 <td class="no-border" style="padding: 2px; text-align: right;">₹${((po.total * (po.sgst || 0)) / 100).toFixed(2)}</td>
+               </tr>
+               <tr>
+                 <td class="no-border" style="padding: 2px;"><strong>CGST(${po.cgst || 0}%):</strong></td>
+                 <td class="no-border" style="padding: 2px; text-align: right;">₹${((po.total * (po.cgst || 0)) / 100).toFixed(2)}</td>
+               </tr>
+               <tr style="border-top: 1px solid #000;">
+                 <td class="no-border" style="padding: 2px;"><strong>Net Total:</strong></td>
+                 <td class="no-border" style="padding: 2px; text-align: right;"><strong>₹${po.finalTotal || po.total || 0}</strong></td>
+               </tr>
+             </table>
+           </td>
+         </tr>
+       </table>
+ 
+       <!-- Remarks -->
+       <table class="main-table">
+         <tr>
+           <td class="bold" style="width: 100px;">REMARKS:</td>
+           <td>${po.remarks || ""}</td>
+         </tr>
+       </table>
+ 
+       <!-- Terms and Conditions -->
+       <table class="main-table">
+         <tr>
+           <td style="width: 50%;">
+             <strong>TERMS & CONDITIONS:</strong><br>
+             <div class="general-conditions">
+               ${generalConditionsDisplay || po.termsAndConditions || ""}
+             </div>
+           </td>
+           <td style="width: 50%;">
+             <strong>PREPARED BY:</strong> ${po.preparedby || ""}<br><br>
+             <strong>APPROVED BY:</strong> ${po.approvedby || ""}
+           </td>
+         </tr>
+       </table>
+ 
+       <!-- Footer -->
+      
+ 
+       <div class="print-note">
+         This is an electronically generated document and does not require signature.
+       </div>
+     </body>
+     </html>
+   `;
+ 
+     // Open print window
+     const printWindow = window.open("", "_blank", "width=800,height=600");
+     printWindow.document.write(html);
+     printWindow.document.close();
+     printWindow.focus();
+ 
+     // Print after content loads
+     printWindow.onload = function () {
+       printWindow.print();
+     };
+   } catch (error) {
+     console.error("Error generating print:", error);
+     alert("Error generating print. Please try again.");
+   }
+ };
 
-    if (num === 0) return "Zero";
 
-    function convertHundreds(n) {
-      let result = "";
-      if (n >= 100) {
-        result += ones[Math.floor(n / 100)] + " Hundred ";
-        n %= 100;
-      }
-      if (n >= 20) {
-        result += tens[Math.floor(n / 10)] + " ";
-        n %= 10;
-      } else if (n >= 10) {
-        result += teens[n - 10] + " ";
-        return result;
-      }
-      if (n > 0) {
-        result += ones[n] + " ";
-      }
-      return result;
-    }
-
-    let result = "";
-    let groupIndex = 0;
-
-    while (num > 0) {
-      if (num % 1000 !== 0) {
-        result =
-          convertHundreds(num % 1000) + thousands[groupIndex] + " " + result;
-      }
-      num = Math.floor(num / 1000);
-      groupIndex++;
-    }
-
-    return result.trim();
-  }
 
   return (
     <div className="content">
@@ -2391,9 +1969,8 @@ const notesRows = (() => {
                   (number) => (
                     <li
                       key={number}
-                      className={`page-item ${
-                        currentPage === number ? "active" : ""
-                      }`}
+                      className={`page-item ${currentPage === number ? "active" : ""
+                        }`}
                     >
                       <button
                         className="page-link"
@@ -2406,9 +1983,8 @@ const notesRows = (() => {
                 )}
 
                 <li
-                  className={`page-item ${
-                    currentPage === totalPages ? "disabled" : ""
-                  }`}
+                  className={`page-item ${currentPage === totalPages ? "disabled" : ""
+                    }`}
                 >
                   <button
                     className="page-link"
@@ -2468,9 +2044,8 @@ const notesRows = (() => {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder={`Search by ${
-                          searchType === "poNumber" ? "PO Number" : searchType
-                        }...`}
+                        placeholder={`Search by ${searchType === "poNumber" ? "PO Number" : searchType
+                          }...`}
                         value={searchQuery}
                         onChange={handleSearchInputChange}
                       />
@@ -2539,8 +2114,8 @@ const notesRows = (() => {
                         {pos.length === 0
                           ? "No purchase orders loaded from API"
                           : searchQuery
-                          ? `No purchase orders found matching "${searchQuery}"`
-                          : 'Enter search term or click "View All"'}
+                            ? `No purchase orders found matching "${searchQuery}"`
+                            : 'Enter search term or click "View All"'}
                       </p>
                     </div>
                   )}

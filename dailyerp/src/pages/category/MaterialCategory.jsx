@@ -217,7 +217,8 @@ const MaterialCategory = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((cat) => (
+                  {categories.length>0&&
+                  categories?.map((cat) => (
                     <tr key={cat._id}>
                       <td>{cat.categoryName}</td>
                       <td>{cat.prefix}</td>
