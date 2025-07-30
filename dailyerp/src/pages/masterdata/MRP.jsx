@@ -22,6 +22,7 @@ function MRP() {
     const [indentIdType, setIndentIdType] = useState('internal');
     const [externalIndentId, setExternalIndentId] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    console.log("selectedCategory",selectedCategory)
     const [location, setLocation] = useState('');
     const [buyerGroup, setBuyerGroup] = useState('');
     const [taxes, setTaxes] = useState([]);
@@ -33,12 +34,17 @@ function MRP() {
     const [remarks, setRemarks] = useState('');
     const [approvedby, setApprovedby] = useState('');
     const [preparedby, setPreparedby] = useState('');
-
+    const [locations, setLocations] = useState([]);
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
-
+    const [generalConditions, setGeneralConditions] = useState([]);
+    const [processes, setProcesses] = useState([]);
+    const [validityDate, setValidityDate] = useState('');
+    const [payTerms, setPayTerms] = useState('');
+    const [poNumber, setPoNumber] = useState('');
+    const [date, setDate] = useState('');
     const fetchMaterials = async () => {
         try {
             const companyId = localStorage.getItem("selectedCompanyId");
@@ -67,7 +73,13 @@ function MRP() {
             console.error("Failed to fetch stock:", error);
         }
     };
-
+const toggleSelection = (id, currentSelection, setSelection) => {
+    if (currentSelection.includes(id)) {
+        setSelection(currentSelection.filter(item => item !== id));
+    } else {
+        setSelection([...currentSelection, id]);
+    }
+};
     useEffect(() => {
         fetchMaterials();
         fetchInventory();
@@ -75,6 +87,31 @@ function MRP() {
             .then((res) => setVendors(res.data));
         axios.get("http://localhost:8080/api/tax")
             .then((res) => setTaxes(res.data));
+        axios.get("http://localhost:8080/api/locations")
+            .then((res) => setLocations(res.data));
+        axios.get('http://localhost:8080/api/general-conditions')
+            .then(res => {
+                const filteredConditions = res.data
+                    .filter(gc => !gc.isDeleted) // remove deleted if needed
+                    .map(gc => ({
+                        _id: gc._id,
+                        name: gc.name,
+                        description: gc.description
+                    }));
+                setGeneralConditions(filteredConditions);
+            });
+
+        axios.get('http://localhost:8080/api/processes')
+            .then(res => {
+                const filteredProcesses = res.data
+                    .filter(p => !p.isDeleted)
+                    .map(p => ({
+                        _id: p._id,
+                        processId: p.processId,
+                        processDescription: p.processDescription
+                    }));
+                setProcesses(filteredProcesses);
+            });
     }, []);
 
     // Combine materials with inventory stock and calculate reorderPoint
@@ -146,10 +183,10 @@ function MRP() {
     };
 
     const handleModalIndentSubmit = async () => {
-        if (!modalMaterial || !selectedCategory || !location || !buyerGroup) {
-            alert("Please fill in all required fields");
-            return;
-        }
+        // if ( !selectedCategory || !location || !buyerGroup) {
+        //     alert("Please fill in all required fields");
+        //     return;
+        // }
 
         // Additional validation for PO
         if (actionType === "PO") {
@@ -214,7 +251,7 @@ function MRP() {
 
         } else if (actionType === "PO") {
             // New PO creation logic - Match backend controller structure
-            const categoryObj = poCategories.find(cat => cat._id === selectedCategory);
+            const categoryObj = poCategories.find(cat => cat._id === selectedCategory._id);
 
             // Calculate total amount with proper validation
             const totalAmount = quantity * unitPrice;
@@ -751,86 +788,211 @@ function MRP() {
                         <div className="modal-dialog modal-xl">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Create {actionType === "PE" ? "Purchase Enquiry" : "Purchase Order"} for {modalMaterial.description}</h5>
+                                    <h5 className="modal-title">
+                                        Create {actionType === "PE" ? "Purchase Enquiry" : "Purchase Order"} for {modalMaterial.description}
+                                    </h5>
                                     <button type="button" className="btn-close" onClick={() => setShowIndentModal(false)} />
                                 </div>
-                                <div className="modal-body">
-                                    <div className="row gap-2">
-                                        <div className="col-lg-3 row">
-                                            <div className="col-xl-6">
-                                                <label>ID Type</label>
-                                            </div>
-                                            <div className="col-xl-6">
-                                                <select className="form-select" value={indentIdType} onChange={(e) => setIndentIdType(e.target.value)}>
-                                                    <option value="internal">Internal</option>
-                                                    <option value="external">External</option>
-                                                </select>
-                                            </div>
-                                        </div>
 
-                                        {indentIdType === "external" && (
+                                <div className="modal-body">
+                                    {/* Common Fields Section */}
+                                    <div className="mb-4">
+                                        <h6 className="text-primary mb-3">Basic Information</h6>
+                                        <div className="row gap-2">
+                                            {/* ID Type */}
                                             <div className="col-lg-3 row">
                                                 <div className="col-xl-6">
-                                                    <label>External {actionType} ID</label>
+                                                    <label>ID Type</label>
+                                                </div>
+                                                <div className="col-xl-6">
+                                                    <select className="form-select" value={indentIdType} onChange={(e) => setIndentIdType(e.target.value)}>
+                                                        <option value="internal">Internal</option>
+                                                        <option value="external">External</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {/* External ID - Conditional */}
+                                            {indentIdType === "external" && (
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-6">
+                                                        <label>External {actionType} ID</label>
+                                                    </div>
+                                                    <div className="col-xl-6">
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={externalIndentId}
+                                                            onChange={(e) => setExternalIndentId(e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Location */}
+                                            {/* <div className="col-xl-3 row form-group">
+                                                <div className="col-xl-6">
+                                                    <label>Location *</label>
                                                 </div>
                                                 <div className="col-xl-6">
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={externalIndentId}
-                                                        onChange={(e) => setExternalIndentId(e.target.value)}
+                                                        value={location}
+                                                        onChange={(e) => setLocation(e.target.value)}
+                                                        placeholder="Enter location"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div> */}
+
+                                            {/* Buyer Group */}
+                                            <div className="col-xl-3 row form-group">
+                                                <div className="col-xl-5">
+                                                    <label>Buyer Group *</label>
+                                                </div>
+                                                <div className="col-xl-7">
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        value={buyerGroup}
+                                                        onChange={(e) => setBuyerGroup(e.target.value)}
+                                                        placeholder="Enter buyer group"
+                                                        required
                                                     />
                                                 </div>
                                             </div>
-                                        )}
 
-                                        {actionType === "PE" && (
-                                            <div className="col-lg-3 row">
+                                            {/* Delivery Date */}
+                                            <div className="col-xl-3 row form-group">
                                                 <div className="col-xl-6">
-                                                    <label>PE Category</label>
+                                                    <label>Delivery Date</label>
                                                 </div>
                                                 <div className="col-xl-6">
-                                                    <select
-                                                        className="form-select"
-                                                        value={selectedCategory}
-                                                        onChange={(e) => setSelectedCategory(e.target.value)}
-                                                    >
-                                                        <option value="">Select</option>
-                                                        {indentCategories.map((cat) => (
-                                                            <option key={cat._id} value={cat._id}>
-                                                                {cat.name || cat.categoryName}
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                    <input
+                                                        type="date"
+                                                        className="form-control"
+                                                        value={deliveryDate}
+                                                        onChange={(e) => setDeliveryDate(e.target.value)}
+                                                    />
                                                 </div>
                                             </div>
-                                        )}
+                                        </div>
+                                    </div>
 
-                                        {actionType === "PO" && (
-                                            <div className="col-lg-3 row">
-                                                <div className="col-xl-6">
-                                                    <label>PO Category</label>
+                                    {/* Purchase Enquiry (PE) Specific Fields */}
+                                    {actionType === "PE" && (
+                                        <>
+                                            <div className="mb-4">
+                                                <h6 className="text-success mb-3">Purchase Enquiry Details</h6>
+                                                <div className="row gap-2">
+                                                    <div className="col-lg-3 row">
+                                                        <div className="col-xl-6">
+                                                            <label>PE Category</label>
+                                                        </div>
+                                                        <div className="col-xl-6">
+                                                            <select
+                                                                className="form-select"
+                                                                value={selectedCategory}
+                                                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                                            >
+                                                                <option value="">Select</option>
+                                                                {indentCategories.map((cat) => (
+                                                                    <option key={cat._id} value={cat._id}>
+                                                                        {cat.name || cat.categoryName}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-lg-3 row">
+                                                        <div className="col-xl-5">
+                                                            <label className="form-label">Location:</label>
+                                                        </div>
+                                                        <div className="col-xl-7">
+                                                            <select
+                                                                className="form-select"
+                                                                value={location}
+                                                                onChange={(e) => setLocation(e.target.value)}
+                                                            >
+                                                                <option value="">-- Select Location --</option>
+                                                                {locations.map((loc) => (
+                                                                    <option
+                                                                        key={loc._id || loc.id || loc.name}
+                                                                        value={loc.name || loc.locationName || loc._id}
+                                                                    >
+                                                                        {loc.name || loc.locationName || loc._id}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="col-xl-6">
-                                                    <select
-                                                        className="form-select"
-                                                        value={selectedCategory}
-                                                        onChange={(e) => setSelectedCategory(e.target.value)}
-                                                    >
-                                                        <option value="">Select</option>
-                                                        {poCategories.map((cat) => (
-                                                            <option key={cat._id} value={cat._id}>
-                                                                {cat.name || cat.categoryName}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
+
                                             </div>
-                                        )}
+                                        </>
+                                    )}
 
-                                        {actionType === "PO" && (
-                                            <>
-                                                {/* Unit Price Field */}
+                                    {/* Purchase Order (PO) Specific Fields */}
+                                    {actionType === "PO" && (
+                                        <div className="mb-4">
+                                            <h6 className="text-info mb-3">Purchase Order Details</h6>
+                                            <div className="row gap-2">
+                                                {/* PO Category */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-5">
+                                                        <label className="form-label">PO Category:</label>
+                                                    </div>
+                                                    <div className="col-xl-7">
+                                                        <select
+                                                            className="form-select"
+                                                            value={selectedCategory?._id || ""}
+                                                            onChange={(e) => {
+                                                                const cat = poCategories.find((c) => c._id === e.target.value);
+                                                                setSelectedCategory(cat);
+                                                            }}
+                                                            required
+                                                        >
+                                                            <option value="">-- Select Category --</option>
+                                                            {poCategories.map((c) => (
+                                                                <option key={c._id} value={c._id}>
+                                                                    {c.categoryName || c.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* PO Number */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-5">
+                                                        <label className="form-label">PO Number:</label>
+                                                    </div>
+                                                    <div className="col-xl-7">
+                                                        <input
+                                                            className="form-control form-control-sm"
+                                                            value={poNumber}
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* PO Creating Date */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-6">
+                                                        <label className="form-label">PO Creating Date:</label>
+                                                    </div>
+                                                    <div className="col-xl-6">
+                                                        <input
+                                                            type="date"
+                                                            className="form-control form-control-sm"
+                                                            value={date}
+                                                            onChange={(e) => setDate(e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {/* Unit Price */}
                                                 <div className="col-xl-3 row form-group">
                                                     <div className="col-xl-4">
                                                         <label>Unit Price *</label>
@@ -854,7 +1016,7 @@ function MRP() {
                                                     </div>
                                                 </div>
 
-                                                {/* Vendor Field */}
+                                                {/* Vendor */}
                                                 <div className="col-lg-3 row">
                                                     <div className="col-xl-3">
                                                         <label className="form-label">Vendor *</label>
@@ -878,7 +1040,7 @@ function MRP() {
                                                     </div>
                                                 </div>
 
-                                                {/* Tax Field */}
+                                                {/* Tax */}
                                                 <div className="col-xl-3 row form-group">
                                                     <div className="col-xl-3">
                                                         <label>Tax *</label>
@@ -902,23 +1064,102 @@ function MRP() {
                                                     </div>
                                                 </div>
 
-                                                {/* Delivery Location Field */}
+                                                {/* Discount */}
                                                 <div className="col-xl-3 row form-group">
                                                     <div className="col-xl-4">
-                                                        <label>Delivery Location</label>
+                                                        <label>Discount</label>
                                                     </div>
                                                     <div className="col-xl-8">
                                                         <input
-                                                            type="text"
+                                                            type="number"
                                                             className="form-control"
-                                                            value={deliveryLocation}
-                                                            onChange={(e) => setDeliveryLocation(e.target.value)}
-                                                            placeholder="Enter delivery location"
+                                                            value={taxDiscount}
+                                                            onChange={(e) => setTaxDiscount(parseFloat(e.target.value) || 0)}
+                                                            placeholder="Enter discount amount"
                                                         />
                                                     </div>
                                                 </div>
 
-                                                {/* Delivery Address Field */}
+                                                {/* Validity Date */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-5">
+                                                        <label className="form-label">Validity Date:</label>
+                                                    </div>
+                                                    <div className="col-xl-7">
+                                                        <input
+                                                            type="date"
+                                                            className="form-control form-control-sm"
+                                                            value={validityDate}
+                                                            onChange={(e) => setValidityDate(e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* General Conditions and Processes */}
+                                            <h6 className="text-secondary mt-4 mb-3">Conditions & Processes</h6>
+                                            <div className="row gap-2">
+                                                {/* General Conditions */}
+                                                <div className="col-lg-3">
+                                                    <label className="form-label">Select General Conditions</label>
+                                                    {generalConditions.map((gc) => (
+                                                        <div key={gc._id} className="d-flex align-items-center mb-1">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="me-2"
+                                                                checked={selectedConditions.includes(gc._id)}
+                                                                onChange={() => toggleSelection(gc._id, selectedConditions, setSelectedConditions)}
+                                                            />
+                                                            <label>{gc.name}</label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                {/* Processes */}
+                                                <div className="col-lg-3">
+                                                    <label className="form-label">Select Processes</label>
+                                                    {processes.map((p) => (
+                                                        <div key={p._id} className="d-flex align-items-center mb-1">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="me-2"
+                                                                checked={selectedProcesses.includes(p._id)}
+                                                                onChange={() => toggleSelection(p._id, selectedProcesses, setSelectedProcesses)}
+                                                            />
+                                                            <label>{p.processDescription}</label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Delivery Information */}
+                                            <h6 className="text-secondary mt-4 mb-3">Delivery Information</h6>
+                                            <div className="row gap-2">
+                                                {/* Location */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-5">
+                                                        <label className="form-label">Location:</label>
+                                                    </div>
+                                                    <div className="col-xl-7">
+                                                        <select
+                                                            className="form-select"
+                                                            value={deliveryLocation}
+                                                            onChange={(e) => setDeliveryLocation(e.target.value)}
+                                                        >
+                                                            <option value="">-- Select Location --</option>
+                                                            {locations.map((loc) => (
+                                                                <option
+                                                                    key={loc._id || loc.id || loc.name}
+                                                                    value={loc.name || loc.locationName || loc._id}
+                                                                >
+                                                                    {loc.name || loc.locationName || loc._id}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* Delivery Address */}
                                                 <div className="col-xl-3 row form-group">
                                                     <div className="col-xl-3">
                                                         <label>Delivery Address</label>
@@ -934,72 +1175,100 @@ function MRP() {
                                                     </div>
                                                 </div>
 
-                                                {/* Contact Person Field */}
-                                                <div className="col-xl-3 row form-group">
-                                                    <div className="col-xl-4">
-                                                        <label>Contact Person</label>
+                                                {/* Contact Person */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-6">
+                                                        <label className="form-label">Contact Person:</label>
                                                     </div>
-                                                    <div className="col-xl-8">
+                                                    <div className="col-xl-6">
                                                         <input
-                                                            type="text"
-                                                            className="form-control"
+                                                            className="form-control form-control-sm"
                                                             value={contactPerson}
                                                             onChange={(e) => setContactPerson(e.target.value)}
-                                                            placeholder="Enter contact person"
                                                         />
                                                     </div>
                                                 </div>
 
-                                                {/* Prepared By Field */}
-                                                <div className="col-xl-3 row form-group">
-                                                    <div className="col-xl-4">
-                                                        <label>Prepared By</label>
+                                                {/* Buyer Group */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-5">
+                                                        <label className="form-label">Buyer Group:</label>
                                                     </div>
-                                                    <div className="col-xl-8">
+                                                    <div className="col-xl-7">
                                                         <input
-                                                            type="text"
+                                                            className="form-control form-control-sm"
+                                                            value={buyerGroup}
+                                                            onChange={(e) => setBuyerGroup(e.target.value)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Authorization */}
+                                            <h6 className="text-secondary mt-4 mb-3">Authorization</h6>
+                                            <div className="row gap-2">
+                                                {/* Prepared By */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-6">
+                                                        <label className="form-label">Prepared By:</label>
+                                                    </div>
+                                                    <div className="col-xl-6">
+                                                        <input
                                                             className="form-control"
                                                             value={preparedby}
                                                             onChange={(e) => setPreparedby(e.target.value)}
-                                                            placeholder="Enter prepared by"
                                                         />
                                                     </div>
                                                 </div>
 
-                                                {/* Approved By Field */}
-                                                <div className="col-xl-3 row form-group">
-                                                    <div className="col-xl-4">
-                                                        <label>Approved By</label>
+                                                {/* Approved By */}
+                                                <div className="col-lg-3 row">
+                                                    <div className="col-xl-6">
+                                                        <label className="form-label">Approved By:</label>
                                                     </div>
-                                                    <div className="col-xl-8">
+                                                    <div className="col-xl-6">
                                                         <input
-                                                            type="text"
                                                             className="form-control"
                                                             value={approvedby}
                                                             onChange={(e) => setApprovedby(e.target.value)}
-                                                            placeholder="Enter approved by"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Additional Information */}
+                                            <h6 className="text-secondary mt-4 mb-3">Additional Information</h6>
+                                            <div className="row gap-2">
+                                                {/* Payment Terms */}
+                                                <div className="col-lg-4 row">
+                                                    <div className="col-xl-3">
+                                                        <label className="form-label">Payment:</label>
+                                                    </div>
+                                                    <div className="col-xl-9">
+                                                        <textarea
+                                                            className="form-control form-control-sm"
+                                                            value={payTerms}
+                                                            onChange={(e) => setPayTerms(e.target.value)}
+                                                            maxLength="250"
                                                         />
                                                     </div>
                                                 </div>
 
-                                                {/* Tax Discount Field */}
-                                                <div className="col-xl-3 row form-group">
+                                                {/* Remarks */}
+                                                <div className="col-lg-3 row">
                                                     <div className="col-xl-4">
-                                                        <label>Discount</label>
+                                                        <label className="form-label">Remarks:</label>
                                                     </div>
                                                     <div className="col-xl-8">
                                                         <input
-                                                            type="number"
-                                                            
                                                             className="form-control"
-                                                            value={taxDiscount}
-                                                            onChange={(e) => setTaxDiscount(parseFloat(e.target.value) || 0)}
-                                                            placeholder="Enter discount amount"
+                                                            value={remarks}
+                                                            onChange={(e) => setRemarks(e.target.value)}
                                                         />
                                                     </div>
                                                 </div>
 
-                                                {/* Notes Field */}
+                                                {/* Notes */}
                                                 <div className="col-xl-3 row form-group">
                                                     <div className="col-xl-2">
                                                         <label>Notes</label>
@@ -1014,75 +1283,15 @@ function MRP() {
                                                         />
                                                     </div>
                                                 </div>
-
-                                                {/* Remarks Field */}
-                                                <div className="col-xl-3 row form-group">
-                                                    <div className="col-xl-3">
-                                                        <label>Remarks</label>
-                                                    </div>
-                                                    <div className="col-xl-9">
-                                                        <textarea
-                                                            className="form-control"
-                                                            rows="2"
-                                                            value={remarks}
-                                                            onChange={(e) => setRemarks(e.target.value)}
-                                                            placeholder="Enter remarks"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
-
-                                        {/* Common fields for both PE and PO */}
-                                        <div className="col-xl-3 row form-group">
-                                            <div className="col-xl-6">
-                                                <label>Location *</label>
-                                            </div>
-                                            <div className="col-xl-6">
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={location}
-                                                    onChange={(e) => setLocation(e.target.value)}
-                                                    placeholder="Enter location"
-                                                    required
-                                                />
                                             </div>
                                         </div>
-
-                                        <div className="col-xl-3 row form-group">
-                                            <div className="col-xl-5">
-                                                <label>Buyer Group *</label>
-                                            </div>
-                                            <div className="col-xl-7">
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    value={buyerGroup}
-                                                    onChange={(e) => setBuyerGroup(e.target.value)}
-                                                    placeholder="Enter buyer group"
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="col-xl-3 row form-group">
-                                            <div className="col-xl-6">
-                                                <label>Delivery Date</label>
-                                            </div>
-                                            <div className="col-xl-6">
-                                                <input
-                                                    type="date"
-                                                    className="form-control"
-                                                    value={deliveryDate}
-                                                    onChange={(e) => setDeliveryDate(e.target.value)}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
+
                                 <div className="modal-footer gap-2">
-                                    <button className="btn btn-secondary" onClick={() => setShowIndentModal(false)}>Cancel</button>
+                                    <button className="btn btn-secondary" onClick={() => setShowIndentModal(false)}>
+                                        Cancel
+                                    </button>
                                     <button className="btn btn-primary" onClick={handleModalIndentSubmit}>
                                         Create {actionType === "PE" ? "Purchase Enquiry" : "Purchase Order"}
                                     </button>

@@ -1047,9 +1047,9 @@ const Sidebar = () => {
                                                 {hasSubPermission("Master Data", "Material Master") && (
                                                     <li><a href="/material-form" className={isActive("/material-form") ? "active" : ""}>Material Master</a></li>
                                                 )}
-                                                {hasSubPermission("Master Data", "Material Master") && (
+                                                {/* {hasSubPermission("Master Data", "Material Master") && (
                                                     <li><a href="/MRP" className={isActive("/MRP") ? "active" : ""}>MRP</a></li>
-                                                )}
+                                                )} */}
                                                 {hasSubPermission("Master Data", "Customer Master") && (
                                                     <li><a href="/customer-form" className={isActive("/customer-form") ? "active" : ""}>Customer Master</a></li>
                                                 )}
@@ -1176,6 +1176,15 @@ const Sidebar = () => {
                                     </ul>
                                 </li>
                             )} */}
+
+                             {hasPermission("Dashboard") && (
+                                <li>
+                                    <ul>
+                                        
+                                        <li className="submenu"><a href="/MRP" className={isActive("/MRP") ? "active" : ""}><i className="ti ti-smart-home"></i><span>MRP</span></a></li>
+                                    </ul>
+                                </li>
+                            )}
                             {/* Purchase Section */}
                             {hasPermission("Purchase") && (
                                 <li>

@@ -3,6 +3,56 @@ const POCategory = require('../models/POCategory');
 const Quotation = require('../models/Quotation');
 
 // Generate PO number based on category prefix and range
+// async function generatePONumber(categoryId) {
+//   try {
+//     const category = await POCategory.findById(categoryId);
+//     if (!category) throw new Error('PO Category not found');
+    
+//     const prefix = category.prefix;
+//     console.log('Category prefix:', prefix);
+//     console.log('Category range:', category.rangeFrom, 'to', category.rangeTo);
+    
+//     // Find the last PO for this category, sorted by creation date or a numeric field
+//     const lastPO = await PurchaseOrder.find({ categoryId })
+//       .sort({ createdAt: -1 }) // Sort by creation date instead of poNumber
+//       .limit(1);
+    
+//     let nextNumber = category.rangeFrom;
+    
+//     if (lastPO.length > 0) {
+//       console.log('Last PO found:', lastPO[0].poNumber);
+      
+//       // Extract number from PO number (e.g., "PONR1-000001" -> "000001")
+//       const lastPONumber = lastPO[0].poNumber;
+//       const numberPart = lastPONumber.split('-').pop(); // Get the part after the last dash
+      
+//       console.log('Extracted number part:', numberPart);
+      
+//       const lastNumber = parseInt(numberPart, 10);
+//       console.log('Parsed last number:', lastNumber);
+      
+//       if (!isNaN(lastNumber)) {
+//         nextNumber = lastNumber + 1;
+//       }
+//     }
+    
+//     console.log('Next number to use:', nextNumber);
+    
+//     if (nextNumber > category.rangeTo) {
+//       throw new Error(`PO number exceeded category range. Next: ${nextNumber}, Max: ${category.rangeTo}`);
+//     }
+    
+//     const generatedPONumber = `${prefix}-${nextNumber.toString().padStart(6, '0')}`;
+//     console.log('Generated PO Number:', generatedPONumber);
+    
+//     return generatedPONumber;
+//   } catch (error) {
+//     console.error('Error in generatePONumber:', error);
+//     throw error;
+//   }
+// }
+
+
 async function generatePONumber(categoryId) {
   try {
     const category = await POCategory.findById(categoryId);
@@ -12,27 +62,29 @@ async function generatePONumber(categoryId) {
     console.log('Category prefix:', prefix);
     console.log('Category range:', category.rangeFrom, 'to', category.rangeTo);
     
-    // Find the last PO for this category, sorted by creation date or a numeric field
-    const lastPO = await PurchaseOrder.find({ categoryId })
-      .sort({ createdAt: -1 }) // Sort by creation date instead of poNumber
-      .limit(1);
+    // Find ALL POs for this category to determine the highest number
+    const existingPOs = await PurchaseOrder.find({ 
+      categoryId,
+      poNumber: { $regex: `^${prefix}-` } // Only get POs with the correct prefix
+    }).select('poNumber');
     
     let nextNumber = category.rangeFrom;
     
-    if (lastPO.length > 0) {
-      console.log('Last PO found:', lastPO[0].poNumber);
+    if (existingPOs.length > 0) {
+      console.log('Found existing POs:', existingPOs.length);
       
-      // Extract number from PO number (e.g., "PONR1-000001" -> "000001")
-      const lastPONumber = lastPO[0].poNumber;
-      const numberPart = lastPONumber.split('-').pop(); // Get the part after the last dash
+      // Extract all numbers and find the maximum
+      const usedNumbers = existingPOs
+        .map(po => {
+          const numberPart = po.poNumber.split('-').pop();
+          return parseInt(numberPart, 10);
+        })
+        .filter(num => !isNaN(num)); // Filter out invalid numbers
       
-      console.log('Extracted number part:', numberPart);
-      
-      const lastNumber = parseInt(numberPart, 10);
-      console.log('Parsed last number:', lastNumber);
-      
-      if (!isNaN(lastNumber)) {
-        nextNumber = lastNumber + 1;
+      if (usedNumbers.length > 0) {
+        const maxUsedNumber = Math.max(...usedNumbers);
+        console.log('Highest used number:', maxUsedNumber);
+        nextNumber = maxUsedNumber + 1;
       }
     }
     
@@ -45,12 +97,19 @@ async function generatePONumber(categoryId) {
     const generatedPONumber = `${prefix}-${nextNumber.toString().padStart(6, '0')}`;
     console.log('Generated PO Number:', generatedPONumber);
     
+    // Optional: Add a check to ensure this number doesn't already exist
+    const existingPO = await PurchaseOrder.findOne({ poNumber: generatedPONumber });
+    if (existingPO) {
+      throw new Error(`PO number ${generatedPONumber} already exists`);
+    }
+    
     return generatedPONumber;
   } catch (error) {
     console.error('Error in generatePONumber:', error);
     throw error;
   }
 }
+
 
 // Alternative approach: Use a counter field in the category
 async function generatePONumberWithCounter(categoryId) {
