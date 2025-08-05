@@ -6,72 +6,41 @@ const Role = require('../models/Roles');
 function organizePermissions(permissions) {
   
 
-const permissionsStructure = {
-  "Dashboard": [
-    "Dashboard"
-  ],
-  
-  "Master Data": [
-    "Material Master",
-    "Customer Master", 
-    "Vendor Master",
-    "Customer Price List",
-    "Vendor Price List",
-    "Tax List",
-    "Location Master"
-  ],
-  
-  "Category": [
-    "Material Category",
-    "Customer Category",
-    "Vendor Category", 
-    "Purchase Indent Category",
-    "Sales Indent Category",
-    "PO Category",
-    "Sales RFQ Category",
-    "Sales Order Category",
-    "Goods Receipt Category",
-    "Goods Issue Category"
-  ],
-  
-  "Purchase": [
-    "Purchase Indent",
-    "Purchase Quotation",
-    "Purchase Order",
-    "Purchase Indent List",
-    "Purchase Quotations List",
-    "Purchase Order List"
-  ],
-  
-  "Sales": [
-    "Sales Indent",
-    "Sales Quotation Form",
-    "Sales Order",
-    "Sales Indent List", 
-    "Sales Quotations List",
-    "Sales Order List"
-  ],
-  
-  "Inventory": [
-    "Material Receipt",
-    "Material Receipt List",
-    "Material Issue",
-    "Material Transfer",
-    "Stock List"
-  ],
-  
-  "Invoice": [
-    "Invoice Category",
-    "Invoice Form",
-    "Invoice List"
-  ],
-  
-  "Billing": [
-    "Billing Category",
-    "Billing Form",
-    "Billing List"
-  ]
-};
+  const permissionsStructure = {
+    "Dashboard": ["Dashboard"],
+    "Master Data": [
+      "Material Master", "Customer Master", "Vendor Master",
+      "Customer Price List", "Vendor Price List", "Tax List",
+      "Location Master", "Process List Master", "General Condition Master"
+    ],
+    "MRP": ["MRP"],
+    "Category": [
+      "Material Category", "Customer Category", "Vendor Category",
+      "Purchase Indent Category", "Sales Indent Category", "PO Category",
+      "Sales RFQ Category", "Sales Order Category", "Goods Receipt Category",
+      "Goods Issue Category", "Billing Category", "Invoice Category",
+      "Purchase Quotation Category","Purchase Contract Category", "Sale Contract Category", "Transfer Category"
+    ],
+    "Purchase": [
+      "Purchase Indent", "Purchase Quotation", "Purchase Contract", "Purchase Order",
+      "Purchase Indent List", "Purchase Quotations List", "Purchase Contract List", "Purchase Order List"
+    ],
+    "Sales": [
+      "Sales Indent", "Sales Quotation Form", "Sales Contract", "Sales Order",
+      "Sales Indent List", "Sales Quotations List", "Sales Contract List", "Sales Order List"
+    ],
+    "Inventory": [
+      "Material Receipt", "Material Receipt List", "Material Issue",
+      "Material Transfer", "Material Issue List", "Stock List"
+    ],
+    "Invoice": ["Invoice Form", "Invoice List"],
+    "Billing": ["Billing Form", "Billing List"],
+    "Accounts": ["GST", "Ledger", "Payments"],
+    "CRM": [
+      "Contacts List", "Leads", "Proposals", "Sources",
+      "Lost Reason", "Contact Stage", "Industry", "Calls"
+    ]
+  };
 
 
 

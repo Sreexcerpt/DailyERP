@@ -616,7 +616,11 @@ const fetchCategories = async () => {
 // Update your fetchVendors function to set both vendors and allVendors
 const fetchVendors = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/vendors');
+    const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+
+
+    const response = await axios.get('http://localhost:8080/api/vendors',{params: { companyId, financialYear }});
     const activeVendors = response.data.filter(
       (vendor) => !vendor.isDeleted && !vendor.isBlocked
     );
@@ -635,7 +639,11 @@ const fetchVendors = async () => {
 // Add this function to fetch locations
 const fetchLocations = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/locations');
+    const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+
+
+    const response = await axios.get('http://localhost:8080/api/locations',{params: { companyId, financialYear }});
     if (Array.isArray(response.data)) {
       setLocations(response.data);
     } else if (response.data && Array.isArray(response.data.locations)) {
@@ -713,8 +721,12 @@ const handleSaveEdit = async () => {
 
   const fetchQuotations = async () => {
     try {
+      const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+
+
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/api/quotations/get');
+      const response = await axios.get('http://localhost:8080/api/quotations/get',{params: { companyId, financialYear }});
      const sortedQuotations = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
 setQuotations(sortedQuotations);

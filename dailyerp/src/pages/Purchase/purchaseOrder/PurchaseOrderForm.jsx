@@ -62,13 +62,21 @@ function PurchaseOrderForm() {
   const [selectedConditions, setSelectedConditions] = useState([]);
   const [selectedProcesses, setSelectedProcesses] = useState([]);
   useEffect(() => {
+     const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+  const commonParams = {
+    params: {
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
+    },
+  };
     axios.get("http://localhost:8080/api/po-categories")
       .then((res) => setCategories(res.data));
-    axios.get('http://localhost:8080/api/indent/get')
+    axios.get('http://localhost:8080/api/indent/get', commonParams)
       .then((res) => {
         setEnquirys(res.data);
       })
-    axios.get("http://localhost:8080/api/quotations/get")
+    axios.get("http://localhost:8080/api/quotations/get", commonParams)
       .then((res) => {
         setQuotations(res.data);
         const allBuyerGroups = [];
@@ -106,16 +114,16 @@ function PurchaseOrderForm() {
         setProcesses(filteredProcesses);
       });
 
-    axios.get("http://localhost:8080/api/locations")
+    axios.get("http://localhost:8080/api/locations", commonParams)
       .then((res) => setLocations(res.data));
 
     axios.get("http://localhost:8080/api/tax")
       .then((res) => setTaxes(res.data));
 
-    axios.get("http://localhost:8080/api/material")
+    axios.get("http://localhost:8080/api/material", commonParams)
       .then((res) => setMaterials(res.data));
 
-    axios.get("http://localhost:8080/api/vendors")
+    axios.get("http://localhost:8080/api/vendors",  commonParams)
       .then((res) => setVendors(res.data));
 
     setItems([

@@ -73,10 +73,10 @@ const MaterialPage = () => {
     const res = await axios.get('http://localhost:8080/api/category');
     setCategories(res.data);
   };
-
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const fetchMaterials = async () => {
-    const companyId = localStorage.getItem('selectedCompanyId');
-    const financialYear = localStorage.getItem('financialYear');
+
 
     const res = await axios.get('http://localhost:8080/api/material', {
       params: { companyId, financialYear }
@@ -397,10 +397,10 @@ const MaterialPage = () => {
                   <td>{mat.dimension || "-"}</td>
                   <td>{mat.mpn || "_"}</td>
                   <td>{mat.hsn || "_"}</td>
-                  <td>{mat.minstock||"_"}</td>
-                  <td>{mat.safetyStock||"_"}</td>
-                  <td>{mat.maxstock||"_"}</td>
-                  <td>{mat.pdt||"_"}</td>
+                  <td>{mat.minstock || "_"}</td>
+                  <td>{mat.safetyStock || "_"}</td>
+                  <td>{mat.maxstock || "_"}</td>
+                  <td>{mat.pdt || "_"}</td>
                   <td>{mat.location || "_"}</td>
                   <td>
                     <div className="form-check">

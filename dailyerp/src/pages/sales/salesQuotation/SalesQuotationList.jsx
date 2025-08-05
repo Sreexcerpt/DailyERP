@@ -205,9 +205,10 @@ function QuotationListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
   useEffect(() => {
-    axios.get('http://localhost:8080/api/salesquotations')
+    axios.get('http://localhost:8080/api/salesquotations', { params: { companyId, financialYear }, })
       .then(res => {
         const sorted = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setQuotations(sorted);

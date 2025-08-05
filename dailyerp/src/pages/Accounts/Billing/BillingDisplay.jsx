@@ -9,14 +9,18 @@ const BillingDisplay = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   useEffect(() => {
     fetchBillings();
   }, []);
 
   const fetchBillings = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/billingform');
+      const response = await axios.get('http://localhost:8080/api/billingform', {
+        params: { companyId, financialYear }
+      });
       setBillings(response.data);
       setError(null);
     } catch (err) {
@@ -59,79 +63,79 @@ const BillingDisplay = () => {
     setCurrentPage(n);
   };
 
-//   const handlePrint = (billing) => {
-//     const printContent = `
-//       <html>
-//         <head>
-//           <title>Billing - ${billing.docnumber}</title>
-//           <style>
-//             body { font-family: Arial; padding: 20px; }
-//             h2 { text-align: center; }
-//             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-//             th, td { border: 1px solid #ccc; padding: 8px; }
-//             th { background: #f0f0f0; }
-//             .summary { margin-top: 20px; font-weight: bold; }
-//             .footer { margin-top: 40px; font-size: 12px; text-align: right; }
-//           </style>
-//         </head>
-//         <body>
-//           <h2>Billing Document</h2>
-//           <p><strong>Document No:</strong> ${billing.docnumber}</p>
-//           <p><strong>Customer:</strong> ${billing.customer}</p>
-//           <p><strong>Location:</strong> ${billing.location}</p>
-//           <p><strong>Reference:</strong> ${billing.reference}</p>
-//           <p><strong>Billing Ref:</strong> ${billing.BillingRef}</p>
-//           <p><strong>Date:</strong> ${new Date(billing.documentDate).toLocaleDateString()}</p>
-//           <table>
-//             <thead>
-//               <tr>
-//                 <th>#</th>
-//                 <th>Material ID</th>
-//                 <th>Description</th>
-//                 <th>Qty</th>
-//                 <th>Unit</th>
-//                 <th>Price</th>
-//                 <th>Total</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               ${billing.items.map((item, index) => `
-//                 <tr>
-//                   <td>${index + 1}</td>
-//                   <td>${item.materialId}</td>
-//                   <td>${item.description}</td>
-//                   <td>${item.quantity}</td>
-//                   <td>${item.baseUnit}</td>
-//                   <td>₹${parseFloat(item.price).toFixed(2)}</td>
-//                   <td>₹${(item.price * item.quantity).toFixed(2)}</td>
-//                 </tr>
-//               `).join('')}
-//             </tbody>
-//           </table>
+  //   const handlePrint = (billing) => {
+  //     const printContent = `
+  //       <html>
+  //         <head>
+  //           <title>Billing - ${billing.docnumber}</title>
+  //           <style>
+  //             body { font-family: Arial; padding: 20px; }
+  //             h2 { text-align: center; }
+  //             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  //             th, td { border: 1px solid #ccc; padding: 8px; }
+  //             th { background: #f0f0f0; }
+  //             .summary { margin-top: 20px; font-weight: bold; }
+  //             .footer { margin-top: 40px; font-size: 12px; text-align: right; }
+  //           </style>
+  //         </head>
+  //         <body>
+  //           <h2>Billing Document</h2>
+  //           <p><strong>Document No:</strong> ${billing.docnumber}</p>
+  //           <p><strong>Customer:</strong> ${billing.customer}</p>
+  //           <p><strong>Location:</strong> ${billing.location}</p>
+  //           <p><strong>Reference:</strong> ${billing.reference}</p>
+  //           <p><strong>Billing Ref:</strong> ${billing.BillingRef}</p>
+  //           <p><strong>Date:</strong> ${new Date(billing.documentDate).toLocaleDateString()}</p>
+  //           <table>
+  //             <thead>
+  //               <tr>
+  //                 <th>#</th>
+  //                 <th>Material ID</th>
+  //                 <th>Description</th>
+  //                 <th>Qty</th>
+  //                 <th>Unit</th>
+  //                 <th>Price</th>
+  //                 <th>Total</th>
+  //               </tr>
+  //             </thead>
+  //             <tbody>
+  //               ${billing.items.map((item, index) => `
+  //                 <tr>
+  //                   <td>${index + 1}</td>
+  //                   <td>${item.materialId}</td>
+  //                   <td>${item.description}</td>
+  //                   <td>${item.quantity}</td>
+  //                   <td>${item.baseUnit}</td>
+  //                   <td>₹${parseFloat(item.price).toFixed(2)}</td>
+  //                   <td>₹${(item.price * item.quantity).toFixed(2)}</td>
+  //                 </tr>
+  //               `).join('')}
+  //             </tbody>
+  //           </table>
 
-//           <div className="summary">
-//             <p>CGST: %${billing.cgst}</p>
-//             <p>SGST: %${billing.sgst}</p>
-//             <p>IGST: %${billing.igst}</p>
-//             <p>Discount: ₹${billing.discount}</p>
-//             <p>Final Total: ₹${billing.finalTotal}</p>
-//           </div>
+  //           <div className="summary">
+  //             <p>CGST: %${billing.cgst}</p>
+  //             <p>SGST: %${billing.sgst}</p>
+  //             <p>IGST: %${billing.igst}</p>
+  //             <p>Discount: ₹${billing.discount}</p>
+  //             <p>Final Total: ₹${billing.finalTotal}</p>
+  //           </div>
 
-//           <div className="footer">
-//             Printed on: ${new Date().toLocaleString()}
-//           </div>
-//         </body>
-//       </html>
-//     `;
+  //           <div className="footer">
+  //             Printed on: ${new Date().toLocaleString()}
+  //           </div>
+  //         </body>
+  //       </html>
+  //     `;
 
-//     const win = window.open('', '_blank');
-//     win.document.write(printContent);
-//     win.document.close();
-//     win.focus();
-//     win.print();
-//   };
-const handlePrint = (billing) => {
-  const printContent = `
+  //     const win = window.open('', '_blank');
+  //     win.document.write(printContent);
+  //     win.document.close();
+  //     win.focus();
+  //     win.print();
+  //   };
+  const handlePrint = (billing) => {
+    const printContent = `
     <html>
       <head>
         <title>Billing - ${billing.docnumber}</title>
@@ -149,10 +153,10 @@ const handlePrint = (billing) => {
       <body>
         <h2>Billing Document</h2>
         <p><strong>Document No:</strong> ${billing.docnumber}</p>
-        <p><strong>Customer:</strong> ${billing.vendor}</p>
+        <p><strong>Customer:</strong> ${billing.customer}</p>
         <p><strong>Location:</strong> ${billing.location}</p>
         <p><strong>Reference:</strong> ${billing.reference}</p>
-        <p><strong>Invoice Ref:</strong> ${billing.invoiceRef}</p>
+        <p><strong>Invoice Ref:</strong> ${billing.BillingRef}</p>
         <p><strong>Date:</strong> ${new Date(billing.documentDate).toLocaleDateString()}</p>
 
         <table>
@@ -199,12 +203,12 @@ const handlePrint = (billing) => {
     </html>
   `;
 
-  const win = window.open('', '_blank');
-  win.document.write(printContent);
-  win.document.close();
-  win.focus();
-  win.print();
-};
+    const win = window.open('', '_blank');
+    win.document.write(printContent);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
 
 
   if (loading) return <div className="text-center"><div className="spinner-border" role="status" /></div>;

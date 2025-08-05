@@ -18,7 +18,9 @@ function InvoiceForm() {
   const [showPOModal, setShowPOModal] = useState(false);
   const [showVendorModal, setShowVendorModal] = useState(false);
   const [searchRowIndex, setSearchRowIndex] = useState(null); // for tracking which row to update
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   const [formData, setFormData] = useState({
     category: "",
     catdesc: "",
@@ -49,17 +51,17 @@ function InvoiceForm() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/api/purchase-orders")
+      .get("http://localhost:8080/api/purchase-orders", { params: { companyId, financialYear }, })
       .then((res) => setPurchaseOrders(res.data))
       .catch((err) => console.error("Error fetching POs:", err));
 
     axios
-      .get("http://localhost:8080/api/vendors")
+      .get("http://localhost:8080/api/vendors", { params: { companyId, financialYear }, })
       .then((res) => setVendors(res.data))
       .catch((err) => console.error("Error fetching vendors:", err));
 
     axios
-      .get("http://localhost:8080/api/material")
+      .get("http://localhost:8080/api/material", { params: { companyId, financialYear }, })
       .then((res) => setMaterials(res.data))
       .catch((err) => console.error("Error fetching materials:", err));
 

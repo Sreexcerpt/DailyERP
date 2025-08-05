@@ -21,6 +21,8 @@ const salesQuotationSchema = new mongoose.Schema({
   validityDate: String,
   salesGroup: String,
   location: String,
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  financialYear: String,
   items: [itemSchema],
   createdAt: { type: Date, default: Date.now }
 });

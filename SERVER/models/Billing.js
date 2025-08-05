@@ -21,9 +21,9 @@ const BillingSchema = new mongoose.Schema({
       deliveryDate: String,
       lotNo: String,
       price: Number,
-        hsnNo: String, // Added HSN number field
-       priceUnit: String, 
-       
+      hsnNo: String, // Added HSN number field
+      priceUnit: String,
+
     }
   ],
   taxCode: String,
@@ -34,8 +34,10 @@ const BillingSchema = new mongoose.Schema({
   totalAmount: Number,
   discount: Number,
   netAmount: Number,
-   finalTotal: Number,
-   balance:Number
+  finalTotal: Number,
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  financialYear: String,
+  balance: Number
 }, { timestamps: true });
 
 module.exports = mongoose.model('Billing', BillingSchema);

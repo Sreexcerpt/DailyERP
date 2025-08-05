@@ -82,15 +82,19 @@ const PurchaseIndent = () => {
 
   // Material ID prefix
   const MATERIAL_PREFIX = 'MMNR-';
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
   // Fetch materials
   useEffect(() => {
-    axios.get('http://localhost:8080/api/material')
+    axios.get('http://localhost:8080/api/material', {
+      params: { companyId },
+    })
       .then(res => {
         const filteredMaterials = res.data.filter(
           (material) => !material.isDeleted && !material.isBlocked
         );
         setMaterials(filteredMaterials);
+        console.log('Fetched materials:', filteredMaterials);
       })
       .catch(err => console.error(err));
     axios
@@ -100,7 +104,9 @@ const PurchaseIndent = () => {
 
   // Fetch purchase categories
   useEffect(() => {
-    axios.get('http://localhost:8080/api/purchasecategory')
+    axios.get('http://localhost:8080/api/purchasecategory',{
+      params: { companyId, financialYear },
+    })
       .then(res => setCategories(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -292,7 +298,8 @@ const PurchaseIndent = () => {
     const selectedCategoryObj = categories.find(cat =>
       cat.name === selectedCategory || cat.categoryName === selectedCategory || cat._id === selectedCategory
     );
-
+ const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
     try {
       const payload = {
         indentIdType: indentIdType,
@@ -303,6 +310,8 @@ const PurchaseIndent = () => {
         buyerGroup: commonBuyerGroup,
         documentDate: documentDate,
         items: validItems,
+          companyId: selectedCompanyId,
+        financialYear: financialYear
       };
       if (indentIdType === "") {
         setPendingFormData(payload);
@@ -698,12 +707,12 @@ const PurchaseIndent = () => {
                         </div>
                         {/* Pagination for Selected Items */}
                         <PaginationComponent
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            onPageChange={paginate}
-                            size="small"
+                          currentPage={currentPage}
+                          totalPages={totalPages}
+                          onPageChange={paginate}
+                          size="small"
 
-                          />
+                        />
                       </>
                     ) : (
                       <div className="text-center py-5">

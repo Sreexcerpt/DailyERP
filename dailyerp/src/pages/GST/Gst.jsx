@@ -18,16 +18,16 @@ function GST() {
     const [selectedLocation, setSelectedLocation] = useState(null);
     const [filteredvendorinvoices, setFilteredVendorInvoices] = useState([]);
     const [filteredcustomerInvoices, setFilteredCustomerInvoices] = useState([]);
-    const [financialYear, setFinancialYear] = useState('');
     const [monthYearOptions, setMonthYearOptions] = useState([]);
-
+    const companyId = localStorage.getItem("selectedCompanyId");
+    const financialYear = localStorage.getItem("financialYear");
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
     // Helper: months in order
     const monthNames = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
 
     useEffect(() => {
         // Get financial year from localStorage
-        const year = localStorage.getItem('financialYear');
-        setFinancialYear(year);
+
 
         axios.get("http://localhost:8080/api/locations")
             .then((res) => setLocations(res.data))
@@ -144,7 +144,9 @@ function GST() {
     useEffect(() => {
         const fetchInvoices = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/invoiceform');
+                const response = await axios.get('http://localhost:8080/api/invoiceform', {
+                    params: { companyId, financialYear }
+                });
                 const filtered = response.data.filter(invoice => {
                     if (!isInFinancialYear(invoice.createdAt)) return false;
                     const matchesLocation = !selectedLocation || invoice.location === selectedLocation;
@@ -178,7 +180,9 @@ function GST() {
     useEffect(() => {
         const fetchcInvoices = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/billingform');
+                const response = await axios.get('http://localhost:8080/api/billingform', {
+                    params: { companyId, financialYear }
+                });
                 const filtered = response.data.filter(invoice => {
                     if (!isInFinancialYear(invoice.createdAt)) return false;
                     const matchesLocation = !selectedLocation || invoice.location === selectedLocation;
@@ -215,19 +219,19 @@ function GST() {
         <>
             <div className="content">
                 <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
-            <h2 className="mb-1">GST List</h2>
-            <nav>
-              <ol className="breadcrumb mb-0">
-                <li className="breadcrumb-item">
-                  <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
-                </li>
-                <li className="breadcrumb-item active" aria-current="page">GST List</li>
-              </ol>
-            </nav>
-          </div>
+                    <div className="my-auto mb-2">
+                        <h2 className="mb-1">GST List</h2>
+                        <nav>
+                            <ol className="breadcrumb mb-0">
+                                <li className="breadcrumb-item">
+                                    <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+                                </li>
+                                <li className="breadcrumb-item active" aria-current="page">GST List</li>
+                            </ol>
+                        </nav>
+                    </div>
 
-        </div>
+                </div>
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
@@ -362,7 +366,7 @@ function GST() {
                                                             <td>{invoice.cgst}</td>
                                                             <td>{invoice.sgst}</td>
                                                             <td>{invoice.igst}</td>
-                                                            <td>{(invoice.cgst || 0) + (invoice.sgst || 0) + (invoice.igst || 0)}</td>
+                                                            <td>{((invoice.cgst || 0) + (invoice.sgst || 0) + (invoice.igst || 0)).toFixed(2)}</td>
                                                         </tr>
                                                     ))}
                                                 </tbody>

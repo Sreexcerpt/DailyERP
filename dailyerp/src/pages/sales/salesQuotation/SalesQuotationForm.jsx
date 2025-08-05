@@ -26,10 +26,13 @@ function SalesQuotationForm() {
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState([]);
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   useEffect(() => {
     // Fetch and filter sales requests (indents)
     axios
-      .get("http://localhost:8080/api/salerequest/get")
+      .get("http://localhost:8080/api/salerequest/get", { params: { companyId, financialYear }, })
       .then((res) => {
         const activeRequests = res.data.filter(
           (r) => !r.isBlocked && !r.isDeleted
@@ -59,7 +62,7 @@ function SalesQuotationForm() {
 
 
     axios
-      .get("http://localhost:8080/api/customers")
+      .get("http://localhost:8080/api/customers", { params: { companyId, financialYear }, })
       .then((res) => {
         const activeCustomers = res.data.filter(
           (c) => !c.isBlocked && !c.isDeleted
@@ -162,6 +165,8 @@ function SalesQuotationForm() {
       categoryId: selectedCategory?.value,
       customerId: selectedCustomer?.value,
       note,
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
       validityDate,
       salesGroup,
       location,
@@ -856,21 +861,21 @@ function SalesQuotationForm() {
                           </div></div>
                       </div>
                       <div className="col-lg-3 row">
-                         <div className="col-xl-3">
-                        <label className="form-label">Location</label></div>
-                         <div className="col-xl-9">
-                        <select
-                          className="form-select"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                        >
-                          <option value="">Select Location</option>
-                          {Array.isArray(locations) && locations.map((loc, idx) => (
-                            <option key={idx} value={loc.name || loc._id || loc}>
-                              {loc.name || loc.locationName || loc}
-                            </option>
-                          ))}
-                        </select></div>
+                        <div className="col-xl-3">
+                          <label className="form-label">Location</label></div>
+                        <div className="col-xl-9">
+                          <select
+                            className="form-select"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                          >
+                            <option value="">Select Location</option>
+                            {Array.isArray(locations) && locations.map((loc, idx) => (
+                              <option key={idx} value={loc.name || loc._id || loc}>
+                                {loc.name || loc.locationName || loc}
+                              </option>
+                            ))}
+                          </select></div>
                       </div>
                       <div className="col-xl-3 row">
                         <div className="col-xl-7">
@@ -1118,6 +1123,7 @@ function SalesQuotationForm() {
                                 </td>
                                 <td>
                                   <input
+                                    type="number"
                                     className="form-control form-control-sm"
                                     value={item.price}
                                     onChange={(e) =>
@@ -1162,6 +1168,7 @@ function SalesQuotationForm() {
           {showMaterialModal && <MaterialModal />}
           {showCustomerModal && <CustomerModal />}
           {showRequestModal && <RequestModal />}
+          {showQuotationModal && <QuotationNumberModal />}
         </div>
 
       </div>

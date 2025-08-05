@@ -27,7 +27,7 @@ function QuotationForm() {
   const [indentSearch, setIndentSearch] = useState("");
   const [vendorSearch, setVendorSearch] = useState("");
   const [materialSearch, setMaterialSearch] = useState("");
-
+  
   const [searchIndent, setSearchIndent] = useState("");
   const [modalIndentSearch, setModalIndentSearch] = useState("");
   // const [selectedIndent, setSelectedIndent] = useState(null);
@@ -46,11 +46,29 @@ function QuotationForm() {
   }, [modalIndentSearch]);
   const [locations, setLocations] = useState([]); // Add this state
   useEffect(() => {
-    axios.get("http://localhost:8080/api/indent/get").then((res) => {
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+  const commonParams = {
+    params: {
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
+    },
+  };
+
+  axios
+    .get("http://localhost:8080/api/indent/get", commonParams)
+    .then((res) => {
       const activeIndents = res.data.filter(
         (indent) => !indent.isDeleted && !indent.isBlocked
       );
 
+      setIndents(
+        activeIndents.map((indent) => ({
+          label: `${indent.indentId} (${indent.categoryName})`,
+          value: indent,
+        }))
+      );
+    
       setIndents(
         activeIndents.map((indent) => ({
           label: `${indent.indentId} (${indent.categoryName})`,
@@ -68,7 +86,7 @@ function QuotationForm() {
       );
     });
 
-    axios.get("http://localhost:8080/api/vendors").then((res) => {
+    axios.get("http://localhost:8080/api/vendors",commonParams).then((res) => {
       const activeVendors = res.data.filter(
         (vendor) => !vendor.isDeleted && !vendor.isBlocked
       );
@@ -83,7 +101,7 @@ function QuotationForm() {
     });
 
 
-    axios.get("http://localhost:8080/api/locations").then((res) => {
+    axios.get("http://localhost:8080/api/locations",  commonParams).then((res) => {
       console.log("Locations API response:", res.data); // Add this to debug
       // Handle different response structures
       if (Array.isArray(res.data)) {
@@ -100,7 +118,7 @@ function QuotationForm() {
 
 
     axios
-      .get("http://localhost:8080/api/material")
+      .get("http://localhost:8080/api/material",commonParams)
       .then((res) => {
         console.log("Fetched materials:", res.data);
         const filteredMaterials = res.data.filter(
@@ -201,6 +219,9 @@ function QuotationForm() {
 
   // Add this new function to handle the final submission
   const handleFinalSubmit = async () => {
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
+  
     const payload = {
       indentId: selectedIndent?.value?.indentId, // Changed from selectedIndent.indentId
       categoryId: selectedIndent?.value?.categoryId, // Changed from selectedIndent.categoryId
@@ -210,6 +231,8 @@ function QuotationForm() {
       quotationReference,
       validityDate,
       vnNo,
+      companyId: selectedCompanyId,
+        financialYear: financialYear,
       note,
       buyerGroup,
       location,
@@ -1104,7 +1127,7 @@ function QuotationForm() {
                                       <input
                                         className="form-control form-control-sm"
                                         value={item.materialId}
-                                        readOnly
+                                       
                                       />
                                     </td>
                                     <td>
@@ -1259,7 +1282,7 @@ function QuotationForm() {
 
           {showIndentModal && <IndentModal />}
           {showVendorModal && <VendorModal />}
-
+{showQuotationModal && <QuotationNumberModal />}
         </div>
       </div>
     </>

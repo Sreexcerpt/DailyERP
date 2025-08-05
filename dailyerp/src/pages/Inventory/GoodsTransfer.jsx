@@ -45,14 +45,21 @@ function GoodsTransfer() {
 
   // Check if category is Display (case insensitive)
   const isDisplayCategory = formData.category.trim().toLowerCase() === "display";
-
+ const companyId = localStorage.getItem("selectedCompanyId");
+    const financialYear = localStorage.getItem("financialYear");
   useEffect(() => {
-    axios.get("http://localhost:8080/api/material")
+   
+    axios.get("http://localhost:8080/api/material", {
+      params: { companyId, financialYear }
+    })
       .then(res => setMaterials(res.data))
       .catch(err => console.error("Error fetching materials:", err));
+
     axios.get("http://localhost:8080/api/locations")
       .then((res) => setLocations(res.data));
-    axios.get("http://localhost:8080/api/goodsTransferCategory")
+    axios.get("http://localhost:8080/api/goodsTransferCategory", {
+      params: { companyId, financialYear },
+    })
       .then(res => setCategories(res.data))
       .catch(err => console.error("Error fetching categories:", err));
   }, []);
@@ -68,7 +75,9 @@ function GoodsTransfer() {
   // Fetch documents for search
   const fetchDocuments = () => {
     console.log('Fetching documents...'); // Debug log
-    axios.get('http://localhost:8080/api/goodsTransfer')
+    axios.get('http://localhost:8080/api/goodsTransfer', {
+      params: { companyId, financialYear },
+    })
       .then(res => {
         console.log('Documents fetched:', res.data); // Debug log
         setDocuments(res.data);

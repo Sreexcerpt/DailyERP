@@ -1,5 +1,5 @@
 const Contract = require('../models/Contract')
-const ContractCategory = require('../models/ContractCategory');
+const ContractCategory = require('../models/PurchaseContractCategoryModel');
 
 // Generate Contract Number
 async function generateCTNRNumber(categoryId) {
@@ -40,7 +40,8 @@ async function generateCTNRNumber(categoryId) {
 // Create Contract
 exports.createContract = async (req, res) => {
     try {
-        const { contractGenType, externalContractNumber, contractCategoryId, ...otherData } = req.body;
+        const { contractGenType, externalContractNumber, ...otherData } = req.body;
+        const contractCategoryId = req.body.categoryId;
         console.log('Received data:', req.body);
         let contractNumber;
 
@@ -68,7 +69,7 @@ exports.createContract = async (req, res) => {
             contractGenType: contractGenType || 'internal',
             ...otherData
         });
-
+console.log('Contract data:', contract);
         await contract.save();
         res.status(201).json({
             message: 'Contract created successfully',
@@ -89,7 +90,14 @@ exports.createContract = async (req, res) => {
 // Get All Contracts
 exports.getAllContracts = async (req, res) => {
     try {
-        const contracts = await Contract.find();
+        const { companyId, financialYear } = req.query;
+
+    const filter = {};
+    if (companyId) filter.companyId = companyId;
+    if (financialYear) filter.financialYear = financialYear;
+
+        const contracts = await Contract.find(filter)
+
         res.json(contracts);
     } catch (error) {
         console.error('Error fetching contracts:', error);

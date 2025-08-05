@@ -91,11 +91,11 @@ exports.createMaterial = async (req, res) => {
 
 exports.getAllMaterials = async (req, res) => {
   try {
-    const { companyId, financialYear } = req.query;
+     const { companyId} = req.query;
 
     const filter = {};
-    if (companyId) filter.companyId = companyId;
-    if (financialYear) filter.financialYear = financialYear;
+     if (companyId) filter.companyId = companyId;
+    // if (financialYear) filter.financialYear = financialYear;
 
     const materials = await Material.find(filter)
       .populate('categoryId', 'categoryName prefix');

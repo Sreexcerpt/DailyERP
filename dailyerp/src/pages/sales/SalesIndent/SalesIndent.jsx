@@ -85,9 +85,11 @@ const Salesrequest = () => {
 
   // Material ID prefix
   const MATERIAL_PREFIX = 'MMNR-';
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   useEffect(() => {
-    axios.get('http://localhost:8080/api/material')
+    axios.get('http://localhost:8080/api/material', { params: { companyId, financialYear }, })
       .then(res => {
         const filteredMaterials = res.data.filter(
           (material) => !material.isDeleted && !material.isBlocked
@@ -97,7 +99,7 @@ const Salesrequest = () => {
       })
       .catch(err => console.error(err));
     axios
-      .get("http://localhost:8080/api/locations")
+      .get("http://localhost:8080/api/locations", { params: { companyId, financialYear }, })
       .then((res) => setLocations(res.data));
   }, []);
 
@@ -306,6 +308,8 @@ const Salesrequest = () => {
         salesGroup: commonsalesGroup,
         documentDate: documentDate,
         items: validItems,
+        companyId: selectedCompanyId,
+        financialYear: financialYear
       };
 
       if (indentIdType === "") {
@@ -314,7 +318,7 @@ const Salesrequest = () => {
         setShowIndentIdModal(true);
       } else {
         if (indentIdType === 'internal') {
-          const res = await axios.post('http://localhost:8080/api/indent/create', payload);
+          const res = await axios.post('http://localhost:8080/api/salerequest/create', payload);
           alert(`Indent saved successfully with ID: ${res.data.indentId}`);
         }
         else if (indentIdType === 'external') {
@@ -922,7 +926,7 @@ const Salesrequest = () => {
                         <div className="d-flex justify-content-center gap-3">
                           <button
                             className="btn btn-primary btn-lg"
-                            onClick={() => handleSubmitIndent()}
+                            onClick={() => handleIndentIdTypeSelection('internal')}
                           >
                             <i className="isax isax-setting-2 me-2"></i>
                             Internal

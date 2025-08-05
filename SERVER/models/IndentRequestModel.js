@@ -24,6 +24,8 @@ const IndentRequestSchema = new mongoose.Schema({
   location: { type: String, required: true },
   buyerGroup: { type: String, required: true },
   documentDate: { type: Date, default: Date.now },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+   financialYear:String,
   items: [IndentItemSchema],
   isDeleted: { type: Boolean, default: false },
   isBlocked: { type: Boolean, default: false },

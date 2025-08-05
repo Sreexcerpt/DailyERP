@@ -30,7 +30,13 @@ exports.updateLocation = async (req, res) => {
 
 exports.getAllLocations = async (req, res) => {
     try {
-        const locations = await Location.find().sort({ createdAt: -1 });
+         const { companyId} = req.query;
+
+    const filter = {};
+    if (companyId) filter.companyId = companyId;
+    //if (financialYear) filter.financialYear = financialYear;
+
+        const locations = await Location.find(filter).sort({ createdAt: -1 });
         res.json(locations);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });

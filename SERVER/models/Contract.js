@@ -25,6 +25,9 @@ const ContractSchema = new mongoose.Schema({
   cnNo: String,
   validityFDate: Date,
   validityTDate: Date,
+  
+companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+   financialYear:String,
   note: String,
   location: String,
   buyerGroup: String,

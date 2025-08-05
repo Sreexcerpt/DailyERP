@@ -24,6 +24,8 @@ const SalesOrderSchema = new mongoose.Schema({
   deliveryAddress: String,
   items: [ItemSchema],
   total: Number,
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  financialYear: String,
   taxName: String,
   cgst: Number,
   sgst: Number,

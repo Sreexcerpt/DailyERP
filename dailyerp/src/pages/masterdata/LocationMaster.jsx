@@ -19,7 +19,10 @@ const LocationMaster = () => {
     const [editId, setEditId] = useState(null);
 
     const fetchLocations = async () => {
-        const res = await axios.get("http://localhost:8080/api/locations");
+        const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+
+        const res = await axios.get("http://localhost:8080/api/locations",{params: { companyId, financialYear }});
         setLocations(res.data);
     };
 
@@ -33,10 +36,20 @@ const LocationMaster = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+
+  const payload = {
+    ...form,
+    companyId: selectedCompanyId,
+    financialYear: financialYear
+  };
+
         if (editId) {
-            await axios.put(`http://localhost:8080/api/locations/${editId}`, form);
+            await axios.put(`http://localhost:8080/api/locations/${editId}`, payload);
         } else {
-            await axios.post("http://localhost:8080/api/locations", form);
+            await axios.post("http://localhost:8080/api/locations", payload);
         }
         setForm(initialForm);
         setEditId(null);

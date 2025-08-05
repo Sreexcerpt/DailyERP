@@ -48,15 +48,26 @@ const processRoutes = require('./routes/Processlist');
 const saleContractCategoryRoutes = require('./routes/saleContractCategoryRoutes');
 const salesContractRoutes = require('./routes/salesContractRoutes');
 
+
+//CRM
+const contactRoutes = require('./routes/contactRoutes'); // Ensure this is the correct path
+const leadRoutes = require('./routes/leadRoutes');
+const proposalRoutes = require('./routes/ProposalRoutes');
+
+
 const app = express();
 app.use(cors());
 
 app.use(express.json());
+
+app.use(express.urlencoded({ extended: true }));
+
 app.use('/uploads', express.static('uploads'));
 // In your server.js or app.js
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // In your server
 connectDB();
+app.use('/api/users', userRoutes);
 // Server side - add logging to your existing endpoint
 app.get('/api/image/:filename', (req, res) => {
   console.log('=== IMAGE API CALLED ===');
@@ -125,7 +136,7 @@ app.use('/api/billingcategory', billingCategoryRoutes);
 app.use('/api', invoiceRoutes);
 app.use('/api', stockRoutes); // Ensure this is the correct path for stock routes
 app.use('/api', billingRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/purchase-contract-categories', require('./routes/PurchaseContractCategoryRoutes'));
 app.use('/api/companies', companyRoutes); // Ensure this is the correct path for company routes
 
 app.use('/api/roles', roleRoutes);
@@ -133,6 +144,19 @@ app.use('/api/permissions', permissionroutes); // Ensure this is the correct pat
 
 app.use('/api/general-conditions', generalConditionRoutes);
 app.use('/api/processes', processRoutes);
+
+
+
+
+// CRM routes
+app.use('/api/contacts', contactRoutes); // Ensure this is the correct path for contact routes
+app.use('/api/leads', leadRoutes);
+app.use('/api/proposals', proposalRoutes);
+app.use('/api/crm/sources', require('./routes/sources'));
+app.use('/api/crm/lost-reasons', require('./routes/lostReasons'));
+app.use('/api/crm/contact-stages', require('./routes/contactStages'));
+app.use('/api/crm/industries', require('./routes/industries'));
+app.use('/api/crm/calls', require('./routes/calls'));
 
 app.use(express.static(path.join(__dirname, 'dist')));
 

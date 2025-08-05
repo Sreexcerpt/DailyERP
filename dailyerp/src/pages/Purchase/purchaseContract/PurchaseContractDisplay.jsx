@@ -1,177 +1,1451 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
-import Select from 'react-select';
-const PAGE_SIZE = 10; // You can adjust this value
+// import React, { useState, useEffect, useMemo } from "react";
+// import axios from "axios";
+// import Select from "react-select";
+// const PAGE_SIZE = 10; // You can adjust this value
+// function PurchaseContractDisplay() {
+//   const [quotations, setQuotations] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [editingQuotation, setEditingQuotation] = useState(null);
+//   const [vendors, setVendors] = useState([]);
+//   const [categories, setCategories] = useState([]);
+//   const [dateFrom, setDateFrom] = useState("");
+//   const [dateTo, setDateTo] = useState("");
+//   // Add these state variables to your existing useState declarations
+//   const [rfqCategories, setRfqCategories] = useState([]);
+//   const [allVendors, setAllVendors] = useState([]);
+//   const [locations, setLocations] = useState([]);
+
+//   // Update your fetchCategories function to set both categories and rfqCategories
+//   const fetchCategories = async () => {
+//     try {
+//       const response = await axios.get(
+//         "http://localhost:8080/api/purchase-contract-categories"
+//       );
+//       const categoryOptions = response.data.map((cat) => ({
+//         label: `${cat.categoryName} (${cat.prefix})`,
+//         value: cat._id,
+//       }));
+//       setCategories(categoryOptions);
+//       setRfqCategories(categoryOptions); // Add this line
+//     } catch (err) {
+//       console.error("Failed to fetch categories:", err);
+//     }
+//   };
+
+//   // Update your fetchVendors function to set both vendors and allVendors
+//   const fetchVendors = async () => {
+//     try {
+//       const companyId = localStorage.getItem('selectedCompanyId');
+//   const financialYear = localStorage.getItem('financialYear');
+
+
+//       const response = await axios.get("http://localhost:8080/api/vendors",{params: { companyId, financialYear }});
+//       const activeVendors = response.data.filter(
+//         (vendor) => !vendor.isDeleted && !vendor.isBlocked
+//       );
+//       const vendorOptions = activeVendors.map((vendor) => ({
+//         label: `${vendor.name1} ${vendor.name2 || ""}`,
+//         value: vendor._id,
+//         vnNo: vendor.vnNo || "",
+//       }));
+//       setVendors(vendorOptions);
+//       setAllVendors(vendorOptions); // Add this line
+//     } catch (err) {
+//       console.error("Failed to fetch vendors:", err);
+//     }
+//   };
+
+//   // Add this function to fetch locations
+//   const fetchLocations = async () => {
+//     try {
+//       const companyId = localStorage.getItem('selectedCompanyId');
+//   const financialYear = localStorage.getItem('financialYear');
+
+
+//       const response = await axios.get("http://localhost:8080/api/locations",{params: { companyId, financialYear }});
+//       if (Array.isArray(response.data)) {
+//         setLocations(response.data);
+//       } else if (response.data && Array.isArray(response.data.locations)) {
+//         setLocations(response.data.locations);
+//       } else {
+//         setLocations([]);
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch locations:", err);
+//       setLocations([]);
+//     }
+//   };
+
+//   // Update your useEffect to call fetchLocations
+//   useEffect(() => {
+//     fetchQuotations();
+//     fetchVendors();
+//     fetchCategories();
+//     fetchLocations(); // Add this line
+//   }, []);
+
+//   // Update your handleEdit function
+//   const handleEdit = async (quotationId) => {
+//     try {
+      
+//       const response = await axios.get(
+//         `http://localhost:8080/api/quotations/${quotationId}`
+//       );
+//       const quotation = response.data;
+
+//       // Set the editing quotation with proper formatting
+//       setEditingQuotation({
+//         ...quotation,
+//         validityDate: quotation.validityDate
+//           ? new Date(quotation.validityDate).toISOString().split("T")[0]
+//           : "",
+//         items: quotation.items.map((item) => ({
+//           ...item,
+//           deliveryDate: item.deliveryDate
+//             ? new Date(item.deliveryDate).toISOString().split("T")[0]
+//             : "",
+//         })),
+//       });
+//     } catch (err) {
+//       console.error("Failed to fetch quotation details:", err);
+//       alert("Failed to load quotation details");
+//     }
+//   };
+
+//   // Update your handleSaveEdit function
+//   const handleSaveEdit = async () => {
+//     try {
+//       // Calculate total price
+//       const totalPrice = editingQuotation.items.reduce((sum, item) => {
+//         return sum + (parseFloat(item.price) || 0);
+//       }, 0);
+
+//       const updatedQuotation = {
+//         ...editingQuotation,
+//         totalPrice,
+//         items: editingQuotation.items.map((item) => ({
+//           ...item,
+//           deliveryDate: item.deliveryDate || null,
+//         })),
+//       };
+
+//       await axios.put(
+//         `http://localhost:8080/api/quotations/${editingQuotation._id}`,
+//         updatedQuotation
+//       );
+//       alert("Quotation updated successfully!");
+//       setEditingQuotation(null);
+//       fetchQuotations(); // Refresh the list
+//     } catch (err) {
+//       console.error("Failed to update quotation:", err);
+//       alert("Failed to update quotation");
+//     }
+//   };
+//   // Fetch all quotations
+//   useEffect(() => {
+//     fetchQuotations();
+//     fetchVendors();
+//     fetchCategories();
+//   }, []);
+
+//   const fetchQuotations = async () => {
+//     try {
+//       setLoading(true);
+//       const companyId = localStorage.getItem('selectedCompanyId');
+//   const financialYear = localStorage.getItem('financialYear');
+
+
+//       const response = await axios.get(
+//         "http://localhost:8080/api/contracts/get"
+//       ,{params: { companyId, financialYear }});
+//       const sortedQuotations = response.data.sort(
+//         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+//       );
+
+//       setQuotations(sortedQuotations);
+//       setError(null);
+//     } catch (err) {
+//       console.error("Failed to fetch quotations:", err);
+//       setError("Failed to load quotations. Please try again.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleCancelEdit = () => {
+//     setEditingQuotation(null);
+//   };
+
+//   const handleEditChange = (field, value) => {
+//     setEditingQuotation((prev) => ({
+//       ...prev,
+//       [field]: value,
+//     }));
+//   };
+
+//   const handleItemEditChange = (index, field, value) => {
+//     const updatedItems = [...editingQuotation.items];
+//     updatedItems[index][field] = value;
+//     setEditingQuotation((prev) => ({
+//       ...prev,
+//       items: updatedItems,
+//     }));
+//   };
+
+//   const handlePrint = (quotation) => {
+//     const printContent = `
+//       <!DOCTYPE html>
+//       <html>
+//       <head>
+//         <title>Quotation - ${quotation._id}</title>
+//         <style>
+//           body { font-family: Arial, sans-serif; margin: 20px; }
+//           .header { text-align: center; margin-bottom: 30px; }
+//           .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+//           .info-item { margin-bottom: 10px; }
+//           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+//           th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+//           th { background-color: #f5f5f5; }
+//           .total-row { background-color: #f0f0f0; font-weight: bold; }
+//           .print-date { text-align: right; margin-top: 30px; font-size: 12px; }
+//           @media print {
+//             body { margin: 0; }
+//             .no-print { display: none; }
+//           }
+//         </style>
+//       </head>
+//       <body>
+//         <div className="header">
+//           <h1>QUOTATION</h1>
+//           <h3>Quotation ID: ${quotation._id}</h3>
+//         </div>
+        
+//         <div className="info-grid">
+//           <div>
+//             <div className="info-item"><strong>Indent ID:</strong> ${
+//               quotation.indentId
+//             }</div>
+//             <div className="info-item"><strong>Category ID:</strong> ${
+//               quotation.categoryId
+//             }</div>
+//             <div className="info-item"><strong>RFQ Category:</strong> ${
+//               quotation.rfqCategoryId
+//             }</div>
+//           </div>
+//           <div>
+//             <div className="info-item"><strong>Vendor:</strong> ${
+//               quotation.vendorName
+//             }</div>
+//             <div className="info-item"><strong>Date:</strong> ${new Date(
+//               quotation.createdAt
+//             ).toLocaleDateString()}</div>
+//           </div>
+//         </div>
+        
+//         ${
+//           quotation.note
+//             ? `<div className="info-item"><strong>Note:</strong> ${quotation.note}</div>`
+//             : ""
+//         }
+        
+//         <table>
+//           <thead>
+//             <tr>
+//               <th>#</th>
+//               <th>Material ID</th>
+//               <th>Description</th>
+//               <th>Quantity</th>
+//               <th>Unit</th>
+//               <th>Price</th>
+//               <th>Total</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             ${quotation.items
+//               .map(
+//                 (item, index) => `
+//               <tr>
+//                 <td>${index + 1}</td>
+//                 <td>${item.materialId}</td>
+//                 <td>${item.description}</td>
+//                 <td>${item.qty}</td>
+//                 <td>${item.unit || item.baseUnit}</td>
+//                 <td>₹${
+//                   item.price ? parseFloat(item.price).toFixed(2) : "0.00"
+//                 }</td>
+//                 <td>₹${
+//                   item.price && item.qty
+//                     ? (parseFloat(item.price) * parseFloat(item.qty)).toFixed(2)
+//                     : "0.00"
+//                 }</td>
+//               </tr>
+//             `
+//               )
+//               .join("")}
+//           </tbody>
+//           <tfoot>
+//             <tr className="total-row">
+//               <td colspan="6" style="text-align: right;"><strong>Grand Total:</strong></td>
+//               <td><strong>₹${quotation.items
+//                 .reduce((total, item) => {
+//                   const itemTotal =
+//                     item.price && item.qty
+//                       ? parseFloat(item.price) * parseFloat(item.qty)
+//                       : 0;
+//                   return total + itemTotal;
+//                 }, 0)
+//                 .toFixed(2)}</strong></td>
+//             </tr>
+//           </tfoot>
+//         </table>
+        
+//         <div className="print-date">
+//           Printed on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
+//         </div>
+//       </body>
+//       </html>
+//     `;
+
+//     const printWindow = window.open("", "_blank");
+//     printWindow.document.write(printContent);
+//     printWindow.document.close();
+//     printWindow.focus();
+//     printWindow.print();
+//   };
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [currentPage, setCurrentPage] = useState(1);
+
+//   // Filter by search term
+//   const [previewQuotation, setPreviewQuotation] = useState(null);
+
+//   // 2. Update the filteredQuotations useMemo to include sorting by totalPrice
+//   const filteredQuotations = useMemo(() => {
+//     let filtered = quotations;
+
+//     // Date range filtering
+//     if (dateFrom || dateTo) {
+//       filtered = filtered.filter((quotation) => {
+//         const createdDate = new Date(quotation.createdAt);
+//         const fromDate = dateFrom ? new Date(dateFrom) : null;
+//         const toDate = dateTo ? new Date(dateTo) : null;
+
+//         if (fromDate && toDate) {
+//           return createdDate >= fromDate && createdDate <= toDate;
+//         } else if (fromDate) {
+//           return createdDate >= fromDate;
+//         } else if (toDate) {
+//           return createdDate <= toDate;
+//         }
+//         return true;
+//       });
+//     }
+
+//     // Search term filtering
+//     if (searchTerm) {
+//       filtered = filtered.filter((quotation) =>
+//         [
+//           quotation.quotationNumber,
+//           quotation.indentId,
+//           quotation.vendorName,
+//           quotation.vnNo,
+//           quotation.note,
+//           quotation.vendor,
+//           quotation.location,
+//           quotation.quotationReference,
+//         ]
+//           .join(" ")
+//           .toLowerCase()
+//           .includes(searchTerm.toLowerCase())
+//       );
+
+//       // Sort by totalPrice in ascending order when searching
+//       filtered = filtered.sort((a, b) => {
+//         const totalA = parseFloat(a.totalPrice) || 0;
+//         const totalB = parseFloat(b.totalPrice) || 0;
+//         return totalA - totalB;
+//       });
+//     }
+
+//     return filtered;
+//   }, [searchTerm, quotations, dateFrom, dateTo]);
+//   const handleReset = () => {
+//     setSearchTerm("");
+//     setDateFrom("");
+//     setDateTo("");
+//     setCurrentPage(1);
+//   };
+//   // 3. Add preview handler function
+//   const handlePreview = async (quotationId) => {
+//     try {
+//       const response = await axios.get(
+//         `http://localhost:8080/api/quotations/${quotationId}`
+//       );
+//       setPreviewQuotation(response.data);
+//     } catch (err) {
+//       console.error("Failed to fetch quotation details:", err);
+//       alert("Failed to load quotation details");
+//     }
+//   };
+
+//   // 4. Function to get row color based on search and price ranking
+//   const getRowColor = (index, isSearching) => {
+//     if (!isSearching) return "transparent";
+
+//     switch (index) {
+//       case 0:
+//         return "#d4edda"; // Light green for lowest price
+//       case 1:
+//         return "#fff3cd"; // Light yellow for second lowest
+//       default:
+//         return "transparent"; // White for others
+//     }
+//   };
+//   // Pagination
+//   const totalPages = Math.ceil(filteredQuotations.length / PAGE_SIZE);
+//   const paginatedQuotations = useMemo(() => {
+//     const start = (currentPage - 1) * PAGE_SIZE;
+//     return filteredQuotations.slice(start, start + PAGE_SIZE);
+//   }, [filteredQuotations, currentPage]);
+
+//   const handleSearchChange = (e) => {
+//     setSearchTerm(e.target.value);
+//     setCurrentPage(1); // Reset to first page on search
+//   };
+
+//   const goToPage = (n) => {
+//     if (n < 1 || n > totalPages) return;
+//     setCurrentPage(n);
+//   };
+//   if (loading) {
+//     return (
+//       <div className="d-flex justify-content-center">
+//         <div className="spinner-border" role="status"></div>
+//       </div>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <div style={{ padding: "20px", marginLeft: "300px" }}>
+//         <h2>Quotations</h2>
+//         <div style={{ color: "red", marginBottom: "20px" }}>{error}</div>
+//         <button onClick={fetchQuotations} style={{ padding: "10px 20px" }}>
+//           Retry
+//         </button>
+//       </div>
+//     );
+//   }
+//   // Preview Modal
+//   if (previewQuotation) {
+//     return (
+//       <div
+//         className="modal fade show"
+//         style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+//       >
+//         <div className="modal-dialog modal-xl">
+//           <div className="modal-content">
+//             <div className="modal-header">
+//               <h5 className="modal-title">
+//                 Quotation Preview - {previewQuotation.quotationNumber}
+//               </h5>
+//               <button
+//                 type="button"
+//                 className="btn-close"
+//                 onClick={() => setPreviewQuotation(null)}
+//               ></button>
+//             </div>
+
+//             <div className="modal-body">
+//               <div className="row g-3 mb-4">
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Indent ID</small>
+//                       <div className="fw-bold">{previewQuotation.indentId}</div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Vendor</small>
+//                       <div className="fw-bold">
+//                         {previewQuotation.vendorName}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Vendor No</small>
+//                       <div className="fw-bold">
+//                         {previewQuotation.vnNo || "-"}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Quotation Reference</small>
+//                       <div className="fw-bold">
+//                         {previewQuotation.quotationReference || "-"}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Validity Date</small>
+//                       <div className="fw-bold">
+//                         {previewQuotation.validityDate
+//                           ? new Date(
+//                               previewQuotation.validityDate
+//                             ).toLocaleDateString()
+//                           : "-"}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Location</small>
+//                       <div className="fw-bold">
+//                         {previewQuotation.location || "-"}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Buyer Group</small>
+//                       <div className="fw-bold">
+//                         {previewQuotation.buyerGroup || "-"}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-md-3">
+//                   <div className="card border-0 bg-light">
+//                     <div className="card-body p-3">
+//                       <small className="text-muted">Created Date</small>
+//                       <div className="fw-bold">
+//                         {new Date(
+//                           previewQuotation.createdAt
+//                         ).toLocaleDateString()}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {previewQuotation.note && (
+//                 <div className="alert alert-info mb-4">
+//                   <strong>Note:</strong> {previewQuotation.note}
+//                 </div>
+//               )}
+
+//               <h6 className="mb-3">Items</h6>
+//               <div className="table-responsive">
+//                 <table className="table table-striped table-hover">
+//                   <thead className="table-dark">
+//                     <tr>
+//                       <th>#</th>
+//                       <th>Material ID</th>
+//                       <th>Description</th>
+//                       <th>Quantity</th>
+//                       <th>Unit</th>
+//                       <th>Price</th>
+//                       <th>Delivery Date</th>
+//                       <th>Total</th>
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {previewQuotation.items.map((item, index) => (
+//                       <tr key={index}>
+//                         <td>{index + 1}</td>
+//                         <td>{item.materialId}</td>
+//                         <td>{item.description}</td>
+//                         <td>{item.qty}</td>
+//                         <td>{item.unit || item.baseUnit}</td>
+//                         <td>
+//                           ₹
+//                           {item.price
+//                             ? parseFloat(item.price).toFixed(2)
+//                             : "0.00"}
+//                         </td>
+//                         <td>
+//                           {item.deliveryDate
+//                             ? new Date(item.deliveryDate).toLocaleDateString()
+//                             : "-"}
+//                         </td>
+//                         <td>
+//                           ₹
+//                           {item.price && item.qty
+//                             ? (
+//                                 parseFloat(item.price) * parseFloat(item.qty)
+//                               ).toFixed(2)
+//                             : "0.00"}
+//                         </td>
+//                       </tr>
+//                     ))}
+//                   </tbody>
+//                   <tfoot>
+//                     <tr className="table-success">
+//                       <td colSpan="7" className="text-end fw-bold">
+//                         Grand Total:
+//                       </td>
+//                       <td className="fw-bold">
+//                         ₹
+//                         {previewQuotation.items
+//                           .reduce((total, item) => {
+//                             const itemTotal =
+//                               item.price && item.qty
+//                                 ? parseFloat(item.price) * parseFloat(item.qty)
+//                                 : 0;
+//                             return total + itemTotal;
+//                           }, 0)
+//                           .toFixed(2)}
+//                       </td>
+//                     </tr>
+//                   </tfoot>
+//                 </table>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   // Edit Modal
+//   if (editingQuotation) {
+//     return (
+//       <div
+//         className="modal fade show"
+//         style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+//       >
+//         <div className="modal-dialog modal-xl">
+//           <div className="modal-content">
+//             <div className="modal-header">
+//               <h5 className="modal-title">
+//                 Edit Quotation - {editingQuotation.quotationNumber}
+//               </h5>
+//               <div>
+//                 <button
+//                   type="button"
+//                   className="btn btn-success me-4 mx-4"
+//                   onClick={handleSaveEdit}
+//                 >
+//                   Save Changes
+//                 </button>
+//                 <button
+//                   type="button"
+//                   className="btn btn-secondary"
+//                   onClick={handleCancelEdit}
+//                 >
+//                   Cancel
+//                 </button>
+//               </div>
+//             </div>
+
+//             <div className="modal-body">
+//               <div className="card">
+//                 <div className="card-body">
+//                   {/* Basic Information */}
+//                   <div className="row g-3 mb-4">
+//                     <div className="col-md-4">
+//                       <label className="form-label">Indent ID</label>
+//                       <input
+//                         type="text"
+//                         className="form-control"
+//                         value={editingQuotation.indentId || ""}
+//                         onChange={(e) =>
+//                           handleEditChange("indentId", e.target.value)
+//                         }
+//                         readOnly
+//                       />
+//                     </div>
+
+//                     <div className="col-md-4">
+//                       <label className="form-label">RFQ Category</label>
+//                       <Select
+//                         options={rfqCategories}
+//                         value={rfqCategories.find(
+//                           (cat) => cat.value === editingQuotation.rfqCategoryId
+//                         )}
+//                         onChange={(selected) =>
+//                           handleEditChange("rfqCategoryId", selected?.value)
+//                         }
+//                         placeholder="Select Category"
+//                       />
+//                     </div>
+
+//                     <div className="col-md-4">
+//                       <label className="form-label">Vendor</label>
+//                       <Select
+//                         options={allVendors}
+//                         value={allVendors.find(
+//                           (v) => v.value === editingQuotation.vendor
+//                         )}
+//                         onChange={(selected) => {
+//                           if (!editingQuotation.vendor) {
+//                             handleEditChange("vendor", selected?.value);
+//                             handleEditChange("vendorName", selected?.label);
+//                             handleEditChange("vnNo", selected?.vnNo || "");
+//                           }
+//                         }}
+//                         placeholder="Select Vendor"
+//                         isDisabled={!!editingQuotation.vendor}
+//                       />
+//                     </div>
+
+//                     <div className="col-md-4">
+//                       <label className="form-label">Quotation Reference</label>
+//                       <input
+//                         type="text"
+//                         className="form-control"
+//                         value={editingQuotation.quotationReference || ""}
+//                         onChange={(e) =>
+//                           handleEditChange("quotationReference", e.target.value)
+//                         }
+//                       />
+//                     </div>
+
+//                     <div className="col-md-4">
+//                       <label className="form-label">Validity Date</label>
+//                       <input
+//                         type="date"
+//                         className="form-control"
+//                         value={editingQuotation.validityDate || ""}
+//                         onChange={(e) =>
+//                           handleEditChange("validityDate", e.target.value)
+//                         }
+//                       />
+//                     </div>
+
+//                     <div className="col-md-4">
+//                       <label className="form-label">Location</label>
+//                       <select
+//                         className="form-select"
+//                         value={editingQuotation.location || ""}
+//                         onChange={(e) =>
+//                           handleEditChange("location", e.target.value)
+//                         }
+//                       >
+//                         <option value="">Select Location</option>
+//                         {locations.map((loc, index) => (
+//                           <option key={index} value={loc.name || loc}>
+//                             {loc.name || loc}
+//                           </option>
+//                         ))}
+//                       </select>
+//                     </div>
+
+//                     <div className="col-md-4">
+//                       <label className="form-label">Buyer Group</label>
+//                       <input
+//                         type="text"
+//                         className="form-control"
+//                         value={editingQuotation.buyerGroup || ""}
+//                         onChange={(e) =>
+//                           handleEditChange("buyerGroup", e.target.value)
+//                         }
+//                       />
+//                     </div>
+
+//                     <div className="col-md-6">
+//                       <label className="form-label">Note</label>
+//                       <textarea
+//                         className="form-control"
+//                         rows={3}
+//                         value={editingQuotation.note || ""}
+//                         onChange={(e) =>
+//                           handleEditChange("note", e.target.value)
+//                         }
+//                         placeholder="Add any notes (optional)"
+//                       />
+//                     </div>
+//                   </div>
+
+//                   {/* Items Table */}
+//                   <h6 className="mb-3">Items</h6>
+//                   <div className="table-responsive">
+//                     <table className="table table-striped table-hover">
+//                       <thead className="table-dark">
+//                         <tr>
+//                           <th>#</th>
+//                           <th>Material ID</th>
+//                           <th>Description</th>
+//                           <th>Quantity</th>
+//                           <th>Base Unit</th>
+//                           <th>Order Unit</th>
+//                           <th>Unit</th>
+//                           <th>Material Group</th>
+//                           <th>Delivery Date</th>
+//                           <th>Price</th>
+//                           <th>Total</th>
+//                         </tr>
+//                       </thead>
+//                       <tbody>
+//                         {editingQuotation.items.map((item, index) => (
+//                           <tr key={index}>
+//                             <td>{index + 1}</td>
+//                             <td>
+//                               <input
+//                                 type="text"
+//                                 className="form-control form-control-sm"
+//                                 value={item.materialId || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "materialId",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                                 readOnly
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="text"
+//                                 className="form-control form-control-sm"
+//                                 value={item.description || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "description",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                                 readOnly
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="number"
+//                                 className="form-control form-control-sm"
+//                                 value={item.qty || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "qty",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="text"
+//                                 className="form-control form-control-sm"
+//                                 value={item.baseUnit || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "baseUnit",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="text"
+//                                 className="form-control form-control-sm"
+//                                 value={item.orderUnit || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "orderUnit",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="text"
+//                                 className="form-control form-control-sm"
+//                                 value={item.unit || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "unit",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="text"
+//                                 className="form-control form-control-sm"
+//                                 value={item.materialgroup || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "materialgroup",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="date"
+//                                 className="form-control form-control-sm"
+//                                 value={item.deliveryDate || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "deliveryDate",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                               />
+//                             </td>
+//                             <td>
+//                               <input
+//                                 type="number"
+//                                 className="form-control form-control-sm"
+//                                 value={item.price || ""}
+//                                 onChange={(e) =>
+//                                   handleItemEditChange(
+//                                     index,
+//                                     "price",
+//                                     e.target.value
+//                                   )
+//                                 }
+//                                 step="0.01"
+//                               />
+//                             </td>
+//                             <td>
+//                               <span className="fw-bold text-success">
+//                                 ₹
+//                                 {item.price && item.qty
+//                                   ? (
+//                                       parseFloat(item.price) *
+//                                       parseFloat(item.qty)
+//                                     ).toFixed(2)
+//                                   : "0.00"}
+//                               </span>
+//                             </td>
+//                           </tr>
+//                         ))}
+//                       </tbody>
+//                       <tfoot>
+//                         <tr className="table-success">
+//                           <td colSpan="10" className="text-end fw-bold">
+//                             Grand Total:
+//                           </td>
+//                           <td className="fw-bold">
+//                             ₹
+//                             {editingQuotation.items
+//                               .reduce((total, item) => {
+//                                 const itemTotal =
+//                                   item.price && item.qty
+//                                     ? parseFloat(item.price) *
+//                                       parseFloat(item.qty)
+//                                     : 0;
+//                                 return total + itemTotal;
+//                               }, 0)
+//                               .toFixed(2)}
+//                           </td>
+//                         </tr>
+//                       </tfoot>
+//                     </table>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="content">
+//       <div
+//         style={{
+//           display: "flex",
+//           justifyContent: "space-between",
+//           alignItems: "center",
+//           marginBottom: "20px",
+//         }}
+//       >
+//         <h6>All Quotations</h6>
+//         <div
+//           style={{
+//             display: "flex",
+//             justifyContent: "space-between",
+//             alignItems: "center",
+//             marginBottom: "20px",
+//           }}
+//         >
+//           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+//             <input
+//               type="text"
+//               placeholder="Search by Quotation Reference etc......."
+//               value={searchTerm}
+//               onChange={handleSearchChange}
+//               className="form-control"
+//               style={{ width: 250, marginTop: "22px" }}
+//             />
+//             <div
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 alignItems: "center",
+//               }}
+//             >
+//               <label style={{ fontSize: "12px", marginBottom: "2px" }}>
+//                 From Date
+//               </label>
+//               <input
+//                 type="date"
+//                 value={dateFrom}
+//                 onChange={(e) => {
+//                   setDateFrom(e.target.value);
+//                   setCurrentPage(1);
+//                 }}
+//                 className="form-control"
+//                 style={{ width: 150 }}
+//               />
+//             </div>
+//             <div
+//               style={{
+//                 display: "flex",
+//                 flexDirection: "column",
+//                 alignItems: "center",
+//               }}
+//             >
+//               <label style={{ fontSize: "12px", marginBottom: "2px" }}>
+//                 To Date
+//               </label>
+//               <input
+//                 type="date"
+//                 value={dateTo}
+//                 onChange={(e) => {
+//                   setDateTo(e.target.value);
+//                   setCurrentPage(1);
+//                 }}
+//                 className="form-control"
+//                 style={{ width: 150 }}
+//               />
+//             </div>
+//             <button
+//               onClick={handleReset}
+//               className="btn btn-sm btn-soft-warning"
+//             >
+//               Reset
+//             </button>
+//             <button
+//               onClick={fetchQuotations}
+//               className="btn btn-sm btn-soft-primary"
+//             >
+//               Refresh
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+
+//       <div className="table-responsive">
+//         <table
+//           className="table table-nowrap datatable dataTable no-footer"
+//           id="DataTables_Table_0"
+//           aria-describedby="DataTables_Table_0_info"
+//         >
+//           <thead>
+//             <tr>
+//               <th>#</th>
+//               <th>Quotation ID</th>
+//               <th>Quotation Reference</th>
+//               {/* <th>Category ID</th>
+//                 <th>RFQ Category</th> */}
+//               <th>Vendor</th>
+//               <th>Location</th> <th>Validity Date</th>
+//               <th>Created</th>
+//               <th>TotalPrice</th>
+//               <th>Note</th>
+//               <th>Actions</th>
+//             </tr>
+//           </thead>
+
+//           <tbody>
+//             {paginatedQuotations.map((quotation, index) => (
+//               <tr key={quotation._id || index}>
+//                 <td>{index + 1}</td>
+//                 <td>{quotation.contractNumber}</td>
+//                 <td>{quotation.contractReference}</td>
+//                 <td>{quotation.vendorName}</td>
+//                 <td>{quotation.location}</td>
+//                 <td>{new Date(quotation.validityDate).toLocaleDateString()}</td>
+//                 <td>{new Date(quotation.createdAt).toLocaleDateString()}</td>
+//                 <td
+//                   style={{ backgroundColor: getRowColor(index, !!searchTerm) }}
+//                 >
+//                   {quotation.totalPrice}
+//                 </td>
+//                 <td>{quotation.note || "-"}</td>
+//                 <td>
+//                   <button
+//                     onClick={() => handlePreview(quotation._id)}
+//                     className="btn btn-sm "
+//                     title="Preview"
+//                   >
+//                     <i className="fas fa-eye" style={{ color: "black" }}></i>
+//                   </button>
+//                   <button
+//                     onClick={() => handleEdit(quotation._id)}
+//                     className="btn btn-sm "
+//                     title="Edit"
+//                   >
+//                     <i className="fas fa-edit" style={{ color: "black" }}></i>
+//                   </button>
+//                   <button
+//                     onClick={() => handlePrint(quotation)}
+//                     className="btn btn-sm "
+//                     title="Print"
+//                   >
+//                     <i className="fas fa-print" style={{ color: "black" }}></i>
+//                   </button>
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+
+//       <div className="d-flex justify-content-center mt-2">
+//         <nav>
+//           <ul className="pagination pagination-sm mb-0">
+//             <li className={`page-item${currentPage === 1 ? " disabled" : ""}`}>
+//               <button
+//                 className="page-link"
+//                 onClick={() => goToPage(currentPage - 1)}
+//                 disabled={currentPage === 1}
+//               >
+//                 <i className="bi bi-chevron-double-left"></i>
+//               </button>
+//             </li>
+//             {/* Page Numbers */}
+//             {(() => {
+//               const pageButtons = [];
+//               const totalToShow = 7; // first 2, last 2, and 3 around current
+//               let startPages = [1, 2];
+//               let endPages = [totalPages - 1, totalPages].filter((n) => n > 2);
+//               let middlePages = [];
+
+//               if (currentPage <= 4) {
+//                 // Show first 5 pages
+//                 startPages = [1, 2, 3, 4, 5].filter((n) => n <= totalPages);
+//                 endPages = [totalPages - 1, totalPages].filter((n) => n > 5);
+//               } else if (currentPage >= totalPages - 3) {
+//                 // Show last 5 pages
+//                 startPages = [1, 2].filter((n) => n < totalPages - 4);
+//                 endPages = [
+//                   totalPages - 4,
+//                   totalPages - 3,
+//                   totalPages - 2,
+//                   totalPages - 1,
+//                   totalPages,
+//                 ].filter((n) => n > 2 && n <= totalPages);
+//               } else {
+//                 // Middle window
+//                 startPages = [1, 2];
+//                 middlePages = [currentPage - 1, currentPage, currentPage + 1];
+//                 endPages = [totalPages - 1, totalPages];
+//               }
+
+//               // Helper to render a set of page numbers
+//               const renderPages = (pages) =>
+//                 pages.map((n) => (
+//                   <li
+//                     key={n}
+//                     className={`page-item${currentPage === n ? " active" : ""}`}
+//                   >
+//                     <button className="page-link" onClick={() => goToPage(n)}>
+//                       {n}
+//                     </button>
+//                   </li>
+//                 ));
+
+//               // Render first pages
+//               pageButtons.push(...renderPages(startPages));
+
+//               // Ellipsis if needed before middle
+//               if (
+//                 (middlePages.length > 0 &&
+//                   middlePages[0] > startPages[startPages.length - 1] + 1) ||
+//                 (middlePages.length === 0 &&
+//                   endPages[0] > startPages[startPages.length - 1] + 1)
+//               ) {
+//                 pageButtons.push(
+//                   <li key="start-ellipsis" className="page-item disabled">
+//                     <span className="page-link">…</span>
+//                   </li>
+//                 );
+//               }
+
+//               // Render middle pages
+//               pageButtons.push(...renderPages(middlePages));
+
+//               // Ellipsis if needed before end
+//               if (
+//                 endPages.length > 0 &&
+//                 ((middlePages.length > 0 &&
+//                   endPages[0] > middlePages[middlePages.length - 1] + 1) ||
+//                   (middlePages.length === 0 &&
+//                     endPages[0] > startPages[startPages.length - 1] + 1))
+//               ) {
+//                 pageButtons.push(
+//                   <li key="end-ellipsis" className="page-item disabled">
+//                     <span className="page-link">…</span>
+//                   </li>
+//                 );
+//               }
+
+//               // Render end pages
+//               pageButtons.push(...renderPages(endPages));
+
+//               return pageButtons;
+//             })()}
+//             <li
+//               className={`page-item${
+//                 currentPage === totalPages ? " disabled" : ""
+//               }`}
+//             >
+//               <button
+//                 className="page-link"
+//                 onClick={() => goToPage(currentPage + 1)}
+//                 disabled={currentPage === totalPages}
+//               >
+//                 <i className="bi bi-chevron-double-right"></i>
+//               </button>
+//             </li>
+//           </ul>
+//         </nav>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default PurchaseContractDisplay;
+
+
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import Select from "react-select";
+
+const PAGE_SIZE = 10;
+
 function PurchaseContractDisplay() {
-  const [quotations, setQuotations] = useState([]);
+  const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingQuotation, setEditingQuotation] = useState(null);
+  const [editingContract, setEditingContract] = useState(null);
   const [vendors, setVendors] = useState([]);
   const [categories, setCategories] = useState([]);
-const [dateFrom, setDateFrom] = useState('');
-const [dateTo, setDateTo] = useState('');
-// Add these state variables to your existing useState declarations
-const [rfqCategories, setRfqCategories] = useState([]);
-const [allVendors, setAllVendors] = useState([]);
-const [locations, setLocations] = useState([]);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [allVendors, setAllVendors] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [previewContract, setPreviewContract] = useState(null);
 
-// Update your fetchCategories function to set both categories and rfqCategories
-const fetchCategories = async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/api/rfq-categories');
-    const categoryOptions = response.data.map((cat) => ({
-      label: `${cat.categoryName} (${cat.prefix})`,
-      value: cat._id
-    }));
-    setCategories(categoryOptions);
-    setRfqCategories(categoryOptions); // Add this line
-  } catch (err) {
-    console.error('Failed to fetch categories:', err);
-  }
-};
+  // Fetch Categories
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/purchase-contract-categories"
+      );
+      const categoryOptions = response.data.map((cat) => ({
+        label: `${cat.categoryName} (${cat.prefix})`,
+        value: cat._id,
+      }));
+      setCategories(categoryOptions);
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    }
+  };
 
-// Update your fetchVendors function to set both vendors and allVendors
-const fetchVendors = async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/api/vendors');
-    const activeVendors = response.data.filter(
-      (vendor) => !vendor.isDeleted && !vendor.isBlocked
-    );
-    const vendorOptions = activeVendors.map((vendor) => ({
-      label: `${vendor.name1} ${vendor.name2 || ""}`,
-      value: vendor._id,
-      vnNo: vendor.vnNo || ""
-    }));
-    setVendors(vendorOptions);
-    setAllVendors(vendorOptions); // Add this line
-  } catch (err) {
-    console.error('Failed to fetch vendors:', err);
-  }
-};
+  // Fetch Vendors
+  const fetchVendors = async () => {
+    try {
+      const companyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
 
-// Add this function to fetch locations
-const fetchLocations = async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/api/locations');
-    if (Array.isArray(response.data)) {
-      setLocations(response.data);
-    } else if (response.data && Array.isArray(response.data.locations)) {
-      setLocations(response.data.locations);
-    } else {
+      const response = await axios.get("http://localhost:8080/api/vendors", {
+        params: { companyId, financialYear }
+      });
+      const activeVendors = response.data.filter(
+        (vendor) => !vendor.isDeleted && !vendor.isBlocked
+      );
+      const vendorOptions = activeVendors.map((vendor) => ({
+        label: `${vendor.name1} ${vendor.name2 || ""}`,
+        value: vendor._id,
+        vnNo: vendor.vnNo || "",
+      }));
+      setVendors(vendorOptions);
+      setAllVendors(vendorOptions);
+    } catch (err) {
+      console.error("Failed to fetch vendors:", err);
+    }
+  };
+
+  // Fetch Locations
+  const fetchLocations = async () => {
+    try {
+      const companyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
+
+      const response = await axios.get("http://localhost:8080/api/locations", {
+        params: { companyId, financialYear }
+      });
+      if (Array.isArray(response.data)) {
+        setLocations(response.data);
+      } else if (response.data && Array.isArray(response.data.locations)) {
+        setLocations(response.data.locations);
+      } else {
+        setLocations([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch locations:", err);
       setLocations([]);
     }
-  } catch (err) {
-    console.error('Failed to fetch locations:', err);
-    setLocations([]);
-  }
-};
+  };
 
-// Update your useEffect to call fetchLocations
-useEffect(() => {
-  fetchQuotations();
-  fetchVendors();
-  fetchCategories();
-  fetchLocations(); // Add this line
-}, []);
-
-// Update your handleEdit function
-const handleEdit = async (quotationId) => {
-  try {
-    const response = await axios.get(`http://localhost:8080/api/quotations/${quotationId}`);
-    const quotation = response.data;
-    
-    // Set the editing quotation with proper formatting
-    setEditingQuotation({
-      ...quotation,
-      validityDate: quotation.validityDate ? new Date(quotation.validityDate).toISOString().split('T')[0] : '',
-      items: quotation.items.map(item => ({
-        ...item,
-        deliveryDate: item.deliveryDate ? new Date(item.deliveryDate).toISOString().split('T')[0] : ''
-      }))
-    });
-  } catch (err) {
-    console.error('Failed to fetch quotation details:', err);
-    alert('Failed to load quotation details');
-  }
-};
-
-// Update your handleSaveEdit function
-const handleSaveEdit = async () => {
-  try {
-    // Calculate total price
-    const totalPrice = editingQuotation.items.reduce((sum, item) => {
-      return sum + (parseFloat(item.price) || 0);
-    }, 0);
-
-    const updatedQuotation = {
-      ...editingQuotation,
-      totalPrice,
-      items: editingQuotation.items.map(item => ({
-        ...item,
-        deliveryDate: item.deliveryDate || null
-      }))
-    };
-
-    await axios.put(`http://localhost:8080/api/quotations/${editingQuotation._id}`, updatedQuotation);
-    alert('Quotation updated successfully!');
-    setEditingQuotation(null);
-    fetchQuotations(); // Refresh the list
-  } catch (err) {
-    console.error('Failed to update quotation:', err);
-    alert('Failed to update quotation');
-  }
-};
-  // Fetch all quotations
-  useEffect(() => {
-    fetchQuotations();
-    fetchVendors();
-    fetchCategories();
-  }, []);
-
-  const fetchQuotations = async () => {
+  // Fetch Purchase Contracts - UPDATED TO MATCH YOUR ROUTES
+  const fetchContracts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8080/api/contracts/get');
-     const sortedQuotations = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const companyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
 
-setQuotations(sortedQuotations);
+      const response = await axios.get(
+        "http://localhost:8080/api/contracts/get", // Using your existing route
+        { params: { companyId, financialYear } }
+      );
+      const sortedContracts = response.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setContracts(sortedContracts);
       setError(null);
     } catch (err) {
-      console.error('Failed to fetch quotations:', err);
-      setError('Failed to load quotations. Please try again.');
+      console.error("Failed to fetch contracts:", err);
+      setError("Failed to load contracts. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchContracts();
+    fetchVendors();
+    fetchCategories();
+    fetchLocations();
+  }, []);
+
+  // Handle Edit - UPDATED TO MATCH YOUR ROUTES
+  const handleEdit = async (contractId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/contracts/${contractId}` // Using your existing route
+      );
+      const contract = response.data;
+
+      setEditingContract({
+        ...contract,
+        validityFromDate: contract.validityFromDate
+          ? new Date(contract.validityFromDate).toISOString().split("T")[0]
+          : "",
+        validityToDate: contract.validityToDate
+          ? new Date(contract.validityToDate).toISOString().split("T")[0]
+          : "",
+        items: contract.items.map((item) => ({
+          ...item,
+        })),
+      });
+    } catch (err) {
+      console.error("Failed to fetch contract details:", err);
+      alert("Failed to load contract details");
+    }
+  };
+
+  // Handle Save Edit - UPDATED TO MATCH YOUR ROUTES
+  const handleSaveEdit = async () => {
+    try {
+      const totalPrice = editingContract.items.reduce((sum, item) => {
+        return sum + (parseFloat(item.price) * parseFloat(item.qty) || 0);
+      }, 0);
+
+      const updatedContract = {
+        ...editingContract,
+        totalPrice,
+      };
+
+      await axios.put(
+        `http://localhost:8080/api/contracts/${editingContract._id}`, // Using your existing route
+        updatedContract
+      );
+      alert("Contract updated successfully!");
+      setEditingContract(null);
+      fetchContracts();
+    } catch (err) {
+      console.error("Failed to update contract:", err);
+      alert("Failed to update contract");
+    }
+  };
 
   const handleCancelEdit = () => {
-    setEditingQuotation(null);
+    setEditingContract(null);
   };
 
   const handleEditChange = (field, value) => {
-    setEditingQuotation(prev => ({
+    setEditingContract((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleItemEditChange = (index, field, value) => {
-    const updatedItems = [...editingQuotation.items];
+    const updatedItems = [...editingContract.items];
     updatedItems[index][field] = value;
-    setEditingQuotation(prev => ({
+    setEditingContract((prev) => ({
       ...prev,
-      items: updatedItems
+      items: updatedItems,
     }));
   };
 
-  const handlePrint = (quotation) => {
+  // Handle Preview - UPDATED TO MATCH YOUR ROUTES
+  const handlePreview = async (contractId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/contracts/${contractId}` // Using your existing route
+      );
+      setPreviewContract(response.data);
+    } catch (err) {
+      console.error("Failed to fetch contract details:", err);
+      alert("Failed to load contract details");
+    }
+  };
+
+  // Handle Print
+  const handlePrint = (contract) => {
     const printContent = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Quotation - ${quotation._id}</title>
+        <title>Purchase Contract - ${contract.contractNumber}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 20px; }
           .header { text-align: center; margin-bottom: 30px; }
@@ -189,24 +1463,25 @@ setQuotations(sortedQuotations);
         </style>
       </head>
       <body>
-        <div className="header">
-          <h1>QUOTATION</h1>
-          <h3>Quotation ID: ${quotation._id}</h3>
+        <div class="header">
+          <h1>PURCHASE CONTRACT</h1>
+          <h3>Contract Number: ${contract.contractNumber}</h3>
         </div>
         
-        <div className="info-grid">
+        <div class="info-grid">
           <div>
-            <div className="info-item"><strong>Indent ID:</strong> ${quotation.indentId}</div>
-            <div className="info-item"><strong>Category ID:</strong> ${quotation.categoryId}</div>
-            <div className="info-item"><strong>RFQ Category:</strong> ${quotation.rfqCategoryId}</div>
+            <div class="info-item"><strong>Vendor:</strong> ${contract.vendorName}</div>
+            <div class="info-item"><strong>Location:</strong> ${contract.location || "-"}</div>
+            <div class="info-item"><strong>Purchase Group:</strong> ${contract.purchaseGroup || "-"}</div>
           </div>
           <div>
-            <div className="info-item"><strong>Vendor:</strong> ${quotation.vendorName}</div>
-            <div className="info-item"><strong>Date:</strong> ${new Date(quotation.createdAt).toLocaleDateString()}</div>
+            <div class="info-item"><strong>Valid From:</strong> ${contract.validityFromDate ? new Date(contract.validityFromDate).toLocaleDateString() : "-"}</div>
+            <div class="info-item"><strong>Valid To:</strong> ${contract.validityToDate ? new Date(contract.validityToDate).toLocaleDateString() : "-"}</div>
+            <div class="info-item"><strong>Created:</strong> ${new Date(contract.createdAt).toLocaleDateString()}</div>
           </div>
         </div>
         
-        ${quotation.note ? `<div className="info-item"><strong>Note:</strong> ${quotation.note}</div>` : ''}
+        ${contract.note ? `<div class="info-item"><strong>Note:</strong> ${contract.note}</div>` : ""}
         
         <table>
           <thead>
@@ -221,141 +1496,133 @@ setQuotations(sortedQuotations);
             </tr>
           </thead>
           <tbody>
-            ${quotation.items.map((item, index) => `
+            ${contract.items.map((item, index) => `
               <tr>
                 <td>${index + 1}</td>
                 <td>${item.materialId}</td>
                 <td>${item.description}</td>
                 <td>${item.qty}</td>
                 <td>${item.unit || item.baseUnit}</td>
-                <td>₹${item.price ? parseFloat(item.price).toFixed(2) : '0.00'}</td>
-                <td>₹${item.price && item.qty ? (parseFloat(item.price) * parseFloat(item.qty)).toFixed(2) : '0.00'}</td>
+                <td>₹${item.price ? parseFloat(item.price).toFixed(2) : "0.00"}</td>
+                <td>₹${item.price && item.qty ? (parseFloat(item.price) * parseFloat(item.qty)).toFixed(2) : "0.00"}</td>
               </tr>
-            `).join('')}
+            `).join("")}
           </tbody>
           <tfoot>
-            <tr className="total-row">
+            <tr class="total-row">
               <td colspan="6" style="text-align: right;"><strong>Grand Total:</strong></td>
-              <td><strong>₹${quotation.items.reduce((total, item) => {
-      const itemTotal = item.price && item.qty ? parseFloat(item.price) * parseFloat(item.qty) : 0;
-      return total + itemTotal;
-    }, 0).toFixed(2)}</strong></td>
+              <td><strong>₹${contract.items.reduce((total, item) => {
+                const itemTotal = item.price && item.qty ? parseFloat(item.price) * parseFloat(item.qty) : 0;
+                return total + itemTotal;
+              }, 0).toFixed(2)}</strong></td>
             </tr>
           </tfoot>
         </table>
         
-        <div className="print-date">
+        <div class="print-date">
           Printed on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
         </div>
       </body>
       </html>
     `;
 
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
   };
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter by search term
-const [previewQuotation, setPreviewQuotation] = useState(null);
+  // Filter contracts
+  const filteredContracts = useMemo(() => {
+    let filtered = contracts;
 
-// 2. Update the filteredQuotations useMemo to include sorting by totalPrice
-const filteredQuotations = useMemo(() => {
-  let filtered = quotations;
-  
-  // Date range filtering
-  if (dateFrom || dateTo) {
-    filtered = filtered.filter((quotation) => {
-      const createdDate = new Date(quotation.createdAt);
-      const fromDate = dateFrom ? new Date(dateFrom) : null;
-      const toDate = dateTo ? new Date(dateTo) : null;
-      
-      if (fromDate && toDate) {
-        return createdDate >= fromDate && createdDate <= toDate;
-      } else if (fromDate) {
-        return createdDate >= fromDate;
-      } else if (toDate) {
-        return createdDate <= toDate;
-      }
-      return true;
-    });
-  }
-  
-  // Search term filtering
-  if (searchTerm) {
-    filtered = filtered.filter((quotation) =>
-      [
-        quotation.quotationNumber,
-        quotation.indentId,
-        quotation.vendorName,
-        quotation.vnNo,
-        quotation.note,
-        quotation.vendor,
-        quotation.location,
-        quotation.quotationReference
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
-    
-    // Sort by totalPrice in ascending order when searching
-    filtered = filtered.sort((a, b) => {
-      const totalA = parseFloat(a.totalPrice) || 0;
-      const totalB = parseFloat(b.totalPrice) || 0;
-      return totalA - totalB;
-    });
-  }
-  
-  return filtered;
-}, [searchTerm, quotations, dateFrom, dateTo]);
-const handleReset = () => {
-  setSearchTerm('');
-  setDateFrom('');
-  setDateTo('');
-  setCurrentPage(1);
-};
-// 3. Add preview handler function
-const handlePreview = async (quotationId) => {
-  try {
-    const response = await axios.get(`http://localhost:8080/api/quotations/${quotationId}`);
-    setPreviewQuotation(response.data);
-  } catch (err) {
-    console.error('Failed to fetch quotation details:', err);
-    alert('Failed to load quotation details');
-  }
-};
+    // Date range filtering
+    if (dateFrom || dateTo) {
+      filtered = filtered.filter((contract) => {
+        const createdDate = new Date(contract.createdAt);
+        const fromDate = dateFrom ? new Date(dateFrom) : null;
+        const toDate = dateTo ? new Date(dateTo) : null;
 
-// 4. Function to get row color based on search and price ranking
-const getRowColor = (index, isSearching) => {
-  if (!isSearching) return 'transparent';
-  
-  switch (index) {
-    case 0: return '#d4edda'; // Light green for lowest price
-    case 1: return '#fff3cd'; // Light yellow for second lowest
-    default: return 'transparent'; // White for others
-  }
-};
+        if (fromDate && toDate) {
+          return createdDate >= fromDate && createdDate <= toDate;
+        } else if (fromDate) {
+          return createdDate >= fromDate;
+        } else if (toDate) {
+          return createdDate <= toDate;
+        }
+        return true;
+      });
+    }
+
+    // Search term filtering
+    if (searchTerm) {
+      filtered = filtered.filter((contract) =>
+        [
+          contract.contractNumber,
+          contract.vendorName,
+          contract.note,
+          contract.location,
+          contract.purchaseGroup,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      );
+
+      // Sort by totalPrice in ascending order when searching
+      filtered = filtered.sort((a, b) => {
+        const totalA = contract.items?.reduce((total, item) => {
+          const itemTotal = item.price && item.qty ? parseFloat(item.price) * parseFloat(item.qty) : 0;
+          return total + itemTotal;
+        }, 0) || 0;
+        const totalB = contract.items?.reduce((total, item) => {
+          const itemTotal = item.price && item.qty ? parseFloat(item.price) * parseFloat(item.qty) : 0;
+          return total + itemTotal;
+        }, 0) || 0;
+        return totalA - totalB;
+      });
+    }
+
+    return filtered;
+  }, [searchTerm, contracts, dateFrom, dateTo]);
+
+  const handleReset = () => {
+    setSearchTerm("");
+    setDateFrom("");
+    setDateTo("");
+    setCurrentPage(1);
+  };
+
+  const getRowColor = (index, isSearching) => {
+    if (!isSearching) return "transparent";
+    switch (index) {
+      case 0:
+        return "#d4edda"; // Light green for lowest price
+      case 1:
+        return "#fff3cd"; // Light yellow for second lowest
+      default:
+        return "transparent";
+    }
+  };
+
   // Pagination
-  const totalPages = Math.ceil(filteredQuotations.length / PAGE_SIZE);
-  const paginatedQuotations = useMemo(() => {
+  const totalPages = Math.ceil(filteredContracts.length / PAGE_SIZE);
+  const paginatedContracts = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredQuotations.slice(start, start + PAGE_SIZE);
-  }, [filteredQuotations, currentPage]);
+    return filteredContracts.slice(start, start + PAGE_SIZE);
+  }, [filteredContracts, currentPage]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
   };
 
   const goToPage = (n) => {
     if (n < 1 || n > totalPages) return;
     setCurrentPage(n);
   };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center">
@@ -366,579 +1633,708 @@ const getRowColor = (index, isSearching) => {
 
   if (error) {
     return (
-      <div style={{ padding: '20px', marginLeft: '300px' }}>
-        <h2>Quotations</h2>
-        <div style={{ color: 'red', marginBottom: '20px' }}>{error}</div>
-        <button onClick={fetchQuotations} style={{ padding: '10px 20px' }}>Retry</button>
+      <div style={{ padding: "20px" }}>
+        <h2>Purchase Contracts</h2>
+        <div style={{ color: "red", marginBottom: "20px" }}>{error}</div>
+        <button onClick={fetchContracts} style={{ padding: "10px 20px" }}>
+          Retry
+        </button>
       </div>
     );
   }
-// Preview Modal
-if (previewQuotation) {
-  return (
-    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-xl">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">
-              Quotation Preview - {previewQuotation.quotationNumber}
-            </h5>
-            <button 
-              type="button" 
-              className="btn-close" 
-              onClick={() => setPreviewQuotation(null)}
-            ></button>
-          </div>
-          
-          <div className="modal-body">
-            <div className="row g-3 mb-4">
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Indent ID</small>
-                    <div className="fw-bold">{previewQuotation.indentId}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Vendor</small>
-                    <div className="fw-bold">{previewQuotation.vendorName}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Vendor No</small>
-                    <div className="fw-bold">{previewQuotation.vnNo || '-'}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Quotation Reference</small>
-                    <div className="fw-bold">{previewQuotation.quotationReference || '-'}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Validity Date</small>
-                    <div className="fw-bold">
-                      {previewQuotation.validityDate ? new Date(previewQuotation.validityDate).toLocaleDateString() : '-'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Location</small>
-                    <div className="fw-bold">{previewQuotation.location || '-'}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Buyer Group</small>
-                    <div className="fw-bold">{previewQuotation.buyerGroup || '-'}</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="card border-0 bg-light">
-                  <div className="card-body p-3">
-                    <small className="text-muted">Created Date</small>
-                    <div className="fw-bold">
-                      {new Date(previewQuotation.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+  // Preview Modal
+  if (previewContract) {
+    return (
+      <div
+        className="modal fade show"
+        style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
+        <div className="modal-dialog modal-xl">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">
+                Purchase Contract Preview - {previewContract.contractNumber}
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setPreviewContract(null)}
+              ></button>
             </div>
 
-            {previewQuotation.note && (
-              <div className="alert alert-info mb-4">
-                <strong>Note:</strong> {previewQuotation.note}
+            <div className="modal-body">
+              <div className="row g-3 mb-4">
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Contract Number</small>
+                      <div className="fw-bold">{previewContract.contractNumber}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Vendor</small>
+                      <div className="fw-bold">{previewContract.vendorName}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Location</small>
+                      <div className="fw-bold">{previewContract.location || "-"}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Purchase Group</small>
+                      <div className="fw-bold">{previewContract.purchaseGroup || "-"}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Valid From</small>
+                      <div className="fw-bold">
+                        {previewContract.validityFromDate
+                          ? new Date(previewContract.validityFromDate).toLocaleDateString()
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Valid To</small>
+                      <div className="fw-bold">
+                        {previewContract.validityToDate
+                          ? new Date(previewContract.validityToDate).toLocaleDateString()
+                          : "-"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Financial Year</small>
+                      <div className="fw-bold">{previewContract.financialYear || "-"}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="card border-0 bg-light">
+                    <div className="card-body p-3">
+                      <small className="text-muted">Created Date</small>
+                      <div className="fw-bold">
+                        {new Date(previewContract.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
 
-            <h6 className="mb-3">Items</h6>
-            <div className="table-responsive">
-              <table className="table table-striped table-hover">
-                <thead className="table-dark">
-                  <tr>
-                    <th>#</th>
-                    <th>Material ID</th>
-                    <th>Description</th>
-                    <th>Quantity</th>
-                    <th>Unit</th>
-                    <th>Price</th>
-                    <th>Delivery Date</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {previewQuotation.items.map((item, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>{item.materialId}</td>
-                      <td>{item.description}</td>
-                      <td>{item.qty}</td>
-                      <td>{item.unit || item.baseUnit}</td>
-                      <td>₹{item.price ? parseFloat(item.price).toFixed(2) : '0.00'}</td>
-                      <td>{item.deliveryDate ? new Date(item.deliveryDate).toLocaleDateString() : '-'}</td>
-                      <td>₹{item.price && item.qty ? (parseFloat(item.price) * parseFloat(item.qty)).toFixed(2) : '0.00'}</td>
+              {previewContract.note && (
+                <div className="alert alert-info mb-4">
+                  <strong>Note:</strong> {previewContract.note}
+                </div>
+              )}
+
+              <h6 className="mb-3">Items</h6>
+              <div className="table-responsive">
+                <table className="table table-striped table-hover">
+                  <thead className="table-dark">
+                    <tr>
+                      <th>#</th>
+                      <th>Material ID</th>
+                      <th>Description</th>
+                      <th>Quantity</th>
+                      <th>Unit</th>
+                      <th>Price</th>
+                      <th>Total</th>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="table-success">
-                    <td colSpan="7" className="text-end fw-bold">Grand Total:</td>
-                    <td className="fw-bold">
-                      ₹{previewQuotation.items.reduce((total, item) => {
-                        const itemTotal = item.price && item.qty ? parseFloat(item.price) * parseFloat(item.qty) : 0;
-                        return total + itemTotal;
-                      }, 0).toFixed(2)}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Edit Modal
-if (editingQuotation) {
-  return (
-    <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-xl">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">
-              Edit Quotation - {editingQuotation.quotationNumber}
-            </h5>
-            <div>
-              <button 
-                type="button"
-                className="btn btn-success me-4 mx-4"
-                onClick={handleSaveEdit}
-              >
-                Save Changes
-              </button>
-              <button 
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleCancelEdit}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-          
-          <div className="modal-body">
-            <div className="card">
-              <div className="card-body">
-                {/* Basic Information */}
-                <div className="row g-3 mb-4">
-                  <div className="col-md-4">
-                    <label className="form-label">Indent ID</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editingQuotation.indentId || ''}
-                      onChange={(e) => handleEditChange('indentId', e.target.value)}
-                      readOnly
-                    />
-                  </div>
-                  
-                  <div className="col-md-4">
-                    <label className="form-label">RFQ Category</label>
-                    <Select
-                      options={rfqCategories}
-                      value={rfqCategories.find(cat => cat.value === editingQuotation.rfqCategoryId)}
-                      onChange={(selected) => handleEditChange('rfqCategoryId', selected?.value)}
-                      placeholder="Select Category"
-                    />
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Vendor</label>
-                    <Select
-                      options={allVendors}
-                      value={allVendors.find(v => v.value === editingQuotation.vendor)}
-                      onChange={(selected) => {
-                        if (!editingQuotation.vendor) {
-                          handleEditChange('vendor', selected?.value);
-                          handleEditChange('vendorName', selected?.label);
-                          handleEditChange('vnNo', selected?.vnNo || '');
-                        }
-                      }}
-                      placeholder="Select Vendor"
-                      isDisabled={!!editingQuotation.vendor}
-                    />
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Quotation Reference</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editingQuotation.quotationReference || ''}
-                      onChange={(e) => handleEditChange('quotationReference', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Validity Date</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={editingQuotation.validityDate || ''}
-                      onChange={(e) => handleEditChange('validityDate', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Location</label>
-                    <select
-                      className="form-select"
-                      value={editingQuotation.location || ''}
-                      onChange={(e) => handleEditChange('location', e.target.value)}
-                    >
-                      <option value="">Select Location</option>
-                      {locations.map((loc, index) => (
-                        <option key={index} value={loc.name || loc}>
-                          {loc.name || loc}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Buyer Group</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editingQuotation.buyerGroup || ''}
-                      onChange={(e) => handleEditChange('buyerGroup', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label">Note</label>
-                    <textarea
-                      className="form-control"
-                      rows={3}
-                      value={editingQuotation.note || ''}
-                      onChange={(e) => handleEditChange('note', e.target.value)}
-                      placeholder="Add any notes (optional)"
-                    />
-                  </div>
-                </div>
-
-                {/* Items Table */}
-                <h6 className="mb-3">Items</h6>
-                <div className="table-responsive">
-                  <table className="table table-striped table-hover">
-                    <thead className="table-dark">
-                      <tr>
-                        <th>#</th>
-                        <th>Material ID</th>
-                        <th>Description</th>
-                        <th>Quantity</th>
-                        <th>Base Unit</th>
-                        <th>Order Unit</th>
-                        <th>Unit</th>
-                        <th>Material Group</th>
-                        <th>Delivery Date</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {editingQuotation.items.map((item, index) => (
-                        <tr key={index}>
-                          <td>{index + 1}</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={item.materialId || ''}
-                              onChange={(e) => handleItemEditChange(index, 'materialId', e.target.value)}
-                              readOnly
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={item.description || ''}
-                              onChange={(e) => handleItemEditChange(index, 'description', e.target.value)}
-                              readOnly
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="form-control form-control-sm"
-                              value={item.qty || ''}
-                              onChange={(e) => handleItemEditChange(index, 'qty', e.target.value)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={item.baseUnit || ''}
-                              onChange={(e) => handleItemEditChange(index, 'baseUnit', e.target.value)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={item.orderUnit || ''}
-                              onChange={(e) => handleItemEditChange(index, 'orderUnit', e.target.value)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={item.unit || ''}
-                              onChange={(e) => handleItemEditChange(index, 'unit', e.target.value)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              value={item.materialgroup || ''}
-                              onChange={(e) => handleItemEditChange(index, 'materialgroup', e.target.value)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="date"
-                              className="form-control form-control-sm"
-                              value={item.deliveryDate || ''}
-                              onChange={(e) => handleItemEditChange(index, 'deliveryDate', e.target.value)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="form-control form-control-sm"
-                              value={item.price || ''}
-                              onChange={(e) => handleItemEditChange(index, 'price', e.target.value)}
-                              step="0.01"
-                            />
-                          </td>
-                          <td>
-                            <span className="fw-bold text-success">
-                              ₹{item.price && item.qty ? (parseFloat(item.price) * parseFloat(item.qty)).toFixed(2) : '0.00'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="table-success">
-                        <td colSpan="10" className="text-end fw-bold">Grand Total:</td>
-                        <td className="fw-bold">
-                          ₹{editingQuotation.items.reduce((total, item) => {
-                            const itemTotal = item.price && item.qty ? parseFloat(item.price) * parseFloat(item.qty) : 0;
-                            return total + itemTotal;
-                          }, 0).toFixed(2)}
+                  </thead>
+                  <tbody>
+                    {previewContract.items.map((item, index) => (
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>{item.materialId}</td>
+                        <td>{item.description}</td>
+                        <td>{item.qty}</td>
+                        <td>{item.unit || item.baseUnit}</td>
+                        <td>
+                          ₹{item.price ? parseFloat(item.price).toFixed(2) : "0.00"}
+                        </td>
+                        <td>
+                          ₹{item.price && item.qty
+                            ? (parseFloat(item.price) * parseFloat(item.qty)).toFixed(2)
+                            : "0.00"}
                         </td>
                       </tr>
-                    </tfoot>
-                  </table>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="table-success">
+                      <td colSpan="6" className="text-end fw-bold">
+                        Grand Total:
+                      </td>
+                      <td className="fw-bold">
+                        ₹{previewContract.items
+                          .reduce((total, item) => {
+                            const itemTotal = item.price && item.qty
+                              ? parseFloat(item.price) * parseFloat(item.qty)
+                              : 0;
+                            return total + itemTotal;
+                          }, 0)
+                          .toFixed(2)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Edit Modal
+  if (editingContract) {
+    return (
+      <div
+        className="modal fade show"
+        style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
+        <div className="modal-dialog modal-xl">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">
+                Edit Purchase Contract - {editingContract.contractNumber}
+              </h5>
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-success me-4 mx-4"
+                  onClick={handleSaveEdit}
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <div className="modal-body">
+              <div className="card">
+                <div className="card-body">
+                  {/* Basic Information */}
+                  <div className="row g-3 mb-4">
+                    <div className="col-md-4">
+                      <label className="form-label">Contract Number</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editingContract.contractNumber || ""}
+                        onChange={(e) =>
+                          handleEditChange("contractNumber", e.target.value)
+                        }
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="col-md-4">
+                      <label className="form-label">Category</label>
+                      <Select
+                        options={categories}
+                        value={categories.find(
+                          (cat) => cat.value === editingContract.categoryId
+                        )}
+                        onChange={(selected) =>
+                          handleEditChange("categoryId", selected?.value)
+                        }
+                        placeholder="Select Category"
+                      />
+                    </div>
+
+                    <div className="col-md-4">
+                      <label className="form-label">Vendor</label>
+                      <Select
+                        options={allVendors}
+                        value={allVendors.find(
+                          (v) => v.value === editingContract.vendorId
+                        )}
+                        onChange={(selected) => {
+                          handleEditChange("vendorId", selected?.value);
+                          handleEditChange("vendorName", selected?.label);
+                        }}
+                        placeholder="Select Vendor"
+                      />
+                    </div>
+
+                    <div className="col-md-4">
+                      <label className="form-label">Valid From Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={editingContract.validityFromDate || ""}
+                        onChange={(e) =>
+                          handleEditChange("validityFromDate", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="col-md-4">
+                      <label className="form-label">Valid To Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={editingContract.validityToDate || ""}
+                        onChange={(e) =>
+                          handleEditChange("validityToDate", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="col-md-4">
+                      <label className="form-label">Location</label>
+                      <select
+                        className="form-select"
+                        value={editingContract.location || ""}
+                        onChange={(e) =>
+                          handleEditChange("location", e.target.value)
+                        }
+                      >
+                        <option value="">Select Location</option>
+                        {locations.map((loc, index) => (
+                          <option key={index} value={loc.name || loc}>
+                            {loc.name || loc}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-md-4">
+                      <label className="form-label">Purchase Group</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={editingContract.purchaseGroup || ""}
+                        onChange={(e) =>
+                          handleEditChange("purchaseGroup", e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="col-md-8">
+                      <label className="form-label">Note</label>
+                      <textarea
+                        className="form-control"
+                        rows={3}
+                        value={editingContract.note || ""}
+                        onChange={(e) =>
+                          handleEditChange("note", e.target.value)
+                        }
+                        placeholder="Add any notes (optional)"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Items Table */}
+                  <h6 className="mb-3">Items</h6>
+                  <div className="table-responsive">
+                    <table className="table table-striped table-hover">
+                      <thead className="table-dark">
+                        <tr>
+                          <th>#</th>
+                          <th>Material ID</th>
+                          <th>Description</th>
+                          <th>Quantity</th>
+                          <th>Base Unit</th>
+                          <th>Order Unit</th>
+                          <th>Unit</th>
+                          <th>Price</th>
+                          <th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {editingContract.items.map((item, index) => (
+                          <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={item.materialId || ""}
+                                onChange={(e) =>
+                                  handleItemEditChange(
+                                    index,
+                                    "materialId",
+                                    e.target.value
+                                  )
+                                }
+                                readOnly
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={item.description || ""}
+                                onChange={(e) =>
+                                  handleItemEditChange(
+                                    index,
+                                    "description",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                className="form-control form-control-sm"
+                                value={item.qty || ""}
+                                onChange={(e) =>
+                                  handleItemEditChange(
+                                    index,
+                                    "qty",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={item.baseUnit || ""}
+                                onChange={(e) =>
+                                  handleItemEditChange(
+                                    index,
+                                    "baseUnit",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={item.orderUnit || ""}
+                                onChange={(e) =>
+                                  handleItemEditChange(
+                                    index,
+                                    "orderUnit",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                value={item.unit || ""}
+                                onChange={(e) =>
+                                  handleItemEditChange(
+                                    index,
+                                    "unit",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                className="form-control form-control-sm"
+                                value={item.price || ""}
+                                onChange={(e) =>
+                                  handleItemEditChange(
+                                    index,
+                                    "price",
+                                    e.target.value
+                                  )
+                                }
+                                step="0.01"
+                              />
+                            </td>
+                            <td>
+                              <span className="fw-bold text-success">
+                                ₹{item.price && item.qty
+                                  ? (parseFloat(item.price) * parseFloat(item.qty)).toFixed(2)
+                                  : "0.00"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="table-success">
+                          <td colSpan="8" className="text-end fw-bold">
+                            Grand Total:
+                          </td>
+                          <td className="fw-bold">
+                            ₹{editingContract.items
+                              .reduce((total, item) => {
+                                const itemTotal = item.price && item.qty
+                                  ? parseFloat(item.price) * parseFloat(item.qty)
+                                  : 0;
+                                return total + itemTotal;
+                              }, 0)
+                              .toFixed(2)}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
-    <div className='content'>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h6>All Quotations</h6>
-       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
- 
-  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-    <input
-      type="text"
-      placeholder="Search by Quotation Reference etc......."
-      value={searchTerm}
-      onChange={handleSearchChange}
-      className="form-control"
-      style={{ width: 250, marginTop:'22px'}}
-    />
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <label style={{ fontSize: '12px', marginBottom: '2px' }}>From Date</label>
-      <input
-        type="date"
-        value={dateFrom}
-        onChange={(e) => {
-          setDateFrom(e.target.value);
-          setCurrentPage(1);
+    <div className="content">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
         }}
-        className="form-control"
-        style={{ width: 150 }}
-      />
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <label style={{ fontSize: '12px', marginBottom: '2px' }}>To Date</label>
-      <input
-        type="date"
-        value={dateTo}
-        onChange={(e) => {
-          setDateTo(e.target.value);
-          setCurrentPage(1);
-        }}
-        className="form-control"
-        style={{ width: 150 }}
-      />
-    </div>
-    <button onClick={handleReset} className='btn btn-sm btn-soft-warning'>
-      Reset
-    </button>
-    <button onClick={fetchQuotations} className='btn btn-sm btn-soft-primary'>
-      Refresh
-    </button>
-  </div>
-</div>
-       
+      >
+        <h6>All Purchase Contracts</h6>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <input
+              type="text"
+              placeholder="Search by Contract Number, Vendor, etc..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="form-control"
+              style={{ width: 300, marginTop: "22px" }}
+            />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <label style={{ fontSize: "12px", marginBottom: "2px" }}>
+                From Date
+              </label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => {
+                  setDateFrom(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="form-control"
+                style={{ width: 150 }}
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <label style={{ fontSize: "12px", marginBottom: "2px" }}>
+                To Date
+              </label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => {
+                  setDateTo(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="form-control"
+                style={{ width: 150 }}
+              />
+            </div>
+            <button
+              onClick={handleReset}
+              className="btn btn-sm btn-soft-warning"
+            >
+              Reset
+            </button>
+            <button
+              onClick={fetchContracts}
+              className="btn btn-sm btn-soft-primary"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
       </div>
 
-
       <div className="table-responsive">
-        <table className="table table-nowrap datatable dataTable no-footer" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" >
+        <table
+          className="table table-nowrap datatable dataTable no-footer"
+          id="DataTables_Table_0"
+          aria-describedby="DataTables_Table_0_info"
+        >
           <thead>
             <tr>
               <th>#</th>
-              <th>Quotation ID</th>
-              <th>Quotation Reference</th>
-              {/* <th>Category ID</th>
-                <th>RFQ Category</th> */}
+              <th>Contract Number</th>
               <th>Vendor</th>
-      <th>Location</th>              <th>Validity Date</th>
+              <th>Location</th>
+              <th>Valid From</th>
+              <th>Valid To</th>
               <th>Created</th>
-              <th>TotalPrice</th>
+              <th>Total Price</th>
               <th>Note</th>
               <th>Actions</th>
             </tr>
           </thead>
-      
-         <tbody>
-  {paginatedQuotations.map((quotation, index) => (
-    <tr 
-      key={quotation._id || index}
-     
-    >
-      <td>{index + 1}</td>
-      <td>{quotation.quotationNumber}</td>
-      <td>{quotation.quotationReference}</td>
-      <td>{quotation.vendorName}</td>
-<td>{quotation.location}</td>
-      <td>{new Date(quotation.validityDate).toLocaleDateString()}</td>
-      <td>{new Date(quotation.createdAt).toLocaleDateString()}</td>
-      <td  style={{ backgroundColor: getRowColor(index, !!searchTerm) }}>{quotation.totalPrice}</td>
-      <td>{quotation.note || '-'}</td>
-      <td>
-  <button
-    onClick={() => handlePreview(quotation._id)}
-    className='btn btn-sm '
-    title="Preview"
-  >
-    <i className="fas fa-eye" style={{color:'black'}}></i>
-  </button>
-  <button
-    onClick={() => handleEdit(quotation._id)}
-    className='btn btn-sm '
-    title="Edit"
-  >
-    <i className="fas fa-edit"style={{color:'black'}}></i>
-  </button>
-  <button
-    onClick={() => handlePrint(quotation)}
-    className='btn btn-sm '
-    title="Print"
-  >
-    <i className="fas fa-print" style={{color:'black'}}></i>
-  </button>
-</td>
-    </tr>
-  ))}
-</tbody>
-         
+
+          <tbody>
+            {paginatedContracts.map((contract, index) => (
+              <tr key={contract._id || index}>
+                <td>{index + 1}</td>
+                <td>{contract.contractNumber}</td>
+                <td>{contract.vendorName}</td>
+                <td>{contract.location || "-"}</td>
+                <td>
+                  {contract.validityFromDate
+                    ? new Date(contract.validityFromDate).toLocaleDateString()
+                    : "-"}
+                </td>
+                <td>
+                  {contract.validityToDate
+                    ? new Date(contract.validityToDate).toLocaleDateString()
+                    : "-"}
+                </td>
+                <td>{new Date(contract.createdAt).toLocaleDateString()}</td>
+                <td
+                  style={{ backgroundColor: getRowColor(index, !!searchTerm) }}
+                >
+                  ₹{contract.items
+                    ?.reduce((total, item) => {
+                      const itemTotal = item.price && item.qty
+                        ? parseFloat(item.price) * parseFloat(item.qty)
+                        : 0;
+                      return total + itemTotal;
+                    }, 0)
+                    .toFixed(2) || "0.00"}
+                </td>
+                <td>{contract.note || "-"}</td>
+                <td>
+                  <button
+                    onClick={() => handlePreview(contract._id)}
+                    className="btn btn-sm"
+                    title="Preview"
+                  >
+                    <i className="fas fa-eye" style={{ color: "black" }}></i>
+                  </button>
+                  <button
+                    onClick={() => handleEdit(contract._id)}
+                    className="btn btn-sm"
+                    title="Edit"
+                  >
+                    <i className="fas fa-edit" style={{ color: "black" }}></i>
+                  </button>
+                  <button
+                    onClick={() => handlePrint(contract)}
+                    className="btn btn-sm"
+                    title="Print"
+                  >
+                    <i className="fas fa-print" style={{ color: "black" }}></i>
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
+      {/* Pagination */}
       <div className="d-flex justify-content-center mt-2">
         <nav>
           <ul className="pagination pagination-sm mb-0">
-            <li className={`page-item${currentPage === 1 ? ' disabled' : ''}`}>
-              <button className="page-link" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-          <i className="bi bi-chevron-double-left"></i>
+            <li className={`page-item${currentPage === 1 ? " disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <i className="bi bi-chevron-double-left"></i>
               </button>
             </li>
-            {/* Page Numbers */}
             {(() => {
               const pageButtons = [];
-              const totalToShow = 7; // first 2, last 2, and 3 around current
+              const totalToShow = 7;
               let startPages = [1, 2];
-              let endPages = [totalPages - 1, totalPages].filter(n => n > 2);
+              let endPages = [totalPages - 1, totalPages].filter((n) => n > 2);
               let middlePages = [];
 
               if (currentPage <= 4) {
-                // Show first 5 pages
-                startPages = [1, 2, 3, 4, 5].filter(n => n <= totalPages);
-                endPages = [totalPages - 1, totalPages].filter(n => n > 5);
+                startPages = [1, 2, 3, 4, 5].filter((n) => n <= totalPages);
+                endPages = [totalPages - 1, totalPages].filter((n) => n > 5);
               } else if (currentPage >= totalPages - 3) {
-                // Show last 5 pages
-                startPages = [1, 2].filter(n => n < totalPages - 4);
-                endPages = [totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
-                  .filter(n => n > 2 && n <= totalPages);
+                startPages = [1, 2].filter((n) => n < totalPages - 4);
+                endPages = [
+                  totalPages - 4,
+                  totalPages - 3,
+                  totalPages - 2,
+                  totalPages - 1,
+                  totalPages,
+                ].filter((n) => n > 2 && n <= totalPages);
               } else {
-                // Middle window
                 startPages = [1, 2];
                 middlePages = [currentPage - 1, currentPage, currentPage + 1];
                 endPages = [totalPages - 1, totalPages];
               }
 
-              // Helper to render a set of page numbers
               const renderPages = (pages) =>
                 pages.map((n) => (
-                  <li key={n} className={`page-item${currentPage === n ? ' active' : ''}`}>
+                  <li
+                    key={n}
+                    className={`page-item${currentPage === n ? " active" : ""}`}
+                  >
                     <button className="page-link" onClick={() => goToPage(n)}>
                       {n}
                     </button>
                   </li>
                 ));
 
-              // Render first pages
               pageButtons.push(...renderPages(startPages));
 
-              // Ellipsis if needed before middle
               if (
-                (middlePages.length > 0 && middlePages[0] > startPages[startPages.length - 1] + 1) ||
-                (middlePages.length === 0 && endPages[0] > startPages[startPages.length - 1] + 1)
+                (middlePages.length > 0 &&
+                  middlePages[0] > startPages[startPages.length - 1] + 1) ||
+                (middlePages.length === 0 &&
+                  endPages[0] > startPages[startPages.length - 1] + 1)
               ) {
                 pageButtons.push(
                   <li key="start-ellipsis" className="page-item disabled">
@@ -947,14 +2343,14 @@ if (editingQuotation) {
                 );
               }
 
-              // Render middle pages
               pageButtons.push(...renderPages(middlePages));
 
-              // Ellipsis if needed before end
               if (
                 endPages.length > 0 &&
-                ((middlePages.length > 0 && endPages[0] > middlePages[middlePages.length - 1] + 1) ||
-                  (middlePages.length === 0 && endPages[0] > startPages[startPages.length - 1] + 1))
+                ((middlePages.length > 0 &&
+                  endPages[0] > middlePages[middlePages.length - 1] + 1) ||
+                  (middlePages.length === 0 &&
+                    endPages[0] > startPages[startPages.length - 1] + 1))
               ) {
                 pageButtons.push(
                   <li key="end-ellipsis" className="page-item disabled">
@@ -963,14 +2359,21 @@ if (editingQuotation) {
                 );
               }
 
-              // Render end pages
               pageButtons.push(...renderPages(endPages));
 
               return pageButtons;
             })()}
-            <li className={`page-item${currentPage === totalPages ? ' disabled' : ''}`}>
-              <button className="page-link" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-               <i className="bi bi-chevron-double-right"></i>
+            <li
+              className={`page-item${
+                currentPage === totalPages ? " disabled" : ""
+              }`}
+            >
+              <button
+                className="page-link"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <i className="bi bi-chevron-double-right"></i>
               </button>
             </li>
           </ul>

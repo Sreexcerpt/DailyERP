@@ -25,30 +25,7 @@ const createBilling = async (req, res) => {
 
     const docnumber = `${category.prefix}-${nextNumber}`;
 
-//     // Calculate totalAmount & finalTotal
-//     const totalAmount = data.items?.reduce((sum, item) => {
-//       return sum + ((item.quantity || 0) * (item.price || 0));
-//     }, 0);
-
-//   const cgstPercent = parseFloat(data.cgst || 0);
-// const sgstPercent = parseFloat(data.sgst || 0);
-// const igstPercent = parseFloat(data.igst || 0);
-// const discount = parseFloat(data.discount || 0);
-
-// const cgstAmt = (cgstPercent / 100) * totalAmount;
-// const sgstAmt = (sgstPercent / 100) * totalAmount;
-// const igstAmt = (igstPercent / 100) * totalAmount;
-
-// const finalTotal = parseFloat((totalAmount + cgstAmt + sgstAmt + igstAmt - discount).toFixed(2));
-
-//     const newBilling = new Billing({
-//       ...data,
-//       docnumber,
-//       finalTotal
-//     });
-
-    // ✅ 1. Calculate totalAmount
-    const totalAmount = data.items?.reduce((sum, item) => {
+   const totalAmount = data.items?.reduce((sum, item) => {
       return sum + ((item.quantity || 0) * (item.price || 0));
     }, 0);
 
@@ -86,8 +63,12 @@ const createBilling = async (req, res) => {
 
 // GET /api/Billingform
 const getAllBillings = async (req, res) => {
+  const { companyId, financialYear } = req.query;
   try {
-    const Billings = await Billing.find().sort({ createdAt: -1 }).populate("salesOrderId");
+    const filter = {};
+    if (companyId) filter.companyId = companyId;
+    if (financialYear) filter.financialYear = financialYear;
+    const Billings = await Billing.find(filter).sort({ createdAt: -1 }).populate("salesOrderId");
     res.json(Billings);
   } catch (err) {
     console.error("Error fetching Billings:", err);

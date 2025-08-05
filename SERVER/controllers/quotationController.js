@@ -99,7 +99,13 @@ exports.createQuotation = async (req, res) => {
 };
 exports.getAllQuotations = async (req, res) => {
   try {
-    const quotations = await Quotation.find();
+    const { companyId, financialYear } = req.query;
+
+    const filter = {};
+    if (companyId) filter.companyId = companyId;
+    if (financialYear) filter.financialYear = financialYear;
+
+    const quotations = await Quotation.find(filter);
     res.json(quotations);
   } catch (error) {
     console.error('Error fetching quotations:', error);

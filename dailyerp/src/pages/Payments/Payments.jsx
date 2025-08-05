@@ -11,7 +11,9 @@ function Payment() {
     description: "",
     docnumber: ""
   });
-  
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   const [vendorInvoices, setVendorInvoices] = useState([]);
   const [customerInvoices, setCustomerInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,9 +26,13 @@ function Payment() {
 
   const fetchInvoices = async () => {
     try {
-      const vendorResponse = await axios.get("http://localhost:8080/api/invoiceform");
-      const customerResponse = await axios.get("http://localhost:8080/api/billingform");
-      
+      const vendorResponse = await axios.get("http://localhost:8080/api/invoiceform", {
+        params: { companyId, financialYear }
+      });
+      const customerResponse = await axios.get("http://localhost:8080/api/billingform", {
+        params: { companyId, financialYear }
+      });
+
       setVendorInvoices(vendorResponse.data || []);
       setCustomerInvoices(customerResponse.data || []);
     } catch (error) {
@@ -37,13 +43,13 @@ function Payment() {
   const getCurrentRecords = () => {
     const records = paymentData.type === "vendor" ? vendorInvoices : customerInvoices;
     return records.filter(record => {
-      const name = paymentData.type === "vendor" 
+      const name = paymentData.type === "vendor"
         ? (record.vendor || "")
         : (record.salesOrderId?.customer || "");
       const docNumber = record.docnumber || "";
-      
+
       return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             docNumber.toLowerCase().includes(searchTerm.toLowerCase());
+        docNumber.toLowerCase().includes(searchTerm.toLowerCase());
     });
   };
 
@@ -58,7 +64,7 @@ function Payment() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === "type") {
       // Reset selection when type changes
       setPaymentData(prev => ({
@@ -79,10 +85,10 @@ function Payment() {
 
   const calculateNewBalance = () => {
     if (!paymentData.selectedRecord || !paymentData.paymentAmount) return null;
-    
+
     const currentBalance = paymentData.selectedRecord.balance || 0;
     const paymentAmount = parseFloat(paymentData.paymentAmount);
-    
+
     // For vendor: payment reduces balance (we owe less)
     // For customer: payment reduces balance (they owe less)
     return currentBalance - paymentAmount;
@@ -111,7 +117,7 @@ function Payment() {
         paymentDescription: paymentData.description || `Payment via ${paymentData.paymentMethod}`
       };
 
-      const endpoint = paymentData.type === "vendor" 
+      const endpoint = paymentData.type === "vendor"
         ? `http://localhost:8080/api/invoiceform/${paymentData.recordId}`
         : `http://localhost:8080/api/billingform/${paymentData.recordId}`;
 
@@ -122,8 +128,8 @@ function Payment() {
         recordType: paymentData.type,
         recordId: paymentData.recordId,
         docnumber: paymentData.docnumber,
-        entityName: paymentData.type === "vendor" 
-          ? paymentData.selectedRecord.vendor 
+        entityName: paymentData.type === "vendor"
+          ? paymentData.selectedRecord.vendor
           : paymentData.selectedRecord.salesOrderId?.customer,
         paymentAmount: paymentAmount,
         previousBalance: currentBalance,
@@ -203,9 +209,9 @@ function Payment() {
               {message.text && (
                 <div className={`alert alert-${message.type === "success" ? "success" : "danger"} alert-dismissible`}>
                   {message.text}
-                  <button 
-                    type="button" 
-                    className="btn-close" 
+                  <button
+                    type="button"
+                    className="btn-close"
                     onClick={() => setMessage({ type: "", text: "" })}
                   ></button>
                 </div>
@@ -247,11 +253,11 @@ function Payment() {
                         </div>
                       ) : (
                         filteredRecords.map((record) => {
-                          const entityName = paymentData.type === "vendor" 
-                            ? record.vendor 
+                          const entityName = paymentData.type === "vendor"
+                            ? record.vendor
                             : record.salesOrderId?.customer;
                           const isSelected = paymentData.recordId === (record._id || record.id);
-                          
+
                           return (
                             <div
                               key={record._id || record.id}
@@ -287,8 +293,8 @@ function Payment() {
                         <h6>Selected Record:</h6>
                         <p className="mb-1">
                           <strong>
-                            {paymentData.type === "vendor" 
-                              ? paymentData.selectedRecord.vendor 
+                            {paymentData.type === "vendor"
+                              ? paymentData.selectedRecord.vendor
                               : paymentData.selectedRecord.salesOrderId?.customer}
                           </strong>
                         </p>
@@ -354,9 +360,9 @@ function Payment() {
                       <button type="button" className="btn btn-secondary" onClick={() => window.history.back()}>
                         Cancel
                       </button>
-                      <button 
-                        type="submit" 
-                        className="btn btn-primary" 
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
                         disabled={loading || !paymentData.selectedRecord || !paymentData.paymentAmount}
                       >
                         {loading ? "Updating..." : "Update Balance"}

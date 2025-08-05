@@ -27,11 +27,13 @@ function SalesContractForm() {
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState([]);
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   useEffect(() => {
     // Fetch and filter sales requests (indents)
     axios
-      .get("http://localhost:8080/api/salerequest/get")
+      .get("http://localhost:8080/api/salerequest/get", { params: { companyId, financialYear }, })
       .then((res) => {
         const activeRequests = res.data.filter(
           (r) => !r.isBlocked && !r.isDeleted
@@ -82,7 +84,7 @@ function SalesContractForm() {
 
   const fetchSavedContracts = () => {
     axios
-      .get("http://localhost:8080/api/salescontracts")
+      .get("http://localhost:8080/api/salescontracts", { params: { companyId, financialYear }, })
       .then((res) => setSavedContracts(res.data))
       .catch(console.error);
   };
@@ -90,12 +92,14 @@ function SalesContractForm() {
   const handleRequestSelect = (req) => {
     setSelectedRequest({ label: req.indentId, value: req._id });
     setSalesGroup(req.salesGroup || "");
+    setLocation(req.location)
     setItems(
       req.items.map((item) => ({
         ...item,
         customerName: selectedCustomer?.name1 || "",
         price: "",
         unit: "",
+
       }))
     );
     setShowRequestModal(false);
@@ -170,6 +174,8 @@ function SalesContractForm() {
       categoryId: selectedCategory?.value,
       customerId: selectedCustomer?.value,
       note,
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
       validityFromDate,
       validityToDate,
       salesGroup,
@@ -875,8 +881,8 @@ function SalesContractForm() {
                           >
                             <option value="">Select Location</option>
                             {Array.isArray(locations) && locations.map((loc, idx) => (
-                              <option key={idx} value={loc.name || loc._id || loc}>
-                                {loc.name || loc.locationName || loc}
+                              <option key={idx} value={loc.name}>
+                                {loc.name}
                               </option>
                             ))}
                           </select>

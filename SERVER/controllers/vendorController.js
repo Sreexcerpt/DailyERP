@@ -69,11 +69,11 @@ exports.createVendor = async (req, res) => {
 // Get all vendors
 exports.getVendors = async (req, res) => {
   try {
-     const { companyId, financialYear } = req.query;
+     const { companyId,  } = req.query;
 
     const filter = {};
     if (companyId) filter.companyId = companyId;
-    if (financialYear) filter.financialYear = financialYear;
+    //if (financialYear) filter.financialYear = financialYear;
 
 
     const vendors = await Vendor.find(filter).populate('categoryId');

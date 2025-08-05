@@ -29,6 +29,8 @@ const QuotationSchema = new mongoose.Schema({
   quotationReference: String, // New field for quotation reference
   vnNo: String,
   validityDate:Date,
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+   financialYear:String,
   note: String,
   location: String,
   buyerGroup: String,

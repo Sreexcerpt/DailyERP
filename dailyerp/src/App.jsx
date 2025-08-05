@@ -52,7 +52,7 @@ import PaymentDisplay from './pages/Payments/PaymentDisplay';
 import Ledger from './pages/Ledger/Ledger';
 import MRP from './pages/masterdata/MRP';
 import Payments from './pages/Payments/Payments';
-
+import PurchaseContractCategoryForm from './pages/category/PurchaseContractCategory';
 
 
 
@@ -74,6 +74,18 @@ import VendorCategoryForm from './pages/category/VendorCategory';
 
 
 
+
+
+//CRM 
+
+import ContactsList from './pages/ContactsList/ContactsList';
+import Leads from './pages/Leads/Leads';
+import Proposals from './pages/Proposal/Proposal';
+import Sources from './pages/CrmSettings/Sources/Sources';
+import LostReason from './pages/CrmSettings/LostReason/LostReason';
+import ContactStage from './pages/CrmSettings/ContactStage/ContactStage';
+import Industry from './pages/CrmSettings/Industry/Industry';
+import Calls from './pages/CrmSettings/Calls/Calls';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -498,10 +510,74 @@ function App() {
               <RFQCategoryForm />
             </ProtectedLayout>
           } />
+
+          <Route path='/PurchaseContractCategory' element={
+            <ProtectedLayout>
+              <PurchaseContractCategoryForm />
+            </ProtectedLayout>
+          } />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          {/* CRM */}
+          <Route path='/contacts' element={
+            <ProtectedLayout>
+              <ContactsList />
+            </ProtectedLayout>
+          } />
+
+          <Route path='/leads' element={
+            <ProtectedLayout>
+              <Leads />
+            </ProtectedLayout>
+          } />
+          <Route path='/proposals' element={
+            <ProtectedLayout>
+              <Proposals />
+            </ProtectedLayout>
+          } />
+          <Route path='/sources' element={
+            <ProtectedLayout>
+              <Sources />
+            </ProtectedLayout>
+          } />
+          <Route path='/lost-reason' element={
+            <ProtectedLayout>
+              <LostReason />
+            </ProtectedLayout>
+          } />
+          <Route path='/contact-stage' element={
+            <ProtectedLayout>
+              <ContactStage />
+            </ProtectedLayout>
+          } />
+          <Route path='/industry' element={
+            <ProtectedLayout>
+              <Industry />
+            </ProtectedLayout>
+          } />
+          <Route path='/calls' element={
+            <ProtectedLayout>
+              <Calls />
+            </ProtectedLayout>
+          } />
         </Routes>
       </Router>
     </>
   )
 }
 
-export default App
+export default App;

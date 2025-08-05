@@ -43,7 +43,7 @@ const PurchaseCategory = require('../models/purchaserequestmodel');
 
 exports.createIndent = async (req, res) => {
   try {
-    const { indentIdType, externalIndentId, categoryId, items } = req.body;
+    const { indentIdType, externalIndentId, categoryId, items, financialYear,companyId} = req.body;
 
     let indentId;
     console.log('Received categoryId:', categoryId);
@@ -95,6 +95,8 @@ exports.createIndent = async (req, res) => {
         indentId,
         categoryId,
         indentIdType,
+        companyId,
+        financialYear,
         documentDate: req.body.documentDate || '', // Optional field, can be empty
         location: req.body.location || '', // Optional field, can be empty
         buyerGroup: req.body.buyerGroup || '', // Optional field, can be empty
@@ -117,8 +119,15 @@ exports.createIndent = async (req, res) => {
 
 // controllers/indentController.js
 exports.getAllIndents = async (req, res) => {
+
   try {
-    const allIndents = await IndentRequest.find().sort({ createdAt: -1 });
+     const { companyId, financialYear } = req.query;
+console.log('Fetching all indents for companyId:', companyId, 'and financialYear:', financialYear);
+    const filter = {};
+    if (companyId) filter.companyId = companyId;
+    if (financialYear) filter.financialYear = financialYear;
+
+    const allIndents = await IndentRequest.find(filter).sort({ createdAt: -1 });
     res.status(200).json(allIndents);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch indents' });

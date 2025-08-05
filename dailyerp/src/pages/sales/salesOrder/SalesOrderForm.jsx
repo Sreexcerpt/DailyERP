@@ -51,10 +51,12 @@ function SalesOrderForm() {
   const [showModal, setShowModal] = useState(false);
   const [materialSearch, setMaterialSearch] = useState('');
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   useEffect(() => {
     axios.get('http://localhost:8080/api/sales-order-categories').then(res => setCategories(res.data));
-    axios.get('http://localhost:8080/api/salesquotations').then(res => {
+    axios.get('http://localhost:8080/api/salesquotations', { params: { companyId, financialYear }, }).then(res => {
       setQuotations(res.data);
 
       // Extract unique buyer groups from all quotation items
@@ -69,10 +71,10 @@ function SalesOrderForm() {
       setsalesGroups(allsalesGroups);
     });
 
-    axios.get("http://localhost:8080/api/locations").then((res) => setLocations(res.data));
-    axios.get('http://localhost:8080/api/tax').then(res => setTaxes(res.data));
-    axios.get('http://localhost:8080/api/material').then(res => setMaterials(res.data));
-    axios.get('http://localhost:8080/api/customers').then(res => setCustomers(res.data));
+    axios.get("http://localhost:8080/api/locations", { params: { companyId, financialYear }, }).then((res) => setLocations(res.data));
+    axios.get('http://localhost:8080/api/tax', { params: { companyId, financialYear }, }).then(res => setTaxes(res.data));
+    axios.get('http://localhost:8080/api/material', { params: { companyId, financialYear }, }).then(res => setMaterials(res.data));
+    axios.get('http://localhost:8080/api/customers', { params: { companyId, financialYear }, }).then(res => setCustomers(res.data));
 
     setItems([
       ...Array(4).fill(null).map(() => ({
@@ -106,34 +108,34 @@ function SalesOrderForm() {
   //   setQuotationSearchResults([]);
   // };
 
-const selectQuotationFromSearch = (selectedItem) => {
-  // Detect the type by checking which unique field is present
-  if (selectedItem.contractNumber) {
-    // Contract selected
-    setSelectedQuotationNumber(selectedItem.contractNumber);
-    setCustomer(selectedItem.customerName || '');
-    setDeliveryLocation(selectedItem.location || '');
-    setItems(selectedItem.items || []);
-    // Set any other relevant fields for contract
-    // Example:
-    // setSalesGroup(selectedItem.salesGroup || '');
-    // setValidityDate(selectedItem.validityFromDate || '');
-  } else if (selectedItem.quotationNumber) {
-    // Quotation selected
-    setSelectedQuotationNumber(selectedItem.quotationNumber);
-    setCustomer(selectedItem.customerName || '');
-    setDeliveryLocation(selectedItem.items?.[0]?.location || '');
-    setItems(selectedItem.items || []);
-    // Set any other relevant fields for quotation
-  } else if (selectedItem.enquiryNumber) {
-    // Enquiry selected
-    setSelectedQuotationNumber(selectedItem.enquiryNumber);
-    setCustomer(selectedItem.customerName || selectedItem.name1 || '');
-    // Set any other relevant fields for enquiry
-  }
+  const selectQuotationFromSearch = (selectedItem) => {
+    // Detect the type by checking which unique field is present
+    if (selectedItem.contractNumber) {
+      // Contract selected
+      setSelectedQuotationNumber(selectedItem.contractNumber);
+      setCustomer(selectedItem.customerName || '');
+      setDeliveryLocation(selectedItem.location || '');
+      setItems(selectedItem.items || []);
+      // Set any other relevant fields for contract
+      // Example:
+      // setSalesGroup(selectedItem.salesGroup || '');
+      // setValidityDate(selectedItem.validityFromDate || '');
+    } else if (selectedItem.quotationNumber) {
+      // Quotation selected
+      setSelectedQuotationNumber(selectedItem.quotationNumber);
+      setCustomer(selectedItem.customerName || '');
+      setDeliveryLocation(selectedItem.items?.[0]?.location || '');
+      setItems(selectedItem.items || []);
+      // Set any other relevant fields for quotation
+    } else if (selectedItem.enquiryNumber) {
+      // Enquiry selected
+      setSelectedQuotationNumber(selectedItem.enquiryNumber);
+      setCustomer(selectedItem.customerName || selectedItem.name1 || '');
+      // Set any other relevant fields for enquiry
+    }
 
-  setShowQuotationModal(false); // Close the modal after selection
-};
+    setShowQuotationModal(false); // Close the modal after selection
+  };
 
   const closeQuotationModal = () => {
     setShowQuotationModal(false);
@@ -358,7 +360,7 @@ const selectQuotationFromSearch = (selectedItem) => {
     );
 
     const data = {
-      poNumber,
+      soNumber,
       quotationId: selectedQuotation?._id,
       quotationNumber: selectedQuotationNumber,
       categoryId: selectedCategory._id,
@@ -372,6 +374,8 @@ const selectQuotationFromSearch = (selectedItem) => {
       deliveryLocation,
       deliveryAddress,
       items,
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
       total: parseFloat(total) || 0,
       taxName: selectedTax?.taxName || '',
       cgst: parseFloat(cgst) || 0,
@@ -536,7 +540,7 @@ const selectQuotationFromSearch = (selectedItem) => {
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => handleSONumberGeneration(soNumberType)}
+              onClick={() => submitSalesOrder(soNumberType === 'external' ? externalSONumber : null)}
               disabled={soNumberType === 'external' && !externalSONumber.trim()}
             >
               <i className="fas fa-save me-1"></i>Generate & Save SO
@@ -738,11 +742,11 @@ const selectQuotationFromSearch = (selectedItem) => {
 
     const fetchResults = async () => {
       let endpoint = '';
-      if (activeTab === 'enquiry') endpoint = '/api/indent/get';
+      if (activeTab === 'enquiry') endpoint = '/api/salerequest/get';
       else if (activeTab === 'quotation') endpoint = '/api/salesquotations';
       else if (activeTab === 'contract') endpoint = '/api/salescontracts';
 
-      const res = await axios.get(`http://localhost:8080${endpoint}`);
+      const res = await axios.get(`http://localhost:8080${endpoint}`, { params: { companyId, financialYear }, });
       setResults(res.data);
     };
 

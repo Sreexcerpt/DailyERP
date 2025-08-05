@@ -11,15 +11,17 @@ const SalesIndentsummary = () => {
     const [loading, setLoading] = useState(false);
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-  const [selectedQuotationId, setSelectedQuotationId] = useState(null)
-  const [selectedQuotation, setSelectedQuotation] = useState(null)
+    const [selectedQuotationId, setSelectedQuotationId] = useState(null)
+    const [selectedQuotation, setSelectedQuotation] = useState(null)
+    const companyId = localStorage.getItem("selectedCompanyId");
+    const financialYear = localStorage.getItem("financialYear");
     useEffect(() => {
         fetchIndents();
     }, []);
 
     const fetchIndents = () => {
         setLoading(true);
-        axios.get('http://localhost:8080/api/salerequest/get')
+        axios.get('http://localhost:8080/api/salerequest/get', { params: { companyId, financialYear }, })
             .then(res => {
                 // Sort by latest first (using createdAt or documentDate)
                 const sortedIndents = res.data.sort((a, b) =>
@@ -100,11 +102,11 @@ const SalesIndentsummary = () => {
 
         setSearchResults(filtered);
     };
-  useEffect(() => {
-    // Filter quotations based on selectedQuotationId
-    const result = savedIndents.find(q => q._id === selectedQuotationId);
-    setSelectedQuotation(result);
-  }, [selectedQuotationId, savedIndents]);
+    useEffect(() => {
+        // Filter quotations based on selectedQuotationId
+        const result = savedIndents.find(q => q._id === selectedQuotationId);
+        setSelectedQuotation(result);
+    }, [selectedQuotationId, savedIndents]);
     const handleViewAll = () => {
         setSearchResults(savedIndents);
         setSearchQuery('');
@@ -610,63 +612,57 @@ const SalesIndentsummary = () => {
                     </div>
                 </div>
             )}
-                  <div id="standard-modal" className="modal fade" tabindex="-1" role="dialog"
-        aria-labelledby="standard-modalLabel" aria-hidden="true">
-        <div className="modal-dialog modal-xl">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h4 className="modal-title" id="standard-modalLabel">Quotation Items</h4>
-              <button type="button" className="btn-close" data-bs-dismiss="modal"
-                aria-label="Close"></button>
-            </div>
-            <div className="modal-body">
-              <div className="table-responsive">
-                {selectedQuotation?.items?.length > 0 &&
-                  <table className='table-sm table-bordered'>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Material ID</th>
-                        <th>Description</th>
-                        <th>Qty</th>
-                        <th>Base Unit</th>
-                        <th>Order Unit</th>
-                        <th>Location</th>
-                        <th>Buyer Group</th>
-                        <th>Unit</th>
-                        {/* <th>Material Group</th> */}
-                        <th>Delivery Date</th>
-                        <th>Vendor</th>
-                        <th>Price</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedQuotation?.items.map((item, idx) => (
-                        <tr key={item._id}>
-                          <td>{idx + 1}</td>
-                          <td>{item.materialId}</td>
-                          <td>{item.description}</td>
-                          <td>{item.qty}</td>
-                          <td>{item.baseUnit}</td>
-                          <td>{item.orderUnit}</td>
-                          <td>{item.location}</td>
-                          <td>{item.buyerGroup}</td>
-                          <td>{item.unit}</td>
-                          {/* <td>{selectedQuotation.categoryId}</td> Assuming Material Group is categoryId */}
-                          <td>{new Date(item.deliveryDate).toLocaleDateString()}</td>
-                          <td>{selectedQuotation.vendorName}</td>
-                          <td>{item.price}</td>
-                        </tr>
-                      ))}
+            <div id="standard-modal" className="modal fade" tabindex="-1" role="dialog"
+                aria-labelledby="standard-modalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h4 className="modal-title" id="standard-modalLabel">Quotation Items</h4>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="table-responsive">
+                                {selectedQuotation?.items?.length > 0 &&
+                                    <table className='table-sm table-bordered'>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Material ID</th>
+                                                <th>Description</th>
+                                                <th>Qty</th>
+                                                <th>Base Unit</th>
+                                                <th>Order Unit</th>
+                                                <th>Location</th>
+                                                {/* <th>Material Group</th> */}
+                                                <th>Delivery Date</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {selectedQuotation?.items.map((item, idx) => (
+                                                <tr key={item._id}>
+                                                    <td>{idx + 1}</td>
+                                                    <td>{item.materialId}</td>
+                                                    <td>{item.description}</td>
+                                                    <td>{item.qty}</td>
+                                                    <td>{item.baseUnit}</td>
+                                                    <td>{item.orderUnit}</td>
+                                                    <td>{item.location}</td>
+                                                    {/* <td>{selectedQuotation.categoryId}</td> Assuming Material Group is categoryId */}
+                                                    <td>{new Date(item.deliveryDate).toLocaleDateString()}</td>
+                                                  
+                                                </tr>
+                                            ))}
 
-                    </tbody>
-                  </table>}
-              </div>
-            </div>
+                                        </tbody>
+                                    </table>}
+                            </div>
+                        </div>
 
-          </div>
-        </div>
-      </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

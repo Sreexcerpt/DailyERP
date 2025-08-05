@@ -17,26 +17,37 @@ const PurchaseIndentsummary = () => {
     useEffect(() => {
         fetchIndents();
     }, []);
+    
     useEffect(() => {
         // Filter quotations based on selectedQuotationId
         const result = savedIndents.find(q => q._id === selectedQuotationId);
         setSelectedQuotation(result);
     }, [selectedQuotationId, savedIndents]);
-    const fetchIndents = () => {
-        setLoading(true);
-        axios.get('http://localhost:8080/api/indent/get')
-            .then(res => {
-                // Sort by latest first (using createdAt or documentDate)
-                const sortedIndents = res.data.sort((a, b) =>
-                    new Date(b.createdAt || b.documentDate) - new Date(a.createdAt || a.documentDate)
-                );
-                setSavedIndents(sortedIndents);
-                console.log("Fetched saved indents:", sortedIndents);
-                setFilteredIndents(sortedIndents);
-            })
-            .catch(err => console.error("Failed to fetch saved indents", err))
-            .finally(() => setLoading(false));
-    };
+const fetchIndents = () => {
+    setLoading(true);
+
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    const financialYear = localStorage.getItem('financialYear');
+
+    axios.get('http://localhost:8080/api/indent/get', {
+        params: {
+            companyId: selectedCompanyId,
+            financialYear: financialYear
+        }
+    })
+    .then(res => {
+        // Sort by latest first (using createdAt or documentDate)
+        const sortedIndents = res.data.sort((a, b) =>
+            new Date(b.createdAt || b.documentDate) - new Date(a.createdAt || a.documentDate)
+        );
+        setSavedIndents(sortedIndents);
+        console.log("Fetched saved indents:", sortedIndents);
+        setFilteredIndents(sortedIndents);
+    })
+    .catch(err => console.error("Failed to fetch saved indents", err))
+    .finally(() => setLoading(false));
+};
+
 
     // Handle status change for delete/undelete and block/unblock - NEW FUNCTION
     const handleStatusChange = async (indentId, statusType, isChecked) => {

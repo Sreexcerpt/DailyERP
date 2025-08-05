@@ -31,7 +31,7 @@ function BillingForm() {
     location: "",
     hsnNo: "",
     priceUnit: "",
-    balance:"",
+    balance: "",
   });
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,30 +46,32 @@ function BillingForm() {
   const [materialSearchType, setMaterialSearchType] = useState("materialId");
   const [materialSearch, setMaterialSearch] = useState("");
   const [viewAllMaterials, setViewAllMaterials] = useState(false);
-
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
+  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   useEffect(() => {
     axios
-      .get("http://localhost:8080/api/sales-orders")
+      .get("http://localhost:8080/api/sales-orders", { params: { companyId, financialYear }, })
       .then((res) => setSalesOrders(res.data))
       .catch((err) => console.error("Error fetching sales orders", err));
 
     axios
-      .get("http://localhost:8080/api/customers")
+      .get("http://localhost:8080/api/customers", { params: { companyId, financialYear }, })
       .then((res) => setCustomers(res.data))
       .catch((err) => console.error("Error fetching customers", err));
 
     axios
-      .get("http://localhost:8080/api/material")
+      .get("http://localhost:8080/api/material", { params: { companyId, financialYear }, })
       .then((res) => setMaterials(res.data))
       .catch((err) => console.error("Error fetching materials:", err));
 
     axios
-      .get("http://localhost:8080/api/billingcategory")
+      .get("http://localhost:8080/api/billingcategory", { params: { companyId, financialYear }, })
       .then((res) => setCategories(res.data))
       .catch((err) => console.error("Error fetching categories:", err));
 
     axios
-      .get("http://localhost:8080/api/tax")
+      .get("http://localhost:8080/api/tax", { params: { companyId, financialYear }, })
       .then((res) => setTaxes(res.data))
       .catch((err) => console.error("Error fetching tax:", err));
   }, []);
@@ -127,7 +129,7 @@ function BillingForm() {
     updatedItems[index][field] = value;
     setSelectedSO({ ...selectedSO, items: updatedItems });
   };
- const totalAmount =
+  const totalAmount =
     selectedSO?.items?.reduce((sum, item) => {
       return sum + parseFloat(item.quantity || 0) * parseFloat(item.price || 0);
     }, 0) || 0;
@@ -159,16 +161,18 @@ function BillingForm() {
       receiptDate: today,
       taxCode: selectedTax.taxCode,
       taxName: selectedTax.taxName,
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
       cgst: cgstAmt,
       sgst: sgstAmt,
       igst: igstAmt,
       totalAmount: totalAmount,
       discount,
       netAmount,
-      finalTotal:finalTotal,
-      balance:finalTotal
+      finalTotal: finalTotal,
+      balance: finalTotal
     };
-console.log(billing.finalTotal)
+    console.log(billing.finalTotal)
     try {
       await axios.post("http://localhost:8080/api/billingform", billing);
       alert("billing saved successfully!");
@@ -185,7 +189,7 @@ console.log(billing.finalTotal)
         customer: "",
         location: "",
         priceUnit: "",
-        balance:""
+        balance: ""
       });
       setSelectedSO(null);
       setSelectedTax({});
@@ -233,7 +237,7 @@ console.log(billing.finalTotal)
     setCustomerViewAllClicked(false);
   };
 
- 
+
 
   return (
     <div className="content p-3">
@@ -383,7 +387,7 @@ console.log(billing.finalTotal)
                           type="button"
                           className="btn btn-outline-primary btn-sm"
                           onClick={() => setShowCustomerModal(true)}
-                          // style={{ width: "40px",height:"25px",padding:"0px 0px 0px 0px"}}
+                        // style={{ width: "40px",height:"25px",padding:"0px 0px 0px 0px"}}
                         >
                           <i className="fas fa-search"></i>
                         </button>
@@ -467,7 +471,7 @@ console.log(billing.finalTotal)
                   <div className="col-md-8">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
-                        Posting Date: 
+                        Posting Date:
                       </label>
                       <input
                         type="date"

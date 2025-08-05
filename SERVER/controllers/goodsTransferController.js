@@ -42,7 +42,13 @@ const createGoodsTransfer = async (req, res) => {
 // GET /api/goodstransfer
 const getAllGoodsTransfers = async (req, res) => {
   try {
-    const transfers = await GoodsTransfer.find().sort({ createdAt: -1 });
+    const { companyId, financialYear } = req.query;
+
+    const filter = {};
+    if (companyId) filter.companyId = companyId;
+    if (financialYear) filter.financialYear = financialYear;
+
+    const transfers = (await GoodsTransfer.find(filter).sort({ createdAt: -1 }));
     res.json(transfers);
   } catch (err) {
     console.error("Error fetching goods transfers:", err);

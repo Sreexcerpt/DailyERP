@@ -2,16 +2,70 @@ const SalesOrder = require('../models/SalesOrder');
 const SalesOrderCategory = require('../models/SalesOrderCategory');
 
 // 1. ADD THIS NEW ROUTE (add this route in your routes file)
-exports.generateSONumber = async (req, res) => {
+// Assumes you have these Mongoose models:
+// - SOCategory (or whatever your sales order category model is called) with fields: prefix, rangeFrom, rangeTo
+// - SalesOrder with field soNumber
+
+async function generateSONumber(categoryId) {
   try {
-    const { categoryId } = req.body;
-    const soNumber = await generateSONumber(categoryId);
-    res.status(200).json({ soNumber });
+    const category = await SalesOrderCategory.findById(categoryId);
+    if (!category) throw new Error('SO Category not found');
+
+    const prefix = category.prefix;
+    console.log('Category prefix:', prefix);
+    console.log('Category range:', category.rangeFrom, 'to', category.rangeTo);
+
+    // Find all existing Sales Orders for this category with matching prefix
+    const existingSOs = await SalesOrder.find({
+      categoryId,
+      soNumber: { $regex: `^${prefix}-` },
+    }).select('soNumber');
+
+    let nextNumber = category.rangeFrom;
+
+    if (existingSOs.length > 0) {
+      console.log('Found existing SOs:', existingSOs.length);
+
+      const usedNumbers = existingSOs
+        .map(so => {
+          const numberPart = so.soNumber.split('-').pop();
+          return parseInt(numberPart, 10);
+        })
+        .filter(num => !isNaN(num));
+
+      if (usedNumbers.length > 0) {
+        const maxUsedNumber = Math.max(...usedNumbers);
+        console.log('Highest used number:', maxUsedNumber);
+        nextNumber = maxUsedNumber + 1;
+      }
+    }
+
+    console.log('Next number to use:', nextNumber);
+
+    if (nextNumber > category.rangeTo) {
+      throw new Error(
+        `SO number exceeded category range. Next: ${nextNumber}, Max: ${category.rangeTo}`
+      );
+    }
+
+    const generatedSONumber = `${prefix}-${nextNumber
+      .toString()
+      .padStart(6, '0')}`;
+    console.log('Generated SO Number:', generatedSONumber);
+
+    // Double-check uniqueness
+    const existingSO = await SalesOrder.findOne({ soNumber: generatedSONumber });
+    if (existingSO) {
+      throw new Error(`SO number ${generatedSONumber} already exists`);
+    }
+
+    return generatedSONumber;
   } catch (error) {
-    console.error('Error generating SO number:', error);
-    res.status(500).json({ error: 'Failed to generate SO number' });
+    console.error('Error in generateSONumber:', error);
+    throw error;
   }
-};
+}
+
 
 // 2. UPDATE YOUR EXISTING createSalesOrder FUNCTION (replace the existing one)
 exports.createSalesOrder = async (req, res) => {
@@ -53,8 +107,9 @@ exports.createSalesOrder = async (req, res) => {
   
 
 exports.getAllSalesOrders = async (req, res) => {
+  const { companyId, financialYear } = req.query;
   try {
-    const orders = await SalesOrder.find().sort({ createdAt: -1 });
+    const orders = await SalesOrder.find({ companyId, financialYear }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch sales orders' });

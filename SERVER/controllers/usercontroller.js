@@ -58,7 +58,7 @@ exports.createUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { identifier, password } = req.body;
-
+console.log('Login attempt with identifier:', identifier,  password);
     // Check if identifier is email or phone
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
     const query = isEmail ? { email: identifier } : { phone: identifier };

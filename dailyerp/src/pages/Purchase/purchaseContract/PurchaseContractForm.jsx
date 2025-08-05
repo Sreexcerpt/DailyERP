@@ -47,7 +47,11 @@ function PurchaseContractForm() {
   }, [modalIndentSearch]);
   const [locations, setLocations] = useState([]); // Add this state
   useEffect(() => {
-    axios.get("http://localhost:8080/api/indent/get").then((res) => {
+    const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+
+
+    axios.get("http://localhost:8080/api/indent/get",{params: { companyId, financialYear }}).then((res) => {
       const activeIndents = res.data.filter(
         (indent) => !indent.isDeleted && !indent.isBlocked
       );
@@ -60,7 +64,7 @@ function PurchaseContractForm() {
       );
     });
 
-    axios.get("http://localhost:8080/api/rfq-categories").then((res) => {
+    axios.get("http://localhost:8080/api/purchase-contract-categories").then((res) => {
       setCategories(
         res.data.map((cat) => ({
           label: `${cat.categoryName} (${cat.prefix})`,
@@ -69,7 +73,7 @@ function PurchaseContractForm() {
       );
     });
 
-    axios.get("http://localhost:8080/api/vendors").then((res) => {
+    axios.get("http://localhost:8080/api/vendors",{params: { companyId, financialYear }}).then((res) => {
       const activeVendors = res.data.filter(
         (vendor) => !vendor.isDeleted && !vendor.isBlocked
       );
@@ -84,7 +88,7 @@ function PurchaseContractForm() {
     });
 
 
-    axios.get("http://localhost:8080/api/locations").then((res) => {
+    axios.get("http://localhost:8080/api/locations",{params: { companyId, financialYear }}).then((res) => {
       console.log("Locations API response:", res.data); // Add this to debug
       // Handle different response structures
       if (Array.isArray(res.data)) {
@@ -101,7 +105,7 @@ function PurchaseContractForm() {
 
 
     axios
-      .get("http://localhost:8080/api/material")
+      .get("http://localhost:8080/api/material",{params: { companyId, financialYear }})
       .then((res) => {
         console.log("Fetched materials:", res.data);
         const filteredMaterials = res.data.filter(
@@ -174,15 +178,22 @@ function PurchaseContractForm() {
 
   // Add this new function to handle the final submission
   const handleFinalSubmit = async () => {
+    
+ const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
+
+
     const payload = {
       indentId: selectedIndent?.value?.indentId, // Changed from selectedIndent.indentId
-      categoryId: selectedIndent?.value?.categoryId, // Changed from selectedIndent.categoryId
+      categoryId: selectedCategory?.value, // Changed from selectedIndent.categoryId
       rfqCategoryId: selectedCategory?.value,
       vendor,
       vendorName,
       contractReference,
       validityFDate,
       validityTDate,
+        companyId: selectedCompanyId,
+        financialYear: financialYear,
       vnNo,
       note,
       buyerGroup,
@@ -201,7 +212,6 @@ function PurchaseContractForm() {
       alert("Contract Created Successfully");
       console.log(res.data);
       setShowContractModal(false);
-      navigate("/contracts-display");
     } catch (err) {
       console.error(err);
       alert("Failed to create contract");
@@ -1248,7 +1258,7 @@ function PurchaseContractForm() {
 
           {showIndentModal && <IndentModal />}
           {showVendorModal && <VendorModal />}
-
+{showContractModal && <ContractNumberModal />}
         </div>
       </div>
     </>
