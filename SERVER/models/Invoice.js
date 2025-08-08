@@ -12,7 +12,7 @@ const InvoiceSchema = new mongoose.Schema({
   location: { type: String },
   receiptDate: { type: String },
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
-   financialYear:String, 
+  financialYear: String,
   purchaseOrderId: { type: mongoose.Schema.Types.ObjectId, ref: 'PurchaseOrder' },
   items: [
     {
@@ -24,8 +24,8 @@ const InvoiceSchema = new mongoose.Schema({
       lotNo: String,
       price: Number,
       hsnNo: String, // Added HSN number field
-       priceUnit: String, 
-       
+      priceUnit: String,
+
     }
   ],
   taxCode: String,
@@ -33,11 +33,13 @@ const InvoiceSchema = new mongoose.Schema({
   cgst: Number,
   sgst: Number,
   igst: Number,
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  financialYear: { type: String },
   totalAmount: Number,
   discount: Number,
   netAmount: Number,
-   finalTotal: Number,
-   balance:Number
+  finalTotal: Number,
+  balance: Number
 }, { timestamps: true });
 
 module.exports = mongoose.model('Invoice', InvoiceSchema);

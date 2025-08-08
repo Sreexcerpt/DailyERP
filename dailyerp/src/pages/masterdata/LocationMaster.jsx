@@ -97,8 +97,8 @@ const LocationMaster = () => {
                     </div>
                 </div>
             </div>
-            <div className="table-responsive">
-                <table className="table table-bordered" style={{ marginTop: 16 }}>
+           
+                <table className="table table-sm table-bordered" style={{ marginTop: 16 }}>
                     <thead>
                         <tr>
                             <th>#</th>
@@ -133,8 +133,7 @@ const LocationMaster = () => {
                         ))}
                     </tbody>
                 </table>
-            </div>
-
+      
             {/* {showModal && (
                 <div
                     style={{

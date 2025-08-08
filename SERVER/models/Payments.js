@@ -116,7 +116,15 @@ const paymentSchema = new mongoose.Schema({
   updatedBy: {
     type: String
   },
-  
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    required: true
+  },
+  financialYear: {
+    type: String,
+    required: true
+  },
   // Additional metadata
   tags: [String],
   attachments: [{

@@ -23,6 +23,7 @@ const Sidebar = () => {
         accountsreport: false,
         crm: false,
         vendorBilling: false,
+        project: false,
     });
 
     const [permissions, setPermissions] = useState([]);
@@ -896,6 +897,102 @@ const Sidebar = () => {
                                 </li>
                             )}
 
+                            {/* Project Management Section */}
+                            {hasPermission("Project Management") && (
+                                <li>
+                                    <ul>
+                                        <li className="submenu">
+                                            <a
+                                                href="#"
+                                                className={
+                                                    ["/projects", "/tasks", "/milestones", "/time-entries"].some(path => isActive(path)) || openSubmenus.project
+                                                        ? "active subdrop"
+                                                        : ""
+                                                }
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    handleToggle("project");
+                                                }}>
+                                                <i className="ti ti-briefcase"></i><span>Project Management</span>
+                                                <span className="menu-arrow"></span>
+                                            </a>
+                                            <ul style={{ display: openSubmenus.project ? "block" : "none" }}>
+                                                {hasSubPermission("Project Management", "Projects") && (
+                                                    <li>
+                                                        <a href="/projects" className={isActive("/projects") ? "active" : ""}>
+                                                            Projects
+                                                        </a>
+                                                    </li>
+                                                )}
+                                                {hasSubPermission("Project Management", "Tasks") && (
+                                                    <li>
+                                                        <a href="/tasks" className={isActive("/tasks") ? "active" : ""}>
+                                                            Tasks
+                                                        </a>
+                                                    </li>
+                                                )}
+                                                {hasSubPermission("Project Management", "Milestones") && (
+                                                    <li>
+                                                        <a href="/milestones" className={isActive("/milestones") ? "active" : ""}>
+                                                            Milestones
+                                                        </a>
+                                                    </li>
+                                                )}
+                                                {hasSubPermission("Project Management", "Time Entries") && (
+                                                    <li>
+                                                        <a href="/time-entries" className={isActive("/time-entries") ? "active" : ""}>
+                                                            Time Entries
+                                                        </a>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            )}
+                            {/* Campaigns Section */}
+                            {hasPermission("Campaigns") && (
+                                <li>
+                                    <ul>
+                                        <li className="submenu">
+                                            <a
+                                                href="#"
+                                                className={
+                                                    ["/campaigns", "/analytics"].some(path => isActive(path)) || openSubmenus.campaigns
+                                                        ? "active subdrop"
+                                                        : ""
+                                                }
+                                                onClick={e => {
+                                                    e.preventDefault();
+                                                    handleToggle("campaigns");
+                                                }}
+                                            >
+                                                Campaigns
+                                            </a>
+                                            <ul style={{ display: openSubmenus.campaigns ? "block" : "none" }}>
+                                                {hasSubPermission("Campaigns", "Campaigns") && (
+                                                    <li>
+                                                        <a href="/campaigns" className={isActive("/campaigns") ? "active" : ""}>
+                                                            Campaigns
+                                                        </a>
+                                                    </li>
+                                                )}
+                                                {hasSubPermission("Campaigns", "Analytics") && (
+                                                    <li>
+                                                        <a href="/analytics" className={isActive("/analytics") ? "active" : ""}>
+                                                            Analytics
+                                                        </a>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            )}
+
+
+
+                            {/* Settings Section */}
                             {/* Show message if no permissions */}
                             {permissions.length === 0 && (
                                 <li className="menu-title">

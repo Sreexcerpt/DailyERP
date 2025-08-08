@@ -23,7 +23,7 @@ import SalesQuotationForm from './pages/sales/salesQuotation/SalesQuotationForm'
 import SalesQuotationListPage from './pages/sales/salesQuotation/SalesQuotationList';
 import SalesOrderForm from './pages/sales/salesOrder/SalesOrderForm';
 import SalesOrderDisplay from './pages/sales/salesOrder/SalesOrderDisplay'
-
+import CompanyForm from './components/Company/Company';
 
 import CustomerForm from "./pages/masterdata/CustomerForm";
 import CustomerPriceListForm from "./pages/masterdata/CustomerPriceList";
@@ -86,6 +86,13 @@ import LostReason from './pages/CrmSettings/LostReason/LostReason';
 import ContactStage from './pages/CrmSettings/ContactStage/ContactStage';
 import Industry from './pages/CrmSettings/Industry/Industry';
 import Calls from './pages/CrmSettings/Calls/Calls';
+import Milestones from './pages/Projects/Milestones';
+import Tasks from './pages/Projects/Tasks';
+import TimeTracking from './pages/Projects/TimeTracking';
+import Projects from './pages/Projects/Projects';
+import Campaigns from './pages/Campaigns/Campaigns';
+import Analytics from './pages/Campaigns/Analytics';
+
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -118,6 +125,11 @@ function App() {
           <Route path='/Access' element={<AccessControl />} />
           <Route path='/gst' element={<ProtectedLayout><GST /></ProtectedLayout>} />
           <Route path='loginscreen' element={<LoginScreen />} />
+          <Route path='/company-form' element={
+            <ProtectedLayout>
+              <CompanyForm />
+            </ProtectedLayout>
+          } />
           <Route path='/' element={
             <ProtectedLayout>
               <Dashboard />
@@ -572,6 +584,38 @@ function App() {
           <Route path='/calls' element={
             <ProtectedLayout>
               <Calls />
+            </ProtectedLayout>
+          } />
+
+
+          <Route path='/milestones' element={
+            <ProtectedLayout>
+              <Milestones />
+            </ProtectedLayout>
+          } />
+          <Route path='/tasks' element={
+            <ProtectedLayout>
+              <Tasks />
+            </ProtectedLayout>
+          } />
+          <Route path='/time-entries' element={
+            <ProtectedLayout>
+              <TimeTracking />
+            </ProtectedLayout>
+          } />
+          <Route path='/projects' element={
+            <ProtectedLayout>
+              <Projects />
+            </ProtectedLayout>
+          } />
+          <Route path='/campaigns' element={
+            <ProtectedLayout>
+              <Campaigns />
+            </ProtectedLayout>
+          } />
+          <Route path='/analytics' element={
+            <ProtectedLayout>
+              <Analytics />
             </ProtectedLayout>
           } />
         </Routes>

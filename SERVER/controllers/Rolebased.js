@@ -39,7 +39,14 @@ function organizePermissions(permissions) {
     "CRM": [
       "Contacts List", "Leads", "Proposals", "Sources",
       "Lost Reason", "Contact Stage", "Industry", "Calls"
-    ]
+    ],
+    "Project Management": [  // Add this new section
+        "Projects", "Tasks", "Milestones", "Time Entries"
+    ],
+    "Campaigns": [  // Add this new section
+        "Campaigns", "Analytics"
+    ],
+
   };
 
 

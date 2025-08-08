@@ -194,9 +194,8 @@ function InvoiceForm() {
       cgst: cgstAmt,
       sgst: sgstAmt,
       igst: igstAmt,
-
-
-
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
       totalAmount,
       discount,
       netAmount,

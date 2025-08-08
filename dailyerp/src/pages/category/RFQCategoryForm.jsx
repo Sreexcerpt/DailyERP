@@ -89,7 +89,7 @@ function RFQCategoryForm() {
             </ul>
           </div>
           <div>
-            <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>Vendor Category</a>
+            <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>RFQ Category</a>
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@ function RFQCategoryForm() {
             <div className="modal-dialog modal-lg">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h4 className="modal-title" id="myLargeModalLabel">  {editingId ? 'Edit Vendor Category' : 'Add Vendor Category'}</h4>
+                  <h4 className="modal-title" id="myLargeModalLabel">  {editingId ? 'Edit RFQ Category' : 'Add RFQ Category'}</h4>
                   <button type="button" className="btn-close" onClick={() => { setEditingId(null); handleCloseModal(), setFormData({ categoryName: '', prefix: '', rangeFrom: '', rangeTo: '' }); }} aria-label="Close"></button>
                 </div>
                 <div className="modal-body">

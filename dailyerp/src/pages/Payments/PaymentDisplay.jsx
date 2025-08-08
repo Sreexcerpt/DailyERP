@@ -30,7 +30,9 @@ function PaymentDisplay() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editPayment, setEditPayment] = useState(null);
     const [message, setMessage] = useState({ type: "", text: "" });
-
+    const companyId = localStorage.getItem("selectedCompanyId");
+    const financialYear = localStorage.getItem("financialYear");
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
     useEffect(() => {
         fetchPayments();
         fetchSummary();
@@ -61,7 +63,9 @@ function PaymentDisplay() {
                 if (value) queryParams.append(key, value);
             });
 
-            const response = await axios.get(`http://localhost:8080/api/payment?${queryParams}`);
+            const response = await axios.get(`http://localhost:8080/api/payment?${queryParams}`, {
+                params: { companyId, financialYear }
+            });
             setPayments(response.data.payments || []);
             setPagination(response.data.pagination || {});
         } catch (error) {
@@ -73,7 +77,9 @@ function PaymentDisplay() {
 
     const fetchSummary = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/api/payment-summary");
+            const response = await axios.get("http://localhost:8080/api/payment-summary", {
+                params: { companyId, financialYear }
+            });
             setSummary(response.data);
         } catch (error) {
             console.error("Error fetching summary:", error);
@@ -134,6 +140,8 @@ function PaymentDisplay() {
                 paymentMethod: editPayment.paymentMethod,
                 status: editPayment.status,
                 description: editPayment.description,
+                companyId: selectedCompanyId,
+                financialYear: financialYear,
                 paymentDate: editPayment.paymentDate,
                 paymentDetails: editPayment.paymentDetails || {}
             };
@@ -414,7 +422,7 @@ function PaymentDisplay() {
         const csvData = payments.map(payment => ({
             'Payment Doc': payment.paymentDocNumber,
             'Date': formatDate(payment.paymentDate),
-            
+
             'Type': payment.recordType,
             'Entity': payment.entityName,
             'Doc Number': payment.docnumber,

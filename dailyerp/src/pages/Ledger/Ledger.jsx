@@ -123,7 +123,7 @@ function Ledger() {
   const vendorData = vendorInvoice.map((item, index) => {
     const originalDebit = item.category?.toLowerCase() === "debit" ? (item.finalTotal || item.netAmount || 0) : 0;
     const originalCredit = item.category?.toLowerCase() === "credit" ? (item.finalTotal || item.netAmount || 0) : 0;
-    const balance = item.balance || 0;
+    const balance = Number(item.balance) || 0;
 
     const { adjustedDebit, adjustedCredit } = processAccountingEntry(originalDebit, originalCredit, balance);
 
@@ -194,6 +194,7 @@ function Ledger() {
 
   const getBalanceStatus = (balance, originalAmount) => {
     if (balance <= 0) return { status: 'Paid', class: 'success' };
+    console.log("balance", balance, originalAmount);
     if (balance === originalAmount) return { status: 'Unpaid', class: 'danger' };
     return { status: 'Partial', class: 'warning' };
   };
@@ -332,7 +333,7 @@ function Ledger() {
                       </thead>
                       <tbody>
                         {paginate(vendorData, vendorPage).map((entry, index) => {
-                          const balanceStatus = getBalanceStatus(entry.balance, entry.originalAmount);
+                          const balanceStatus = getBalanceStatus(Number(entry.balance), entry.originalAmount);
                           return (
                             <tr key={entry.id}>
                               <td>{(vendorPage - 1) * PAGE_SIZE + index + 1}</td>

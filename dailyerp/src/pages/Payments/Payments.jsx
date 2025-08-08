@@ -40,18 +40,41 @@ function Payment() {
     }
   };
 
+  // const getCurrentRecords = () => {
+  //   const records = paymentData.type === "vendor" ? vendorInvoices : customerInvoices;
+  //   return records.filter(record => {
+  //     const name = paymentData.type === "vendor"
+  //       ? (record.vendor || "")
+  //       : (record.salesOrderId?.customer || "");
+  //     const docNumber = record.docnumber || "";
+  //     const hasPositiveBalance = (record.balance || 0) > 0;
+  //     return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //       docNumber.toLowerCase().includes(searchTerm.toLowerCase());
+  //   });
+  // };
+
   const getCurrentRecords = () => {
     const records = paymentData.type === "vendor" ? vendorInvoices : customerInvoices;
+
     return records.filter(record => {
+      // Get name and document number for search filtering
       const name = paymentData.type === "vendor"
         ? (record.vendor || "")
         : (record.salesOrderId?.customer || "");
       const docNumber = record.docnumber || "";
 
-      return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      // Check if record matches search term
+      const matchesSearchTerm = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         docNumber.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Check if balance is greater than 0
+      const hasPositiveBalance = (record.balance || 0) > 0;
+
+      // Return true only if both conditions are met
+      return matchesSearchTerm && hasPositiveBalance;
     });
   };
+
 
   const handleRecordSelection = (record) => {
     setPaymentData(prev => ({
@@ -91,7 +114,7 @@ function Payment() {
 
     // For vendor: payment reduces balance (we owe less)
     // For customer: payment reduces balance (they owe less)
-    return currentBalance - paymentAmount;
+    return (currentBalance.toFixed(2) - paymentAmount.toFixed(2));
   };
 
   const handleSubmit = async (e) => {
@@ -112,7 +135,9 @@ function Payment() {
       const updatePayload = {
         balance: newBalance,
         lastPaymentAmount: paymentAmount,
-        lastPaymentDate: new Date().toISOString(),
+        companyId: selectedCompanyId,
+        financialYear: financialYear,
+        lastPaymentDocNumber: paymentData.docnumber || "",
         lastPaymentMethod: paymentData.paymentMethod,
         paymentDescription: paymentData.description || `Payment via ${paymentData.paymentMethod}`
       };
@@ -132,6 +157,8 @@ function Payment() {
           ? paymentData.selectedRecord.vendor
           : paymentData.selectedRecord.salesOrderId?.customer,
         paymentAmount: paymentAmount,
+        companyId: selectedCompanyId,
+        financialYear: financialYear,
         previousBalance: currentBalance,
         newBalance: newBalance,
         paymentMethod: paymentData.paymentMethod,
@@ -304,12 +331,13 @@ function Payment() {
                     )}
 
                     <div className="mb-3">
-                      <label className="form-label">Payment Amount *</label>
+                      <label htmlFor="paymentAmount" className="form-label">Payment Amount *</label>
                       <div className="input-group">
                         <span className="input-group-text"><i className="ti ti-currency-rupee"></i></span>
                         <input
                           type="number"
-                          className="form-control"
+                          id="paymentAmount"
+                          className={`form-control ${parseFloat(paymentData?.paymentAmount) > parseFloat(paymentData?.selectedRecord?.balance || 0) ? 'is-invalid' : ''}`}
                           name="paymentAmount"
                           value={paymentData.paymentAmount}
                           onChange={handleInputChange}
@@ -317,11 +345,17 @@ function Payment() {
                           min="0"
                           step="0.01"
                           required
+                          max={paymentData?.selectedRecord?.balance}
                           disabled={!paymentData.selectedRecord}
                         />
+                        {parseFloat(paymentData.paymentAmount) > parseFloat(paymentData?.selectedRecord?.balance || 0) && (
+                          <div className="invalid-feedback">
+                            Amount cannot exceed current balance of ₹{(paymentData?.selectedRecord?.balance || 0).toFixed(2)}
+                          </div>
+                        )}
                       </div>
                       {newBalance !== null && (
-                        <small className="text-muted">
+                        <small className="text-muted mt-1 d-block">
                           New balance will be: <strong>₹{newBalance.toFixed(2)}</strong>
                         </small>
                       )}

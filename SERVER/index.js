@@ -157,6 +157,12 @@ app.use('/api/crm/lost-reasons', require('./routes/lostReasons'));
 app.use('/api/crm/contact-stages', require('./routes/contactStages'));
 app.use('/api/crm/industries', require('./routes/industries'));
 app.use('/api/crm/calls', require('./routes/calls'));
+app.use('/api/projects', require('./routes/projects'));
+app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/milestones', require('./routes/milestones'));
+app.use('/api/time-entries', require('./routes/timeEntries'));
+app.use('/api/campaigns', require('./routes/campaigns'));
+
 
 app.use(express.static(path.join(__dirname, 'dist')));
 
