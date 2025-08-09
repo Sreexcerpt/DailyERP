@@ -173,7 +173,7 @@ const handlePrint = (invoice) => {
             ${invoice.items.map((item, index) => `
               <tr>
                 <td>${index + 1}</td>
-                <td>${item.materialId}</td>
+                <td>${item.materialId||"DEMO"}</td>
                 <td>${item.description}</td>
                 <td>${item.quantity}</td>
                 <td>${item.baseUnit}</td>

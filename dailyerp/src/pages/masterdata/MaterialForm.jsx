@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
 const baseUnits = ["Piece", "Box", "Kg", "Ltr"];
 
 const MaterialPage = () => {
   const [categories, setCategories] = useState([]);
   const [materials, setMaterials] = useState([]);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [filteredMaterials, setFilteredMaterials] = useState([]);
   const [editingMaterial, setEditingMaterial] = useState(null);
   const [formData, setFormData] = useState({
@@ -291,8 +291,17 @@ const MaterialPage = () => {
 
     return pageNumbers;
   };
+
+
+    const handleImportSuccess = (result) => {
+    alert(`Import completed: ${result.results.imported} records imported`);
+    fetchMaterials(); // Refresh the data
+    setShowImportModal(false); // Close the modal
+  };
   return (
     <div className="content">
+
+
       <h4>Material Master</h4>
       <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2 mt-3">
         <div>
@@ -309,6 +318,12 @@ const MaterialPage = () => {
             />
           </div>
         </div>
+         {/* <button 
+                className="btn btn-success me-2"
+                onClick={() => setShowImportModal(true)}
+              >
+                📥 Import Materials
+              </button> */}
         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
           <div className="dropdown">
             <a
@@ -926,6 +941,9 @@ const MaterialPage = () => {
           </div>
         </>
       )}
+
+
+
     </div>
   );
 };

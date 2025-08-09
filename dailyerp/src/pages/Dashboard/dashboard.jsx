@@ -175,13 +175,7 @@ const Dashboard = () => {
               color: 'success',
               bgColor: 'bg-success',
             },
-            {
-              title: 'Stock Items',
-              value: materials.length,
-              icon: Archive,
-              color: 'warning',
-              bgColor: 'bg-warning',
-            },
+            
             {
               title: 'Vendor Invoices',
               value: invoices.length,

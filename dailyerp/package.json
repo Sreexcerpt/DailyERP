@@ -8,17 +8,19 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "proxy":"http://localhost:8080"
+    "proxy": ""
   },
   "dependencies": {
     "axios": "^1.10.0",
     "lucide-react": "^0.525.0",
+    "papaparse": "^5.5.3",
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.3",
     "react-select": "^5.10.2",
-    "recharts": "^3.1.0"
+    "recharts": "^3.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
