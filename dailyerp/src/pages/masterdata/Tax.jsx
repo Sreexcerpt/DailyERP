@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import DataImportModal from '../../components/DataImportModal';
 const TaxForm = () => {
   const [formData, setFormData] = useState({
     taxCode: '',
@@ -13,11 +13,15 @@ const TaxForm = () => {
   const [errors, setErrors] = useState({});
   const [taxes, setTaxes] = useState([]);
   const [editId, setEditId] = useState(null);
+  const [showDataImportModal, setShowDataImportModal] = useState(false);
 
   useEffect(() => {
     fetchTaxes();
   }, []);
-
+  const handleImportSuccess = (result) => {
+    alert(`Import completed: ${result.results.imported} records imported`);
+    setShowDataImportModal(false);
+  };
   const fetchTaxes = async () => {
     const res = await axios.get('http://localhost:8080/api/tax');
     setTaxes(res.data);
@@ -133,9 +137,15 @@ const TaxForm = () => {
               <h4>Taxes Master</h4>
             </div>
             <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
+              <button
+                className="btn btn-outline-primary d-inline-flex align-items-center"
+                onClick={() => setShowDataImportModal(true)}
+              >
+                <i className="ti ti-import me-1"></i>Import
+              </button>
               <div className="dropdown">
                 <a href="#" onClick={handleOpendropdown} className="btn btn-outline-primary d-inline-flex align-items-center" data-bs-toggle="dropdown">
-                  <i className="isax isax-export-1 me-1"></i>Export
+                  <i className="ti ti-export-1 me-1"></i>Export
                 </a>
                 <ul className={showdropdown ? `dropdown-menu show` : "dropdown-menu"}>
                   <li>
@@ -147,7 +157,7 @@ const TaxForm = () => {
                 </ul>
               </div>
               <div>
-                <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>New Tax</a>
+                <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="ti ti-add-circle5 me-1"></i>New Tax</a>
               </div>
             </div>
           </div>
@@ -262,6 +272,12 @@ const TaxForm = () => {
               </div>
             </div>
           )}
+          <DataImportModal
+            show={showDataImportModal}
+            onClose={() => setShowDataImportModal(false)}
+            onImportSuccess={handleImportSuccess}
+            masterDataType="tax"
+          />
         </div>
       
   );

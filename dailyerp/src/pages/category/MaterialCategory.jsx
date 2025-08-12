@@ -4,7 +4,7 @@ import axios from 'axios';
 const MaterialCategory = () => {
   const [formData, setFormData] = useState({
     categoryName: '',
-    prefix: '',
+    // prefix: '',
     rangeStart: '',
     rangeEnd: ''
   });
@@ -36,10 +36,10 @@ const MaterialCategory = () => {
         if (!value) return 'Category name is required';
         if (!alphaRegex.test(value)) return 'Only alphabets (max 100 characters)';
         break;
-      case 'prefix':
-        if (!value) return 'Prefix is required';
-        if (!alphaNumericRegex.test(value)) return 'Alphanumeric (max 8 characters)';
-        break;
+      // case 'prefix':
+      //   if (!value) return 'Prefix is required';
+      //   if (!alphaNumericRegex.test(value)) return 'Alphanumeric (max 8 characters)';
+      //   break;
       case 'rangeStart':
       case 'rangeEnd':
         if (!value) return `${name} is required`;
@@ -64,13 +64,13 @@ const MaterialCategory = () => {
           limitMsg = 'Maximum 100 characters allowed';
         }
         break;
-      case 'prefix':
-        cleanedValue = value.replace(/[^A-Za-z0-9]/g, '');
-        if (cleanedValue.length > 8) {
-          cleanedValue = cleanedValue.slice(0, 8);
-          limitMsg = 'Maximum 8 characters allowed';
-        }
-        break;
+      // case 'prefix':
+      //   cleanedValue = value.replace(/[^A-Za-z0-9]/g, '');
+      //   if (cleanedValue.length > 8) {
+      //     cleanedValue = cleanedValue.slice(0, 8);
+      //     limitMsg = 'Maximum 8 characters allowed';
+      //   }
+      //   break;
       case 'rangeStart':
       case 'rangeEnd':
         cleanedValue = value.replace(/[^0-9]/g, '');
@@ -93,7 +93,7 @@ const MaterialCategory = () => {
   const isFormValid = () => {
     return (
       !validateField('categoryName', formData.categoryName) &&
-      !validateField('prefix', formData.prefix) &&
+      // !validateField('prefix', formData.prefix) &&
       !validateField('rangeStart', formData.rangeStart) &&
       !validateField('rangeEnd', formData.rangeEnd)
     );
@@ -161,7 +161,7 @@ const MaterialCategory = () => {
   const handleEdit = (cat) => {
     setFormData({
       categoryName: cat.categoryName,
-      prefix: cat.prefix,
+      // prefix: cat.prefix,
       rangeStart: cat.rangeStart,
       rangeEnd: cat.rangeEnd
     });
@@ -209,7 +209,7 @@ const MaterialCategory = () => {
                 <thead>
                   <tr>
                     <th>Name</th>
-                    <th>Prefix</th>
+                    {/* <th>Prefix</th> */}
                     <th>Start</th>
                     <th>End</th>
                     <th>Status</th>
@@ -221,7 +221,7 @@ const MaterialCategory = () => {
                   categories?.map((cat) => (
                     <tr key={cat._id}>
                       <td>{cat.categoryName}</td>
-                      <td>{cat.prefix}</td>
+                      {/* <td>{cat.prefix}</td> */}
                       <td>{cat.rangeStart}</td>
                       <td>{cat.rangeEnd}</td>
                       <td>{materialIds[cat._id] || 'Loading...'}</td>
@@ -247,13 +247,13 @@ const MaterialCategory = () => {
                     <div className="modal-body">
                       <form onSubmit={handleSubmit}>
                         <div className="row">
-                          {['categoryName', 'prefix', 'rangeStart', 'rangeEnd'].map((field) => (
+                          {['categoryName', 'rangeStart', 'rangeEnd'].map((field) => (
                             <div className="mb-3 col-xl-3" key={field}>
                               <label className="form-label">
                                 {field === 'categoryName'
                                   ? 'Category Name'
-                                  : field === 'prefix'
-                                    ? 'Prefix'
+                                  // : field === 'prefix'
+                                  //   ? 'Prefix'
                                     : field === 'rangeStart'
                                       ? 'Range Start'
                                       : 'Range End'}

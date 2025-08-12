@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Modal, Button } from 'react-bootstrap';
-
+import DataImportModal from '../../components/DataImportModal';
 function GeneralCondition() {
   const [conditions, setConditions] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState(null);
+  const [showDataImportModal, setShowDataImportModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -22,7 +23,10 @@ function GeneralCondition() {
       console.error('Failed to fetch:', err);
     }
   };
-
+  const handleImportSuccess = (result) => {
+    alert(`Import completed: ${result.results.imported} records imported`);
+    setShowDataImportModal(false);
+  };
   // Open modal for add/edit
   const handleOpenModal = (data = null) => {
     if (data) {
@@ -83,7 +87,10 @@ function GeneralCondition() {
   return (
     <div className="p-4">
       <h2>General Conditions</h2>
-      <button className="btn btn-primary mb-3" onClick={() => handleOpenModal()}>Add General Condition</button>
+      <button className="btn btn-outline-primary me-2" onClick={() => setShowDataImportModal(true)}>
+        <i className="isax isax-import me-1"></i>Import
+      </button>
+      <button className="btn btn-primary me-3" onClick={() => handleOpenModal()}>Add General Condition</button>
 
       {/* Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -113,7 +120,7 @@ function GeneralCondition() {
       </Modal>
 
       {/* Table */}
-      <table className="table table-bordered">
+      <table className="table table-bordered table-sm">
         <thead>
           <tr>
             <th>Condition</th>
@@ -127,7 +134,7 @@ function GeneralCondition() {
           {conditions.map((mat) => (
             <tr key={mat._id}>
               <td>{mat.name}</td>
-              <td>{mat.description}</td>
+              <td className='text-wrap'>{mat.description}</td>
               <td>
                 <input
                   className="form-check-input"
@@ -154,6 +161,12 @@ function GeneralCondition() {
           ))}
         </tbody>
       </table>
+      <DataImportModal
+        show={showDataImportModal}
+        onHide={() => setShowDataImportModal(false)}
+        onImportSuccess={handleImportSuccess}
+        masterDataType="generalCondition"
+      />
     </div>
   );
 }

@@ -5,13 +5,13 @@ const MaterialCategory=require('../models/MaterialCategory')
 // @access  Public
 const createCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeStart, rangeEnd } = req.body;
+    const { categoryName,  rangeStart, rangeEnd } = req.body;
 
-    if (!categoryName || !prefix || rangeStart === undefined || rangeEnd === undefined) {
+    if (!categoryName || rangeStart === undefined || rangeEnd === undefined) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const category = new MaterialCategory({ categoryName, prefix, rangeStart, rangeEnd });
+    const category = new MaterialCategory({ categoryName, rangeStart, rangeEnd });
     await category.save();
 
     res.status(201).json({ message: 'Category created successfully', category });

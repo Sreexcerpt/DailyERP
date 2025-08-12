@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Modal, Button } from 'react-bootstrap';
-
+import DataImportModal from '../../components/DataImportModal';
 function ProcessList() {
   const [processes, setProcesses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState(null);
+  const [showDataImportModal, setShowDataImportModal] = useState(false);
   const [formData, setFormData] = useState({
     processId: '',
     processDescription: '',
     isDeleted: false,
     isBlocked: false,
   });
-
+  const handleImportSuccess = (result) => {
+    alert(`Import completed: ${result.results.imported} records imported`);
+    setShowDataImportModal(false);
+  };
   const fetchData = async () => {
     try {
       const res = await axios.get('http://localhost:8080/api/processes');
@@ -78,7 +82,10 @@ function ProcessList() {
   return (
     <div className="p-4">
       <h2>Process Master</h2>
-      <button className="btn btn-primary mb-3" onClick={() => handleOpenModal()}>Add Process</button>
+      <button className="btn btn-outline-primary me-2" onClick={() => setShowDataImportModal(true)}>
+        <i className="isax isax-import me-1"></i>Import
+      </button>
+      <button className="btn btn-primary " onClick={() => handleOpenModal()}>Add Process</button>
 
       {/* Modal Form */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -139,7 +146,7 @@ function ProcessList() {
           {processes.map((proc) => (
             <tr key={proc._id}>
               <td>{proc.processId}</td>
-              <td>{proc.processDescription}</td>
+              <td className='text-wrap'>{proc.processDescription}</td>
               <td>
                 <input
                   className="form-check-input"
@@ -166,6 +173,12 @@ function ProcessList() {
           ))}
         </tbody>
       </table>
+      <DataImportModal
+        show={showDataImportModal}
+        onClose={() => setShowDataImportModal(false)}
+        onImportSuccess={handleImportSuccess}
+        masterDataType="process"
+      />
     </div>
   );
 }

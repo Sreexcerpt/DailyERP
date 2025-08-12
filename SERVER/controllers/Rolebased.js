@@ -4,7 +4,7 @@ const Role = require('../models/Roles');
 
 
 function organizePermissions(permissions) {
-  
+
 
   const permissionsStructure = {
     "Dashboard": ["Dashboard"],
@@ -19,7 +19,7 @@ function organizePermissions(permissions) {
       "Purchase Indent Category", "Sales Indent Category", "PO Category",
       "Sales RFQ Category", "Sales Order Category", "Goods Receipt Category",
       "Goods Issue Category", "Billing Category", "Invoice Category",
-      "Purchase Quotation Category","Purchase Contract Category", "Sale Contract Category", "Transfer Category"
+      "Purchase Quotation Category", "Purchase Contract Category", "Sale Contract Category", "Transfer Category"
     ],
     "Purchase": [
       "Purchase Indent", "Purchase Quotation", "Purchase Contract", "Purchase Order",
@@ -41,11 +41,20 @@ function organizePermissions(permissions) {
       "Lost Reason", "Contact Stage", "Industry", "Calls"
     ],
     "Project Management": [  // Add this new section
-        "Projects", "Tasks", "Milestones", "Time Entries"
+      "Projects", "Tasks", "Milestones", "Time Entries"
     ],
     "Campaigns": [  // Add this new section
-        "Campaigns", "Analytics"
+      "Campaigns", "Analytics"
     ],
+    "HRMS": [
+      "Designation",
+      "Department",
+      "Employee",
+      "LeaveRequests",
+      "LeaveRequestManagement",
+      "Payroll"
+
+    ]
 
   };
 
@@ -102,15 +111,15 @@ exports.getNextRoleId = async (req, res) => {
 exports.createRole = async (req, res) => {
   try {
     const { roleName, permissions } = req.body;
-    
+
     // Get the count of existing roles to generate next ID
     const roleCount = await Role.countDocuments();
     const roleId = `R${(roleCount + 1).toString().padStart(2, '0')}`;
-    
+
     const structuredPermissions = organizePermissions(permissions);
     const role = new Role({ roleId, roleName, permissions, structuredPermissions });
     await role.save();
-    
+
     res.status(201).json(role);
   } catch (error) {
     console.error("Error creating role:", error);

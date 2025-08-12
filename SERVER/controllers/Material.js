@@ -1,33 +1,6 @@
 const Material = require('../models/Material');
 const MaterialCategory = require('../models/MaterialCategory');
 
-// Generate Material ID
-// exports.generateMaterialId = async (req, res) => {
-//   try {
-//     const { categoryId } = req.body;
-//     const category = await MaterialCategory.findById(categoryId);
-//     if (!category) return res.status(404).json({ message: 'Category not found' });
-
-//     const materialCount = await Material.countDocuments({ categoryId });
-//     const nextNumber = category.rangeStart + materialCount;
-
-//     const materialId = `${category.prefix}-${nextNumber}`;
-//     res.json({ materialId });
-//   } catch (err) {
-//     res.status(500).json({ error: 'Error generating material ID' });
-//   }
-// };
-
-// // Save material
-// exports.createMaterial = async (req, res) => {
-//   try {
-//     const material = new Material(req.body);
-//     await material.save();
-//     res.status(201).json({ message: 'Material saved', material });
-//   } catch (err) {
-//     res.status(500).json({ error: 'Error saving material' });
-//   }
-// };
 exports.generateMaterialId = async (req, res) => {
   try {
     const { categoryId } = req.body;
@@ -37,7 +10,7 @@ exports.generateMaterialId = async (req, res) => {
     const materialCount = await Material.countDocuments({ categoryId });
     const nextNumber = category.rangeStart + materialCount;
 
-    const materialId = `${category.prefix}-${nextNumber}`;
+    const materialId = nextNumber;
     res.json({ materialId });
   } catch (err) {
     res.status(500).json({ error: 'Error generating material ID' });

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 const baseUnits = ["Piece", "Box", "Kg", "Ltr"];
-
+import DataImportModal from "../../components/DataImportModal";
 const MaterialPage = () => {
   const [categories, setCategories] = useState([]);
+
   const [materials, setMaterials] = useState([]);
   const [showImportModal, setShowImportModal] = useState(false);
   const [filteredMaterials, setFilteredMaterials] = useState([]);
@@ -293,7 +294,7 @@ const MaterialPage = () => {
   };
 
 
-    const handleImportSuccess = (result) => {
+  const handleImportSuccess = (result) => {
     alert(`Import completed: ${result.results.imported} records imported`);
     fetchMaterials(); // Refresh the data
     setShowImportModal(false); // Close the modal
@@ -318,13 +319,14 @@ const MaterialPage = () => {
             />
           </div>
         </div>
-         {/* <button 
-                className="btn btn-success me-2"
-                onClick={() => setShowImportModal(true)}
-              >
-                📥 Import Materials
-              </button> */}
+
         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
+          <button
+            className="btn btn-outline-info me-2"
+            onClick={() => setShowImportModal(true)}
+          >
+            Import Materials
+          </button>
           <div className="dropdown">
             <a
               href="#"
@@ -941,7 +943,13 @@ const MaterialPage = () => {
           </div>
         </>
       )}
-
+      <DataImportModal
+        show={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImportSuccess}
+        masterDataType="material"
+        apiEndpoint="materials"
+      />
 
 
     </div>

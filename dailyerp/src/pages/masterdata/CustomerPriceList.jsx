@@ -1,749 +1,395 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import DataImportModal from "../../components/DataImportModal";
 function CustomerPriceListForm() {
-  // const [formData, setFormData] = useState({
-  //   _id: "", // for edit tracking
-  //   categoryId: "",
-  //   customerId: "",
-  //   materialId: "",
-  //   location: "",
-  //   bum: "",
-  //   orderUnit: "",
-  //   price:"",
-  //   salesGroup: "",
-  //   taxId: "",
-  //   tandc: "",
-  // });
-
-  // const [conversionValue, setConversionValue] = useState(1);
-  // const [categories, setCategories] = useState([]);
-  // const [customers, setCustomers] = useState([]);
-  // const [materials, setMaterials] = useState([]);
-  // const [taxes, setTaxes] = useState([]);
-  // const [allData, setAllData] = useState([]);
-  // const [showSearchModal, setShowSearchModal] = useState(false);
-  // const [searchResults, setSearchResults] = useState([]);
-  // const [searchType, setSearchType] = useState("materialId");
-  // const [currentEditIndex, setCurrentEditIndex] = useState(null);
-  // useEffect(() => {
-  //   fetchCategories();
-  //   fetchCustomers();
-  //   fetchMaterials();
-  //   fetchTaxes();
-  //   fetchAllPriceLists();
-  // }, []);
-
-  // const fetchCategories = async () => {
-  //   const res = await axios.get(
-  //     "http://localhost:8080/api/customer-categories"
-  //   );
-  //   setCategories(res.data);
-  // };
-
-  // const fetchCustomers = async () => {
-  //   const res = await axios.get("http://localhost:8080/api/customers");
-  //   setCustomers(res.data);
-  //   console.log("cut", res.data);
-  // };
-
-  // const fetchMaterials = async () => {
-  //   const res = await axios.get("http://localhost:8080/api/material");
-  //   setMaterials(res.data);
-  // };
-
-  // const fetchTaxes = async () => {
-  //   const res = await axios.get("http://localhost:8080/api/tax");
-  //   setTaxes(res.data);
-  // };
-
-  // const fetchAllPriceLists = async () => {
-  //   const res = await axios.get(
-  //     "http://localhost:8080/api/customer-price-lists"
-  //   );
-  //   setAllData(res.data);
-  // };
-
-  // const handleChange = async (e) => {
-  //   const { name, value } = e.target;
-  //   let updatedForm = { ...formData, [name]: value };
-
-  //   if (name === "materialId") {
-  //     try {
-  //       const res = await axios.get(
-  //         `http://localhost:8080/api/material/${value}`
-  //       );
-  //       const conv = res.data.conversionValue || 1;
-  //       setConversionValue(conv);
-  //       const bum = parseFloat(formData.bum) || 0;
-  //       updatedForm.orderUnit = (bum * conv).toFixed(2);
-  //     } catch {
-  //       setConversionValue(1);
-  //     }
-  //   }
-
-  //   if (name === "bum") {
-  //     const bum = parseFloat(value);
-  //     if (!isNaN(bum)) {
-  //       updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
-  //     } else {
-  //       updatedForm.orderUnit = "";
-  //     }
-  //   }
-
-  //   setFormData(updatedForm);
-  // };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     if (formData._id) {
-  //       await axios.put(
-  //         `http://localhost:8080/api/customer-price-lists/${formData._id}`,
-  //         formData
-  //       );
-  //       alert("Updated successfully");
-  //     } else {
-  //       await axios.post(
-  //         `http://localhost:8080/api/customer-price-lists`,
-  //         formData
-  //       );
-  //       alert("Saved successfully");
-  //     }
-
-  //     setFormData({
-  //       _id: "",
-  //       categoryId: "",
-  //       customerId: "",
-  //       materialId: "",
-  //       unit: "",
-  //       bum: "",
-  //       orderUnit: "",
-  //       salesGroup: "",
-  //       taxId: "",
-  //       tandc: "",
-  //     });
-
-  //     setConversionValue(1);
-  //     handleCloseModal();
-  //     fetchAllPriceLists(); // refresh table
-  //   } catch (err) {
-  //     alert("Error saving data");
-  //     console.error("Submit error:", err);
-  //   }
-  // };
-  // const handleEdit = (item) => {
-  //   // Helper function to safely extract ID
-  //   const extractId = (field) => {
-  //     if (!field) return ""; // Handle null, undefined, or empty values
-  //     if (typeof field === "object" && field._id) return field._id;
-  //     if (typeof field === "string") return field;
-  //     return "";
-  //   };
-
-  //   // Extract IDs from nested objects or use the ID directly
-  //   const categoryId = extractId(item.categoryId);
-  //   const customerId = extractId(item.customerId);
-  //   const materialId = extractId(item.materialId);
-  //   const taxId = extractId(item.taxId);
-  //   const tandc = extractId(item.tandc);
-
-  //   const newFormData = {
-  //     _id: item._id,
-  //     categoryId: categoryId,
-  //     customerId: customerId,
-  //     materialId: materialId,
-  //     unit: item.unit || "",
-  //     bum: item.bum || "",
-  //     orderUnit: item.orderUnit || "",
-  //     salesGroup: item.salesGroup || "",
-  //     taxId: taxId,
-  //     tandc: tandc,
-  //   };
-
-  //   setFormData(newFormData);
-  //   setShowModal(true);
-
-  //   // Set conversion value if material exists
-  //   if (materialId) {
-  //     axios
-  //       .get(`http://localhost:8080/api/material/${materialId}`)
-  //       .then((res) => {
-  //         const conv = res.data.conversionValue || 1;
-  //         setConversionValue(conv);
-  //         console.log("Conversion value set to:", conv);
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error fetching material conversion:", error);
-  //         setConversionValue(1);
-  //       });
-  //   }
-  // };
-
-  // const [showModal, setShowModal] = useState(false);
-
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const itemsPerPage = 10;
-
-  // const paginatedData = allData.slice(
-  //   (currentPage - 1) * itemsPerPage,
-  //   currentPage * itemsPerPage
-  // );
-
-  // const totalPages = Math.ceil(allData.length / itemsPerPage);
-  // const handlePageClick = (page) => {
-  //   if (page >= 1 && page <= totalPages) {
-  //     setCurrentPage(page);
-  //   }
-  // };
-  // const [searchQuery, setSearchQuery] = useState("");
-
-  // const filteredData = allData.filter((item) => {
-  //   const customerName = item.customerId?.name1?.toLowerCase() || "";
-  //   const categoryName = item.categoryId?.categoryName?.toLowerCase() || "";
-  //   const materialDesc = item.materialId?.description?.toLowerCase() || "";
-
-  //   return (
-  //     customerName.includes(searchQuery.toLowerCase()) ||
-  //     categoryName.includes(searchQuery.toLowerCase()) ||
-  //     materialDesc.includes(searchQuery.toLowerCase())
-  //   );
-  // });
-
-  // const handleOpenModal = () => setShowModal(true);
-  // const handleCloseModal = () => setShowModal(false);
-  // const [showdropdown, setShowdropdown] = useState(false);
-
-  // const handleOpendropdown = () => setShowdropdown(true);
-  // const handleClosedropdown = () => setShowdropdown(false);
-
-  // const openSearchModal = () => {
-  //   setCurrentEditIndex();
-  //   setShowSearchModal(true);
-  //   setSearchQuery("");
-  //   // handleCloseModal();
-  //   setSearchResults([]);
-  // };
-
-  // const closeSearchModal = () => {
-  //   setShowSearchModal(false);
-  //   setCurrentEditIndex(null);
-  //   setSearchQuery("");
-  //   setSearchResults([]);
-  // };
-  // const selectMaterialFromSearch = (material) => {
-  //   console.log("Selected material:", material);
-  //   // Trigger handleChange with name as "materialId" and value as material._id
-  //   handleChange({ target: { name: "materialId", value: material._id } });
-
-  //   closeSearchModal();
-  // };
-  // const handleSearchInputChange = (e) => {
-  //   const value = e.target.value;
-  //   setSearchQuery(value);
-  // };
-  // const handleSearch = () => {
-  //   if (!searchQuery.trim()) {
-  //     setSearchResults([]);
-  //     return;
-  //   }
-
-  //   console.log("Searching with query:", searchQuery, "Type:", searchType);
-  //   console.log("Available materials:", materials);
-
-  //   if (searchType === "materialId") {
-  //     let searchTerm = searchQuery;
-
-  //     if (/^\d+$/.test(searchQuery)) {
-  //       searchTerm = MATERIAL_PREFIX + searchQuery;
-  //     }
-
-  //     const filtered = materials.filter((material) => {
-  //       const materialId = material.materialId || "";
-  //       return materialId.toLowerCase().includes(searchTerm.toLowerCase());
-  //     });
-
-  //     console.log("Filtered results for materialId:", filtered);
-  //     setSearchResults(filtered);
-  //   } else {
-  //     const filtered = materials.filter((material) => {
-  //       const description = material.description || "";
-  //       return description.toLowerCase().includes(searchQuery.toLowerCase());
-  //     });
-
-  //     console.log("Filtered results for description:", filtered);
-  //     setSearchResults(filtered);
-  //   }
-  // };
-  // useEffect(() => {
-  //   const timeoutId = setTimeout(() => {
-  //     if (searchQuery.trim()) {
-  //       handleSearch();
-  //     } else {
-  //       setSearchResults([]);
-  //     }
-  //   }, 300);
-
-  //   return () => clearTimeout(timeoutId);
-  // }, [searchQuery, searchType, materials]);
-
-  // const handleViewAll = () => {
-  //   setSearchResults(materials);
-  //   setSearchQuery("");
-  // };
-
-  // const handleClearResults = () => {
-  //   setSearchResults([]);
-  //   setSearchQuery("");
-  // };
-  // const [showCustomerSearchModal, setShowCustomerSearchModal] = useState(false);
-  // const [customerSearchResults, setCustomerSearchResults] = useState([]);
-  // const [customerSearchType, setCustomerSearchType] = useState("customerId");
-  // const [customerSearchQuery, setCustomerSearchQuery] = useState("");
-  // const openCustomerSearchModal = () => {
-  //   setShowCustomerSearchModal(true);
-  //   setCustomerSearchQuery("");
-  //   setCustomerSearchResults([]);
-  // };
-
-  // const closeCustomerSearchModal = () => {
-  //   setShowCustomerSearchModal(false);
-  //   setCustomerSearchQuery("");
-  //   setCustomerSearchResults([]);
-  // };
-
-  // const handleCustomerSearchInputChange = (e) => {
-  //   const value = e.target.value;
-  //   setCustomerSearchQuery(value);
-  // };
-
-  // const handleCustomerSearch = () => {
-  //   if (!customerSearchQuery.trim()) {
-  //     setCustomerSearchResults([]);
-  //     return;
-  //   }
-
-  //   if (customerSearchType === "customerId") {
-  //     const filtered = customers.filter((customer) => {
-  //       const customerId = customer.customerId || "";
-  //       return customerId
-  //         .toLowerCase()
-  //         .includes(customerSearchQuery.toLowerCase());
-  //     });
-  //     setCustomerSearchResults(filtered);
-  //   } else {
-  //     const filtered = customers.filter((customer) => {
-  //       const name = customer.name1 || "";
-  //       return name.toLowerCase().includes(customerSearchQuery.toLowerCase());
-  //     });
-  //     setCustomerSearchResults(filtered);
-  //   }
-  // };
-
-  // const handleViewAllCustomers = () => {
-  //   setCustomerSearchResults(customers);
-  //   setCustomerSearchQuery("");
-  // };
-
-  // const handleClearCustomerResults = () => {
-  //   setCustomerSearchResults([]);
-  //   setCustomerSearchQuery("");
-  // };
-
-  // const selectCustomerFromSearch = (customer) => {
-  //   handleChange({ target: { name: "customerId", value: customer._id } });
-  //   closeCustomerSearchModal();
-  // };
-  // useEffect(() => {
-  //   const timeoutId = setTimeout(() => {
-  //     if (customerSearchQuery.trim()) {
-  //       handleCustomerSearch();
-  //     } else {
-  //       setCustomerSearchResults([]);
-  //     }
-  //   }, 300);
-
-  //   return () => clearTimeout(timeoutId);
-  // }, [customerSearchQuery, customerSearchType, customers]);
+  const [showDataImportModal, setShowDataImportModal] = useState(false);
   const [formData, setFormData] = useState({
-      _id: "", // for edit tracking
-      categoryId: "",
-      customerId: "",
-      materialId: "",
-      unit: "",
-      bum: "",
-      price:"",
-      orderUnit: "",
-      salesGroup: "",
-      taxId: "",
-      tandc: "",
-    });
+    _id: "", // for edit tracking
+    categoryId: "",
+    customerId: "",
+    materialId: "",
+    unit: "",
+    bum: "",
+    price: "",
+    orderUnit: "",
+    salesGroup: "",
+    taxId: "",
+    tandc: "",
+  });
   const companyId = localStorage.getItem('selectedCompanyId');
-    const financialYear = localStorage.getItem('financialYear');
-    const [conversionValue, setConversionValue] = useState(1);
-    const [categories, setCategories] = useState([]);
-    const [customers, setCustomers] = useState([]);
-    const [materials, setMaterials] = useState([]);
-    const [taxes, setTaxes] = useState([]);
-    const [allData, setAllData] = useState([]);
-    const [showSearchModal, setShowSearchModal] = useState(false);
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchType, setSearchType] = useState('materialId');
-    const [currentEditIndex, setCurrentEditIndex] = useState(null);
-    useEffect(() => {
-      fetchCategories();
-      fetchCustomers();
-      fetchMaterials();
-      fetchTaxes();
-      fetchAllPriceLists();
-    }, []);
-  
-    const fetchCategories = async () => {
-      const res = await axios.get(
-        "http://localhost:8080/api/customer-categories"
-      );
-      setCategories(res.data);
+  const financialYear = localStorage.getItem('financialYear');
+  const [conversionValue, setConversionValue] = useState(1);
+  const [categories, setCategories] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [taxes, setTaxes] = useState([]);
+  const [allData, setAllData] = useState([]);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchType, setSearchType] = useState('materialId');
+  const [currentEditIndex, setCurrentEditIndex] = useState(null);
+  const handleImportSuccess = (result) => {
+    alert(`Import completed: ${result.results.imported} records imported`);
+    setShowDataImportModal(false);
+  };
+  useEffect(() => {
+    fetchCategories();
+    fetchCustomers();
+    fetchMaterials();
+    fetchTaxes();
+    fetchAllPriceLists();
+  }, []);
+
+  const fetchCategories = async () => {
+    const res = await axios.get(
+      "http://localhost:8080/api/customer-categories"
+    );
+    setCategories(res.data);
+  };
+
+  const fetchCustomers = async () => {
+    const res = await axios.get("http://localhost:8080/api/customers");
+    setCustomers(res.data);
+    console.log("cut", res.data);
+  };
+
+  const fetchMaterials = async () => {
+    const res = await axios.get("http://localhost:8080/api/material");
+    setMaterials(res.data);
+  };
+
+  const fetchTaxes = async () => {
+    const res = await axios.get("http://localhost:8080/api/tax");
+    setTaxes(res.data);
+  };
+
+  const fetchAllPriceLists = async () => {
+    const res = await axios.get(
+      "http://localhost:8080/api/customer-price-lists", {
+      params: { companyId, financialYear }
+    }
+    );
+    setAllData(res.data);
+  };
+
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+    let updatedForm = { ...formData, [name]: value };
+
+    if (name === "materialId") {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/api/material/${value}`
+        );
+        const conv = res.data.conversionValue || 1;
+        setConversionValue(conv);
+        const bum = parseFloat(formData.bum) || 0;
+        updatedForm.orderUnit = (bum * conv).toFixed(2);
+      } catch {
+        setConversionValue(1);
+      }
+    }
+
+    if (name === "bum") {
+      const bum = parseFloat(value);
+      if (!isNaN(bum)) {
+        updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
+      } else {
+        updatedForm.orderUnit = "";
+      }
+    }
+
+    setFormData(updatedForm);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const dataToSubmit = {
+      ...formData,
+      companyId,
+      financialYear
     };
-  
-    const fetchCustomers = async () => {
-      const res = await axios.get("http://localhost:8080/api/customers");
-      setCustomers(res.data);
-      console.log("cut", res.data);
+    try {
+      if (formData._id) {
+        await axios.put(
+          `http://localhost:8080/api/customer-price-lists/${formData._id}`,
+          dataToSubmit
+        );
+        alert("Updated successfully");
+      } else {
+        await axios.post(
+          `http://localhost:8080/api/customer-price-lists`,
+          dataToSubmit
+        );
+        alert("Saved successfully");
+      }
+
+      setFormData({
+        _id: "",
+        categoryId: "",
+        customerId: "",
+        materialId: "",
+        unit: "",
+        bum: "",
+        price: "",
+        orderUnit: "",
+        salesGroup: "",
+        taxId: "",
+        tandc: "",
+      });
+
+      setConversionValue(1);
+      handleCloseModal();
+      fetchAllPriceLists(); // refresh table
+    } catch (err) {
+      alert("Error saving data");
+      console.error("Submit error:", err);
+    }
+  };
+  const handleEdit = (item) => {
+
+    // Helper function to safely extract ID
+    const extractId = (field) => {
+      if (!field) return ""; // Handle null, undefined, or empty values
+      if (typeof field === "object" && field._id) return field._id;
+      if (typeof field === "string") return field;
+      return "";
     };
-  
-    const fetchMaterials = async () => {
-      const res = await axios.get("http://localhost:8080/api/material");
-      setMaterials(res.data);
+
+    // Extract IDs from nested objects or use the ID directly
+    const categoryId = extractId(item.categoryId);
+    const customerId = extractId(item.customerId);
+    const materialId = extractId(item.materialId);
+    const taxId = extractId(item.taxId);
+    const tandc = extractId(item.tandc);
+
+    const newFormData = {
+      _id: item._id,
+      categoryId: categoryId,
+      customerId: customerId,
+      materialId: materialId,
+      unit: item.unit || "",
+      bum: item.bum || "",
+      orderUnit: item.orderUnit || "",
+      salesGroup: item.salesGroup || "",
+      taxId: taxId,
+      tandc: tandc,
+      price: price,
     };
-  
-    const fetchTaxes = async () => {
-      const res = await axios.get("http://localhost:8080/api/tax");
-      setTaxes(res.data);
-    };
-  
-    const fetchAllPriceLists = async () => {
-      const res = await axios.get(
-        "http://localhost:8080/api/customer-price-lists",{
-            params: { companyId, financialYear }
-        }
-      );
-      setAllData(res.data);
-    };
-  
-    const handleChange = async (e) => {
-      const { name, value } = e.target;
-      let updatedForm = { ...formData, [name]: value };
-  
-      if (name === "materialId") {
-        try {
-          const res = await axios.get(
-            `http://localhost:8080/api/material/${value}`
-          );
+
+    setFormData(newFormData);
+    setShowModal(true);
+
+    // Set conversion value if material exists
+    if (materialId) {
+      axios
+        .get(`http://localhost:8080/api/material/${materialId}`)
+        .then((res) => {
           const conv = res.data.conversionValue || 1;
           setConversionValue(conv);
-          const bum = parseFloat(formData.bum) || 0;
-          updatedForm.orderUnit = (bum * conv).toFixed(2);
-        } catch {
+          console.log("Conversion value set to:", conv);
+        })
+        .catch((error) => {
+          console.error("Error fetching material conversion:", error);
           setConversionValue(1);
-        }
-      }
-  
-      if (name === "bum") {
-        const bum = parseFloat(value);
-        if (!isNaN(bum)) {
-          updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
-        } else {
-          updatedForm.orderUnit = "";
-        }
-      }
-  
-      setFormData(updatedForm);
-    };
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-   const dataToSubmit = {
-        ...formData,
-        companyId,
-        financialYear
-      };
-      try {
-        if (formData._id) {
-          await axios.put(
-            `http://localhost:8080/api/customer-price-lists/${formData._id}`,
-            dataToSubmit
-          );
-          alert("Updated successfully");
-        } else {
-          await axios.post(
-            `http://localhost:8080/api/customer-price-lists`,
-            dataToSubmit
-          );
-          alert("Saved successfully");
-        }
-  
-        setFormData({
-          _id: "",
-          categoryId: "",
-          customerId: "",
-          materialId: "",
-          unit: "",
-          bum: "",
-          price:"",
-          orderUnit: "",
-          salesGroup: "",
-          taxId: "",
-          tandc: "",
         });
-  
-        setConversionValue(1);
-        handleCloseModal();
-        fetchAllPriceLists(); // refresh table
-      } catch (err) {
-        alert("Error saving data");
-        console.error("Submit error:", err);
-      }
-    };
-    const handleEdit = (item) => {
-  
-      // Helper function to safely extract ID
-      const extractId = (field) => {
-        if (!field) return ""; // Handle null, undefined, or empty values
-        if (typeof field === "object" && field._id) return field._id;
-        if (typeof field === "string") return field;
-        return "";
-      };
-  
-      // Extract IDs from nested objects or use the ID directly
-      const categoryId = extractId(item.categoryId);
-      const customerId = extractId(item.customerId);
-      const materialId = extractId(item.materialId);
-      const taxId = extractId(item.taxId);
-      const tandc = extractId(item.tandc);
-  
-      const newFormData = {
-        _id: item._id,
-        categoryId: categoryId,
-        customerId: customerId,
-        materialId: materialId,
-        unit: item.unit || "",
-        bum: item.bum || "",
-        orderUnit: item.orderUnit || "",
-        salesGroup: item.salesGroup || "",
-        taxId: taxId,
-        tandc: tandc,
-        price:price,
-      };
-  
-      setFormData(newFormData);
-      setShowModal(true);
-  
-      // Set conversion value if material exists
-      if (materialId) {
-        axios
-          .get(`http://localhost:8080/api/material/${materialId}`)
-          .then((res) => {
-            const conv = res.data.conversionValue || 1;
-            setConversionValue(conv);
-            console.log("Conversion value set to:", conv);
-          })
-          .catch((error) => {
-            console.error("Error fetching material conversion:", error);
-            setConversionValue(1);
-          });
-      }
-    };
-  
-    const [showModal, setShowModal] = useState(false);
-  
-  
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-  
-    const paginatedData = allData.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
+    }
+  };
+
+  const [showModal, setShowModal] = useState(false);
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const paginatedData = allData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(allData.length / itemsPerPage);
+  const handlePageClick = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredData = allData.filter((item) => {
+    const customerName = item.customerId?.name1?.toLowerCase() || "";
+    const categoryName = item.categoryId?.categoryName?.toLowerCase() || "";
+    const materialDesc = item.materialId?.description?.toLowerCase() || "";
+
+    return (
+      customerName.includes(searchQuery.toLowerCase()) ||
+      categoryName.includes(searchQuery.toLowerCase()) ||
+      materialDesc.includes(searchQuery.toLowerCase())
     );
-  
-    const totalPages = Math.ceil(allData.length / itemsPerPage);
-    const handlePageClick = (page) => {
-      if (page >= 1 && page <= totalPages) {
-        setCurrentPage(page);
+  });
+
+
+  const handleOpenModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
+  const [showdropdown, setShowdropdown] = useState(false);
+
+  const handleOpendropdown = () => setShowdropdown(true);
+  const handleClosedropdown = () => setShowdropdown(false);
+
+  const openSearchModal = () => {
+    setCurrentEditIndex();
+    setShowSearchModal(true);
+    setSearchQuery('');
+    // handleCloseModal();
+    setSearchResults([]);
+  };
+
+  const closeSearchModal = () => {
+    setShowSearchModal(false);
+    setCurrentEditIndex(null);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+  const selectMaterialFromSearch = (material) => {
+    console.log("Selected material:", material);
+    // Trigger handleChange with name as "materialId" and value as material._id
+    handleChange({ target: { name: "materialId", value: material._id } });
+
+    closeSearchModal();
+  };
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+  };
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    console.log('Searching with query:', searchQuery, 'Type:', searchType);
+    console.log('Available materials:', materials);
+
+    if (searchType === 'materialId') {
+      let searchTerm = searchQuery;
+
+      if (/^\d+$/.test(searchQuery)) {
+        searchTerm = MATERIAL_PREFIX + searchQuery;
       }
-    };
-    const [searchQuery, setSearchQuery] = useState("");
-  
-    const filteredData = allData.filter((item) => {
-      const customerName = item.customerId?.name1?.toLowerCase() || "";
-      const categoryName = item.categoryId?.categoryName?.toLowerCase() || "";
-      const materialDesc = item.materialId?.description?.toLowerCase() || "";
-  
-      return (
-        customerName.includes(searchQuery.toLowerCase()) ||
-        categoryName.includes(searchQuery.toLowerCase()) ||
-        materialDesc.includes(searchQuery.toLowerCase())
-      );
-    });
-  
-  
-    const handleOpenModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
-    const [showdropdown, setShowdropdown] = useState(false);
-  
-    const handleOpendropdown = () => setShowdropdown(true);
-    const handleClosedropdown = () => setShowdropdown(false);
-  
-    const openSearchModal = () => {
-      setCurrentEditIndex();
-      setShowSearchModal(true);
-      setSearchQuery('');
-      // handleCloseModal();
-      setSearchResults([]);
-    };
-  
-    const closeSearchModal = () => {
-      setShowSearchModal(false);
-      setCurrentEditIndex(null);
-      setSearchQuery('');
-      setSearchResults([]);
-    };
-    const selectMaterialFromSearch = (material) => {
-      console.log("Selected material:", material);
-      // Trigger handleChange with name as "materialId" and value as material._id
-      handleChange({ target: { name: "materialId", value: material._id } });
-  
-      closeSearchModal();
-    };
-    const handleSearchInputChange = (e) => {
-      const value = e.target.value;
-      setSearchQuery(value);
-    };
-    const handleSearch = () => {
-      if (!searchQuery.trim()) {
+
+      const filtered = materials.filter(material => {
+        const materialId = material.materialId || '';
+        return materialId.toLowerCase().includes(searchTerm.toLowerCase());
+      });
+
+      console.log('Filtered results for materialId:', filtered);
+      setSearchResults(filtered);
+    } else {
+      const filtered = materials.filter(material => {
+        const description = material.description || '';
+        return description.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+
+      console.log('Filtered results for description:', filtered);
+      setSearchResults(filtered);
+    }
+  };
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim()) {
+        handleSearch();
+      } else {
         setSearchResults([]);
-        return;
       }
-  
-      console.log('Searching with query:', searchQuery, 'Type:', searchType);
-      console.log('Available materials:', materials);
-  
-      if (searchType === 'materialId') {
-        let searchTerm = searchQuery;
-  
-        if (/^\d+$/.test(searchQuery)) {
-          searchTerm = MATERIAL_PREFIX + searchQuery;
-        }
-  
-        const filtered = materials.filter(material => {
-          const materialId = material.materialId || '';
-          return materialId.toLowerCase().includes(searchTerm.toLowerCase());
-        });
-  
-        console.log('Filtered results for materialId:', filtered);
-        setSearchResults(filtered);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, searchType, materials]);
+
+  const handleViewAll = () => {
+    setSearchResults(materials);
+    setSearchQuery('');
+  };
+
+  const handleClearResults = () => {
+    setSearchResults([]);
+    setSearchQuery('');
+  };
+  const [showCustomerSearchModal, setShowCustomerSearchModal] = useState(false);
+  const [customerSearchResults, setCustomerSearchResults] = useState([]);
+  const [customerSearchType, setCustomerSearchType] = useState('customerId');
+  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+  const openCustomerSearchModal = () => {
+    setShowCustomerSearchModal(true);
+    setCustomerSearchQuery('');
+    setCustomerSearchResults([]);
+  };
+
+  const closeCustomerSearchModal = () => {
+    setShowCustomerSearchModal(false);
+    setCustomerSearchQuery('');
+    setCustomerSearchResults([]);
+  };
+
+  const handleCustomerSearchInputChange = (e) => {
+    const value = e.target.value;
+    setCustomerSearchQuery(value);
+  };
+
+  const handleCustomerSearch = () => {
+    if (!customerSearchQuery.trim()) {
+      setCustomerSearchResults([]);
+      return;
+    }
+
+    if (customerSearchType === 'customerId') {
+      const filtered = customers.filter(customer => {
+        const customerId = customer.customerId || '';
+        return customerId.toLowerCase().includes(customerSearchQuery.toLowerCase());
+      });
+      setCustomerSearchResults(filtered);
+    } else {
+      const filtered = customers.filter(customer => {
+        const name = customer.name1 || '';
+        return name.toLowerCase().includes(customerSearchQuery.toLowerCase());
+      });
+      setCustomerSearchResults(filtered);
+    }
+  };
+
+  const handleViewAllCustomers = () => {
+    setCustomerSearchResults(customers);
+    setCustomerSearchQuery('');
+  };
+
+  const handleClearCustomerResults = () => {
+    setCustomerSearchResults([]);
+    setCustomerSearchQuery('');
+  };
+
+  const selectCustomerFromSearch = (customer) => {
+    handleChange({ target: { name: "customerId", value: customer._id } });
+    closeCustomerSearchModal();
+  };
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (customerSearchQuery.trim()) {
+        handleCustomerSearch();
       } else {
-        const filtered = materials.filter(material => {
-          const description = material.description || '';
-          return description.toLowerCase().includes(searchQuery.toLowerCase());
-        });
-  
-        console.log('Filtered results for description:', filtered);
-        setSearchResults(filtered);
-      }
-    };
-    useEffect(() => {
-      const timeoutId = setTimeout(() => {
-        if (searchQuery.trim()) {
-          handleSearch();
-        } else {
-          setSearchResults([]);
-        }
-      }, 300);
-  
-      return () => clearTimeout(timeoutId);
-    }, [searchQuery, searchType, materials]);
-  
-    const handleViewAll = () => {
-      setSearchResults(materials);
-      setSearchQuery('');
-    };
-  
-    const handleClearResults = () => {
-      setSearchResults([]);
-      setSearchQuery('');
-    };
-    const [showCustomerSearchModal, setShowCustomerSearchModal] = useState(false);
-    const [customerSearchResults, setCustomerSearchResults] = useState([]);
-    const [customerSearchType, setCustomerSearchType] = useState('customerId');
-    const [customerSearchQuery, setCustomerSearchQuery] = useState('');
-    const openCustomerSearchModal = () => {
-      setShowCustomerSearchModal(true);
-      setCustomerSearchQuery('');
-      setCustomerSearchResults([]);
-    };
-  
-    const closeCustomerSearchModal = () => {
-      setShowCustomerSearchModal(false);
-      setCustomerSearchQuery('');
-      setCustomerSearchResults([]);
-    };
-  
-    const handleCustomerSearchInputChange = (e) => {
-      const value = e.target.value;
-      setCustomerSearchQuery(value);
-    };
-  
-    const handleCustomerSearch = () => {
-      if (!customerSearchQuery.trim()) {
         setCustomerSearchResults([]);
-        return;
       }
-  
-      if (customerSearchType === 'customerId') {
-        const filtered = customers.filter(customer => {
-          const customerId = customer.customerId || '';
-          return customerId.toLowerCase().includes(customerSearchQuery.toLowerCase());
-        });
-        setCustomerSearchResults(filtered);
-      } else {
-        const filtered = customers.filter(customer => {
-          const name = customer.name1 || '';
-          return name.toLowerCase().includes(customerSearchQuery.toLowerCase());
-        });
-        setCustomerSearchResults(filtered);
-      }
-    };
-  
-    const handleViewAllCustomers = () => {
-      setCustomerSearchResults(customers);
-      setCustomerSearchQuery('');
-    };
-  
-    const handleClearCustomerResults = () => {
-      setCustomerSearchResults([]);
-      setCustomerSearchQuery('');
-    };
-  
-    const selectCustomerFromSearch = (customer) => {
-      handleChange({ target: { name: "customerId", value: customer._id } });
-      closeCustomerSearchModal();
-    };
-    useEffect(() => {
-      const timeoutId = setTimeout(() => {
-        if (customerSearchQuery.trim()) {
-          handleCustomerSearch();
-        } else {
-          setCustomerSearchResults([]);
-        }
-      }, 300);
-  
-      return () => clearTimeout(timeoutId);
-    }, [customerSearchQuery, customerSearchType, customers]);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [customerSearchQuery, customerSearchType, customers]);
   return (
     <div className="content content-two">
       <h4>Customer-Price-List</h4>
       <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3 mt-3">
+        <div>
+          <button className="btn btn-outline-primary" onClick={() => setShowDataImportModal(true)}>
+            <i className="isax isax-import me-1"></i>Import
+          </button>
+        </div>
         <div>
           <div className="input-group">
             <span className="input-group-text">
@@ -796,22 +442,12 @@ function CustomerPriceListForm() {
         </div>
       </div>
 
-      {/* <div className="mb-3">
-          <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <div className="d-flex align-items-center flex-wrap gap-2">
-              <div className="table-search d-flex align-items-center mb-0">
-                <input
-                  type="search"
-                  placeholder="Search Customer / Category / Material"
-                  className="form-control"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-
-          </div>
-        </div> */}
+      <DataImportModal
+        show={showDataImportModal}
+        onClose={() => setShowDataImportModal(false)}
+        onImportSuccess={handleImportSuccess}
+        masterDataType="customerPriceList"
+      />
 
       <div className="table-responsive">
         <table className="table table-bordered datatable">
@@ -822,7 +458,7 @@ function CustomerPriceListForm() {
               <th>Material</th>
               <th>Location</th>
               <th>BUM</th>
-              <th>Order Unit</th> 
+              <th>Order Unit</th>
               <th>Price</th>
               <th>Sales Group</th>
               <th>Tax</th>
@@ -846,7 +482,7 @@ function CustomerPriceListForm() {
                 <td className="text-dark">{row.unit}</td>
                 <td className="text-dark">{row.bum}</td>
                 <td className="text-dark">{row.orderUnit}</td>
-                 <td className="text-dark">{row.orderUnit}</td>
+                <td className="text-dark">{row.orderUnit}</td>
                 <td className="text-dark">{row.salesGroup}</td>
                 <td className="text-dark">{row.taxId?.taxName}</td>
                 <td style={{ cursor: "pointer" }}>
@@ -871,9 +507,8 @@ function CustomerPriceListForm() {
         >
           <ul className="pagination">
             <li
-              className={`paginate_button page-item previous ${
-                currentPage === 1 ? "disabled" : ""
-              }`}
+              className={`paginate_button page-item previous ${currentPage === 1 ? "disabled" : ""
+                }`}
             >
               <a
                 href="#"
@@ -890,9 +525,8 @@ function CustomerPriceListForm() {
             {Array.from({ length: totalPages }, (_, i) => (
               <li
                 key={i}
-                className={`paginate_button page-item ${
-                  currentPage === i + 1 ? "active" : ""
-                }`}
+                className={`paginate_button page-item ${currentPage === i + 1 ? "active" : ""
+                  }`}
               >
                 <a
                   href="#"
@@ -908,9 +542,8 @@ function CustomerPriceListForm() {
             ))}
 
             <li
-              className={`paginate_button page-item next ${
-                currentPage === totalPages ? "disabled" : ""
-              }`}
+              className={`paginate_button page-item next ${currentPage === totalPages ? "disabled" : ""
+                }`}
             >
               <a
                 href="#"
@@ -957,7 +590,7 @@ function CustomerPriceListForm() {
                         location: "",
                         bum: "",
                         orderUnit: "",
-                        price:"",
+                        price: "",
                         salesGroup: "",
                         taxId: "",
                         tandc: "",
@@ -967,417 +600,8 @@ function CustomerPriceListForm() {
                   ></button>
                 </div>
                 <div className="modal-body">
-                  {/* <form onSubmit={handleSubmit}>
-                      <div className="modal-body">
-                        <div className="row">
-                          
-                          <div className="col-md-6">
-                            <label className="form-label">Category</label>
-                            <select
-                              name="categoryId"
-                              className="form-select"
-                              value={formData.categoryId}
-                              onChange={handleChange}
-                              required
-                            >
-                              <option value="">Select</option>
-                              {categories.map((cat) => (
-                                <option key={cat._id} value={cat._id}>
-                                  {cat.categoryName}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          
-                         
-                          <div className="col-md-6">
-                            <label className="form-label">Customer</label>
-                            <div className="input-group">
-                              <select
-                                name="customerId"
-                                className="form-control"
-                                value={formData.customerId}
-                                onChange={handleChange}
-                                required
-                              >
-                                <option value="">Select</option>
-                                {customers.map((c) => (
-                                  <option key={c._id} value={c._id}>
-                                    {c.name1}
-                                  </option>
-                                ))}
-                              </select>
-                              <button
-                                type="button"
-                                className="btn btn-outline-info"
-                                onClick={() => openCustomerSearchModal()}
-                                title="Search Customer"
-                              >
-                                <i className="fas fa-search"></i>
-                              </button>
-                            </div>
-                          </div>
-                         
-                          <div className="col-md-6">
-                            <label className="form-label">Material</label>
-                            <div className="input-group">
-                              <select
-                                name="materialId"
-                                className="form-control"
-                                value={formData.materialId}
-                                onChange={handleChange}
-                                required
-                              >
-                                <option value="">Select</option>
-                                {materials.map((m) => (
-                                  <option key={m._id} value={m._id}>
-                                    {m.description}
-                                  </option>
-                                ))}
-                              </select>
-                              <button
-                                type="button"
-                                className="btn btn-outline-info"
-                                onClick={() => openSearchModal()}
-                                title="Search Material"
-                              >
-                                <i className="fas fa-search"></i>
-                              </button>
-                            </div>
-
-
-
-                          </div>
-
-                        
-                          <div className="col-md-6">
-                            <label className="form-label">Unit</label>
-                            <input
-                              type="text"
-                              name="unit"
-                              className="form-control"
-                              value={formData.unit}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-
-                          
-                          <div className="col-md-6">
-                            <label className="form-label">BUM</label>
-                            <input
-                              type="number"
-                              name="bum"
-                              className="form-control"
-                              value={formData.bum}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-
-                         
-                          <div className="col-md-6">
-                            <label className="form-label">Sales Group</label>
-                            <input
-                              type="text"
-                              name="salesGroup"
-                              className="form-control"
-                              value={formData.salesGroup}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-
-                        
-                          <div className="col-md-6">
-                            <label className="form-label">Order Unit</label>
-                            <input
-                              type="text"
-                              name="orderUnit"
-                              className="form-control"
-                              value={formData.orderUnit}
-                              required
-                            />
-                          </div>
-
-                          
-                          <div className="col-md-6">
-                            <label className="form-label">T&C</label>
-                            <input
-                              type="text"
-                              name="tandc"
-                              className="form-control"
-                              value={formData.tandc}
-                              onChange={handleChange}
-                              required
-                            />
-                          </div>
-
-                          
-                          <div className="col-md-12">
-                            <label className="form-label">Tax</label>
-                            <select
-                              name="taxId"
-                              className="form-select"
-                              value={formData.taxId}
-                              onChange={handleChange}
-                            >
-                              <option value="">Select</option>
-                              {taxes.map((tax) => (
-                                <option key={tax._id} value={tax._id}>
-                                  {tax.taxName} (CGST: {tax.cgst}%, SGST: {tax.sgst}%,
-                                  IGST: {tax.igst}%)
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="modal-footer d-flex align-items-center justify-content-between gap-1">
-                        <button
-                          type="button"
-                          className="btn btn-outline-white"
-                          onClick={() => setShowModal(false)}
-                        >
-                          Cancel
-                        </button>
-                        <button type="submit" className="btn btn-primary">
-                          {formData._id ? "Update" : "Save"}
-                        </button>
-                      </div>
-                    </form> */}
-
                   <form onSubmit={handleSubmit}>
                     <div className="modal-body">
-                      {/* <div className="row">
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Category</label>
-                            </div>
-                            <div className="col-8">
-                              <select
-                                name="categoryId"
-                                className="form-select"
-                                value={formData.categoryId}
-                                onChange={handleChange}
-                                required
-                              >
-                                <option value="">Select</option>
-                                {categories.map((cat) => (
-                                  <option key={cat._id} value={cat._id}>
-                                    {cat.categoryName}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Customer</label>
-                            </div>
-                            <div className="col-8 d-flex">
-                              <select
-                                name="customerId"
-                                className="form-select me-2"
-                                value={formData.customerId}
-                                onChange={handleChange}
-                                required
-                              >
-                                <option value="">Select</option>
-                                {customers.map((c) => (
-                                  <option key={c._id} value={c._id}>
-                                    {c.name1}
-                                  </option>
-                                ))}
-                              </select>
-                              <button
-                                type="button"
-                                className="btn btn-outline-primary"
-                                onClick={openCustomerSearchModal}
-                                title="Search Customer"
-                              >
-                                <i className="fas fa-search"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Material</label>
-                            </div>
-                            <div className="col-8 d-flex">
-                              <select
-                                name="materialId"
-                                className="form-select me-2"
-                                value={formData.materialId}
-                                onChange={handleChange}
-                                required
-                              >
-                                <option value="">Select</option>
-                                {materials.map((m) => (
-                                  <option key={m._id} value={m._id}>
-                                    {m.description}
-                                  </option>
-                                ))}
-                              </select>
-                              <button
-                                type="button"
-                                className="btn btn-outline-primary"
-                                onClick={openSearchModal}
-                                title="Search Material"
-                              >
-                                <i className="fas fa-search"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Location</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="unit"
-                                className="form-control"
-                                placeholder="Enter location"
-                                value={formData.unit}
-                                onChange={handleChange}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">BUM</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="number"
-                                name="bum"
-                                className="form-control"
-                                placeholder="Enter BUM"
-                                value={formData.bum}
-                                onChange={handleChange}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                       
-
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Order Unit</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="orderUnit"
-                                className="form-control"
-                                placeholder="Enter Order Unit"
-                                value={formData.orderUnit}
-                                onChange={handleChange}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
- <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Sales Group</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="salesGroup"
-                                className="form-control"
-                                placeholder="Enter Sales Group"
-                                value={formData.salesGroup}
-                                onChange={handleChange}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-                         <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Price</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="salesGroup"
-                                className="form-control"
-                                placeholder="Enter Price"
-                                value={formData.price}
-                                onChange={handleChange}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">T&amp;C</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="tandc"
-                                className="form-control"
-                                placeholder="Enter T&amp;C"
-                                value={formData.tandc}
-                                onChange={handleChange}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Tax</label>
-                            </div>
-                            <div className="col-8">
-                              <select
-                                name="taxId"
-                                className="form-select"
-                                value={formData.taxId}
-                                onChange={handleChange}
-                              >
-                                <option value="">Select</option>
-                                {taxes.map((tax) => (
-                                  <option key={tax._id} value={tax._id}>
-                                    {tax.taxName} (CGST: {tax.cgst}%, SGST:{" "}
-                                    {tax.sgst}%, IGST: {tax.igst}%)
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div> */}
-
                       <div className="row">
                         <div className="col-md-4 mb-2">
                           <div className="row">
@@ -1732,8 +956,8 @@ function CustomerPriceListForm() {
                         {materials.length === 0
                           ? "No materials loaded from API"
                           : searchQuery
-                          ? `No materials found matching "${searchQuery}"`
-                          : 'Enter search term or click "View All"'}
+                            ? `No materials found matching "${searchQuery}"`
+                            : 'Enter search term or click "View All"'}
                       </p>
                     </div>
                   )}
@@ -1869,8 +1093,8 @@ function CustomerPriceListForm() {
                         {customers.length === 0
                           ? "No customers loaded from API"
                           : customerSearchQuery
-                          ? `No customers found matching "${customerSearchQuery}"`
-                          : 'Enter search term or click "View All"'}
+                            ? `No customers found matching "${customerSearchQuery}"`
+                            : 'Enter search term or click "View All"'}
                       </p>
                     </div>
                   )}

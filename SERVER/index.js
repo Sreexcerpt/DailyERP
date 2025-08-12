@@ -1,6 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const fs=require('fs')
+const fs = require('fs')
 const cors = require('cors');
 const categoryRoutes = require('./routes/MaterialcategoryRoutes');
 const connectDB = require('./config/db');
@@ -12,15 +12,15 @@ const customerRoutes = require('./routes/customerRoutes');
 const vendorPriceRoutes = require('./routes/vendorPriceListRoutes');
 const taxRoutes = require('./routes/Tax');
 const customerPriceRoutes = require('./routes/customerPriceListRoutes');
-const purchaserequest=require('./routes/purchaserequest') // Ensure this is the correct path
+const purchaserequest = require('./routes/purchaserequest') // Ensure this is the correct path
 const indentRoutes = require('./routes/indentRoutes');
 const rfqCategoryRoutes = require('./routes/quotationCategoryRoutes');
 const quotationRoutes = require('./routes/quotationRoutes');
 const contractRoutes = require("./routes/contractRoutes");
 const salecategoryRoutes = require('./routes/Salecategory');
 const paymentRoutes = require('./routes/paymentRoutes');
-const salesRequestRoutes = require('./routes/Salesrequest');  
-const saleQuotationCategoryRoutes = require('./routes/saleQuotationCategoryRoutes'); 
+const salesRequestRoutes = require('./routes/Salesrequest');
+const saleQuotationCategoryRoutes = require('./routes/saleQuotationCategoryRoutes');
 const salesQuotationRoutes = require('./routes/salesQuotationRoutes');
 const path = require('path');
 const poCategoryRoutes = require('./routes/poCategoryRoutes');
@@ -55,6 +55,17 @@ const leadRoutes = require('./routes/leadRoutes');
 const proposalRoutes = require('./routes/ProposalRoutes');
 
 
+
+
+//HRMS
+
+const departmentRoutes = require('./routes/hrms/department')
+const employeeRoutes = require('./routes/hrms/employeeroutes')
+const designationRoutes = require('./routes/hrms/designation')
+
+const salaryRoutes = require("./routes/hrms/salary"); const leaveRoutes = require('./routes/hrms/Leave');
+
+
 const app = express();
 app.use(cors());
 
@@ -72,13 +83,13 @@ app.use('/api/users', userRoutes);
 app.get('/api/image/:filename', (req, res) => {
   console.log('=== IMAGE API CALLED ===');
   console.log('Requested filename:', req.params.filename);
-  
+
   const filename = req.params.filename;
   const filepath = path.join(__dirname, 'uploads', filename);
-  
+
   console.log('Full filepath:', filepath);
   console.log('File exists:', fs.existsSync(filepath));
-  
+
   if (fs.existsSync(filepath)) {
     console.log('Sending file:', filepath);
     res.sendFile(filepath);
@@ -106,9 +117,9 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/tax', taxRoutes);
 
 app.use('/api/vendor-price-lists', vendorPriceRoutes);
-app.use('/api',paymentRoutes);
+app.use('/api', paymentRoutes);
 app.use('/api/customer-price-lists', customerPriceRoutes);
-app.use('/api/purchasecategory',purchaserequest);
+app.use('/api/purchasecategory', purchaserequest);
 app.use('/api/rfq-categories', rfqCategoryRoutes);
 app.use('/api/quotations', quotationRoutes);
 app.use('/api/contracts', contractRoutes);
@@ -129,7 +140,7 @@ app.use('/api/goodsissue', goodsIssueRoutes);
 app.use('/api/goodsTransferCategory', goodsTransferCategoryRoutes);
 app.use('/api/goodstransfer', goodsTransferRoutes);
 app.use('/api', goodsReceiptRoutes);
-app.use('/api/goodsreceiptcategory', goodsReceiptCategoryRoutes);  
+app.use('/api/goodsreceiptcategory', goodsReceiptCategoryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/invoicecategory', invoiceCategoryRoutes);
 app.use('/api/billingcategory', billingCategoryRoutes);
@@ -163,6 +174,32 @@ app.use('/api/milestones', require('./routes/milestones'));
 app.use('/api/time-entries', require('./routes/timeEntries'));
 app.use('/api/campaigns', require('./routes/campaigns'));
 
+
+
+
+
+
+// HRMS
+
+app.use('/api', departmentRoutes);
+app.use("/api/faculties", employeeRoutes);
+
+
+app.use('/api/designations', designationRoutes);
+
+app.use('/api/leave', leaveRoutes);
+
+
+
+app.use("/api/salary-records", salaryRoutes);
+
+
+
+
+const masterDataImportRoutes = require('./routes/master-data-import');
+
+// API Routes
+app.use('/api/master-data', masterDataImportRoutes);
 
 app.use(express.static(path.join(__dirname, 'dist')));
 

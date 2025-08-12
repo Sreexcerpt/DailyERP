@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import DataImportModal from "../../components/DataImportModal";
 function CustomerForm() {
   const [formData, setFormData] = useState({
     categoryId: '',
@@ -26,7 +26,7 @@ function CustomerForm() {
   const [editingId, setEditingId] = useState(null);
   const [errors, setErrors] = useState({});
   const [extraAddresses, setExtraAddresses] = useState([]);
-
+  const [showDataImportModal, setShowDataImportModal] = useState(false);
   // New states for customer type selection
   const [showCustomerTypeModal, setShowCustomerTypeModal] = useState(false);
   const [customerType, setCustomerType] = useState(''); // 'external' or 'internal'
@@ -336,6 +336,11 @@ function CustomerForm() {
       alert('Failed to update status!');
     }
   };
+    const handleImportSuccess = (result) => {
+      console.log('Import successful:', result);
+      fetchCustomers();
+    };
+
   return (
     <div className="content">
       <h4>Customer Master</h4>
@@ -357,6 +362,12 @@ function CustomerForm() {
           </div>
         </div>
         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
+          <button
+            onClick={() => setShowDataImportModal(true)}
+            className="btn btn-outline-primary d-inline-flex align-items-center"
+          >
+            <i className="isax isax-import-1 me-1"></i>Import
+          </button>
           <div className="dropdown">
             <a
               href="#"
@@ -1494,6 +1505,13 @@ function CustomerForm() {
           </div></>
         )}
       </div>
+      <DataImportModal
+        show={showDataImportModal}
+        onClose={() => setShowDataImportModal(false)}
+        onImport={handleImportSuccess}
+        masterDataType="customer"
+        apiEndpoint="/api/customers/import"
+      />
     </div>
   );
 }

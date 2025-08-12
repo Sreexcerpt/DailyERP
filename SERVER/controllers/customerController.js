@@ -32,7 +32,7 @@ async function generateCNNo(categoryId) {
   const count = await Customer.countDocuments({ categoryId });
 
   const nextNum = category.rangeFrom + count;
-  return `${category.prefix}${nextNum.toString().padStart(3, '0')}`;
+  return nextNum.toString().padStart(3, '0');
 }
 
 // Check if external customer ID already exists

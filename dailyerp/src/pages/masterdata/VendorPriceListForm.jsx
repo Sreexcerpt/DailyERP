@@ -1,1129 +1,517 @@
 import React, { useState, useEffect } from "react";
-
+import DataImportModal from "../../components/DataImportModal";
 function VendorPriceListForm() {
-  // const [formData, setFormData] = useState({
-  //   categoryId: "",
-  //   vendorId: "",
-  //   materialId: "",
-  //   unit: "",
-  //   bum: "",
-  //   orderUnit: "",
-  //   buyer: "",
-  //   taxId: "",
-  // });
-  // // Add these state variables
-  // const [showVendorSearchModal, setShowVendorSearchModal] = useState(false);
-  // const [showMaterialSearchModal, setShowMaterialSearchModal] = useState(false);
-  // const [vendorSearchResults, setVendorSearchResults] = useState([]);
-  // const [materialSearchResults, setMaterialSearchResults] = useState([]);
-  // const [vendorSearchType, setVendorSearchType] = useState('vendorId');
-  // const [materialSearchType, setMaterialSearchType] = useState('materialId');
-  // const [vendorSearchQuery, setVendorSearchQuery] = useState('');
-  // const [materialSearchQuery, setMaterialSearchQuery] = useState('');
-  // const [categories, setCategories] = useState([]);
-  // const [vendors, setVendors] = useState([]);
-  // const [materials, setMaterials] = useState([]);
-  // const [taxes, setTaxes] = useState([]);
-  // const [priceList, setPriceList] = useState([]);
-  // const [conversionValue, setConversionValue] = useState(1);
-  // const [editingId, setEditingId] = useState(null);
-  // const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    categoryId: "",
+    vendorId: "",
+    materialId: "",
+    unit: "",
+    bum: "",
+    price: "",
+    orderUnit: "",
+    buyer: "",
+    taxId: "",
+  });
 
-  // useEffect(() => {
-  //   fetchCategories();
-  //   fetchVendors();
-  //   fetchMaterials();
-  //   fetchTaxes();
-  //   fetchPriceList();
-  // }, []);
+  // Add these state variables
+  const [showVendorSearchModal, setShowVendorSearchModal] = useState(false);
+  const [showMaterialSearchModal, setShowMaterialSearchModal] = useState(false);
+  const [vendorSearchResults, setVendorSearchResults] = useState([]);
+  const [materialSearchResults, setMaterialSearchResults] = useState([]);
+  const [vendorSearchType, setVendorSearchType] = useState('vendorId');
+  const [materialSearchType, setMaterialSearchType] = useState('materialId');
+  const [vendorSearchQuery, setVendorSearchQuery] = useState('');
+  const [materialSearchQuery, setMaterialSearchQuery] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [taxes, setTaxes] = useState([]);
+  const [priceList, setPriceList] = useState([]);
+  const [conversionValue, setConversionValue] = useState(1);
+  const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+  const [showDataImportModal, setShowDataImportModal] = useState(false);
+  useEffect(() => {
+    fetchCategories();
+    fetchVendors();
+    fetchMaterials();
+    fetchTaxes();
+    fetchPriceList();
+  }, []);
 
-  // const fetchCategories = async () => {
-  //   try {
-  //     const res = await fetch("http://localhost:8080/api/vendor-categories");
-  //     const data = await res.json();
-  //     setCategories(data);
-  //   } catch (err) {
-  //     console.error("Error fetching categories:", err);
-  //   }
-  // };
+  const fetchCategories = async () => {
+    try {
 
-  // const fetchVendors = async () => {
-  //   try {
-  //     const res = await fetch("http://localhost:8080/api/vendors");
-  //     const data = await res.json();
-  //     setVendors(data);
-  //   } catch (err) {
-  //     console.error("Error fetching vendors:", err);
-  //   }
-  // };
+      const res = await fetch("http://localhost:8080/api/vendor-categories");
+      const data = await res.json();
+      setCategories(data);
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
 
-  // const fetchMaterials = async () => {
-  //   try {
-  //     const res = await fetch("http://localhost:8080/api/material");
-  //     const data = await res.json();
-  //     setMaterials(data);
-  //   } catch (err) {
-  //     console.error("Error fetching materials:", err);
-  //   }
-  // };
+  const fetchVendors = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/vendors");
+      const data = await res.json();
+      setVendors(data);
+    } catch (err) {
+      console.error("Error fetching vendors:", err);
+    }
+  };
 
-  // const fetchTaxes = async () => {
-  //   try {
-  //     const res = await fetch("http://localhost:8080/api/tax");
-  //     const data = await res.json();
-  //     setTaxes(data);
-  //   } catch (err) {
-  //     console.error("Error fetching taxes:", err);
-  //   }
-  // };
+  const fetchMaterials = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/material");
+      const data = await res.json();
+      setMaterials(data);
+    } catch (err) {
+      console.error("Error fetching materials:", err);
+    }
+  };
 
-  // const fetchPriceList = async () => {
-  //   try {
-  //     const res = await fetch("http://localhost:8080/api/vendor-price-lists");
-  //     const data = await res.json();
-  //     setPriceList(data);
-  //   } catch (err) {
-  //     console.error("Error fetching price list:", err);
-  //   }
-  // };
-
-  // const handleChange = async (e) => {
-  //   const { name, value } = e.target;
-  //   let updatedForm = { ...formData, [name]: value };
-
-  //   if (name === "materialId") {
-  //     try {
-  //       const res = await fetch(`http://localhost:8080/api/material/${value}`);
-  //       const mat = await res.json();
-  //       const conv = mat.conversionValue || 1;
-  //       setConversionValue(conv);
-
-  //       const bum = parseFloat(formData.bum) || 0;
-  //       updatedForm.orderUnit = (bum * conv).toFixed(2);
-  //     } catch (err) {
-  //       console.error("Error fetching material:", err);
-  //       setConversionValue(1);
-  //     }
-  //   }
-
-  //   if (name === "bum") {
-  //     const bum = parseFloat(value);
-  //     if (!isNaN(bum)) {
-  //       updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
-  //     } else {
-  //       updatedForm.orderUnit = "";
-  //     }
-  //   }
-
-  //   setFormData(updatedForm);
-  // };
-
-  // const handleSubmit = async () => {
-  //   const errors = [];
-  //   if (!formData.unit.trim()) errors.push("Unit (Location) is required.");
-  //   if (!formData.categoryId) errors.push("Category is required.");
-  //   if (!formData.vendorId) errors.push("Vendor is required.");
-  //   if (!formData.materialId) errors.push("Material is required.");
-  //   if (!formData.bum) errors.push("BUM (Base Unit Multiplier) is required.");
-  //   if (!formData.buyer.trim()) errors.push("Buyer is required.");
-
-  //   if (errors.length > 0) {
-  //     alert(errors.join("\n"));
-  //     return;
-  //   }
-
-  //   try {
-  //     if (editingId) {
-  //       // Update existing record
-  //       console.log("Updating with ID:", editingId);
-  //       console.log("Form data:", formData);
-
-  //       const res = await fetch(
-  //         `http://localhost:8080/api/vendor-price-lists/${editingId}`,
-  //         {
-  //           method: "PUT",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify(formData),
-  //         }
-  //       );
-
-  //       console.log("Update response status:", res.status);
-
-  //       if (res.ok) {
-  //         alert("Vendor Price List Updated Successfully!");
-  //         setEditingId(null);
-  //       } else {
-  //         const errorText = await res.text();
-  //         console.error("Update failed:", errorText);
-  //         throw new Error(`Update failed: ${res.status} - ${errorText}`);
-  //       }
-  //     } else {
-  //       // Create new record
-  //       const res = await fetch(
-  //         "http://localhost:8080/api/vendor-price-lists",
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           body: JSON.stringify(formData),
-  //         }
-  //       );
-
-  //       if (res.ok) {
-  //         alert("Vendor Price List Saved Successfully!");
-  //       } else {
-  //         const errorText = await res.text();
-  //         console.error("Save failed:", errorText);
-  //         throw new Error(`Save failed: ${res.status} - ${errorText}`);
-  //       }
-  //     }
-
-  //     resetForm();
-  //     setShowForm(false);
-  //     fetchPriceList(); // Refresh the list
-
-  //   } catch (error) {
-  //     console.error("Error saving data:", error);
-  //     alert("Failed to save Vendor Price List: " + error.message);
-  //   }
-  // };
-
-  // const resetForm = () => {
-  //   setFormData({
-  //     categoryId: "",
-  //     vendorId: "",
-  //     materialId: "",
-  //     unit: "",
-  //     bum: "",
-  //     orderUnit: "",
-  //     buyer: "",
-  //     taxId: "",
-  //   });
-  //   setConversionValue(1);
-  //   setEditingId(null);
-  // };
-
-  // const handleEdit = async (id) => {
-  //   try {
-  //     console.log("Editing ID:", id);
-  //     const res = await fetch(
-  //       `http://localhost:8080/api/vendor-price-lists/${id}`
-  //     );
-
-  //     if (!res.ok) {
-  //       throw new Error(`Failed to fetch: ${res.status} - ${res.statusText}`);
-  //     }
-
-  //     const data = await res.json();
-
-
-  //     // Extract ID from ObjectId format or use as string
-  //     const extractId = (idField) => {
-  //       if (!idField) return "";
-  //       if (typeof idField === "string") return idField;
-  //       if (typeof idField === "object") {
-  //         return idField.$oid || idField._id || idField.toString();
-  //       }
-  //       return idField.toString();
-  //     };
-
-  //     setFormData({
-  //       categoryId: extractId(data.categoryId),
-  //       vendorId: extractId(data.vendorId),
-  //       materialId: extractId(data.materialId),
-  //       unit: data.unit,
-  //       bum: data.bum,
-  //       orderUnit: data.orderUnit,
-  //       buyer: data.buyer,
-  //       taxId: extractId(data.taxId),
-  //     });
-
-  //     setEditingId(id);
-  //     setShowForm(true);
-  //     setShowModal(true);
-  //   } catch (err) {
-  //     console.error("Error fetching record for edit:", err);
-  //     alert("Failed to load record for editing: " + err.message);
-  //   }
-  // };
-
-  // const handleDelete = async (id) => {
-  //   if (window.confirm("Are you sure you want to delete this record?")) {
-  //     try {
-  //       const res = await fetch(
-  //         `http://localhost:8080/api/vendor-price-lists/${id}`,
-  //         {
-  //           method: "DELETE",
-  //         }
-  //       );
-  //       if (res.ok) {
-  //         alert("Record deleted successfully!");
-  //         fetchPriceList();
-  //       } else {
-  //         throw new Error("Delete failed");
-  //       }
-  //     } catch (err) {
-  //       console.error("Error deleting record:", err);
-  //       alert("Failed to delete record");
-  //     }
-  //   }
-  // };
-
-  // const handleCancel = () => {
-  //   resetForm();
-  //   setShowForm(false);
-  // };
-
-  // // Helper function to extract ID from ObjectId format
-  // const extractId = (idField) => {
-  //   if (!idField) return null;
-  //   if (typeof idField === "string") return idField;
-  //   if (typeof idField === "object") {
-  //     return idField.$oid || idField._id || idField.toString();
-  //   }
-  //   return idField.toString();
-  // };
-
-  // const getCategoryName = (categoryId) => {
-  //   const id = extractId(categoryId);
-  //   const category = categories.find((cat) => cat._id === id);
-  //   return category ? category.categoryName : "Unknown";
-  // };
-
-  // const getVendorName = (vendorId) => {
-  //   const id = extractId(vendorId);
-  //   const vendor = vendors.find((v) => v._id === id);
-  //   return vendor ? vendor.name1 : "Unknown";
-  // };
-
-  // const getMaterialName = (materialId) => {
-  //   const id = extractId(materialId);
-  //   const material = materials.find((m) => m._id === id);
-  //   return material ? material.description : "Unknown";
-  // };
-
-  // const getTaxName = (taxId) => {
-  //   if (!taxId) return "No Tax";
-  //   const id = extractId(taxId);
-  //   const tax = taxes.find((t) => t._id === id);
-  //   return tax ? tax.taxName : "Unknown";
-  // };
-
-  // const [showModal, setShowModal] = useState(false);
-
-
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const itemsPerPage = 10;
-
-  // const paginatedData = priceList.slice(
-  //   (currentPage - 1) * itemsPerPage,
-  //   currentPage * itemsPerPage
-  // );
-
-  // const totalPages = Math.ceil(priceList.length / itemsPerPage);
-  // const handlePageClick = (page) => {
-  //   if (page >= 1 && page <= totalPages) {
-  //     setCurrentPage(page);
-  //   }
-  // };
-  // // Vendor Search Handlers
-  // const openVendorSearchModal = () => {
-  //   setShowVendorSearchModal(true);
-  //   setVendorSearchQuery('');
-  //   setVendorSearchResults([]);
-  // };
-
-  // const closeVendorSearchModal = () => {
-  //   setShowVendorSearchModal(false);
-  //   setVendorSearchQuery('');
-  //   setVendorSearchResults([]);
-  // };
-
-  // const handleVendorSearchInputChange = (e) => {
-  //   setVendorSearchQuery(e.target.value);
-  // };
-
-  // const handleVendorSearch = () => {
-  //   if (!vendorSearchQuery.trim()) {
-  //     setVendorSearchResults([]);
-  //     return;
-  //   }
-
-  //   if (vendorSearchType === 'vendorId') {
-  //     const filtered = vendors.filter(vendor => {
-  //       const vendorId = vendor.vendorId || '';
-  //       return vendorId.toLowerCase().includes(vendorSearchQuery.toLowerCase());
-  //     });
-  //     setVendorSearchResults(filtered);
-  //   } else {
-  //     const filtered = vendors.filter(vendor => {
-  //       const name = vendor.name1 || '';
-  //       return name.toLowerCase().includes(vendorSearchQuery.toLowerCase());
-  //     });
-  //     setVendorSearchResults(filtered);
-  //   }
-  // };
-
-  // const handleViewAllVendors = () => {
-  //   setVendorSearchResults(vendors);
-  //   setVendorSearchQuery('');
-  // };
-
-  // const handleClearVendorResults = () => {
-  //   setVendorSearchResults([]);
-  //   setVendorSearchQuery('');
-  // };
-
-  // const selectVendorFromSearch = (vendor) => {
-  //   handleChange({ target: { name: "vendorId", value: vendor._id } });
-  //   closeVendorSearchModal();
-  // };
-
-  // // Material Search Handlers
-  // const openMaterialSearchModal = () => {
-  //   setShowMaterialSearchModal(true);
-  //   setMaterialSearchQuery('');
-  //   setMaterialSearchResults([]);
-  // };
-
-  // const closeMaterialSearchModal = () => {
-  //   setShowMaterialSearchModal(false);
-  //   setMaterialSearchQuery('');
-  //   setMaterialSearchResults([]);
-  // };
-
-  // const handleMaterialSearchInputChange = (e) => {
-  //   setMaterialSearchQuery(e.target.value);
-  // };
-
-  // const handleMaterialSearch = () => {
-  //   if (!materialSearchQuery.trim()) {
-  //     setMaterialSearchResults([]);
-  //     return;
-  //   }
-
-  //   if (materialSearchType === 'materialId') {
-  //     const filtered = materials.filter(material => {
-  //       const materialId = material.materialId || '';
-  //       return materialId.toLowerCase().includes(materialSearchQuery.toLowerCase());
-  //     });
-  //     setMaterialSearchResults(filtered);
-  //   } else {
-  //     const filtered = materials.filter(material => {
-  //       const description = material.description || '';
-  //       return description.toLowerCase().includes(materialSearchQuery.toLowerCase());
-  //     });
-  //     setMaterialSearchResults(filtered);
-  //   }
-  // };
-
-  // const handleViewAllMaterials = () => {
-  //   setMaterialSearchResults(materials);
-  //   setMaterialSearchQuery('');
-  // };
-
-  // const handleClearMaterialResults = () => {
-  //   setMaterialSearchResults([]);
-  //   setMaterialSearchQuery('');
-  // };
-
-  // const selectMaterialFromSearch = (material) => {
-  //   handleChange({ target: { name: "materialId", value: material._id } });
-  //   closeMaterialSearchModal();
-  // };
-
-  // // Add these useEffect hooks
-  // useEffect(() => {
-  //   const timeoutId = setTimeout(() => {
-  //     if (vendorSearchQuery.trim()) {
-  //       handleVendorSearch();
-  //     } else {
-  //       setVendorSearchResults([]);
-  //     }
-  //   }, 300);
-
-  //   return () => clearTimeout(timeoutId);
-  // }, [vendorSearchQuery, vendorSearchType, vendors]);
-
-  // useEffect(() => {
-  //   const timeoutId = setTimeout(() => {
-  //     if (materialSearchQuery.trim()) {
-  //       handleMaterialSearch();
-  //     } else {
-  //       setMaterialSearchResults([]);
-  //     }
-  //   }, 300);
-
-  //   return () => clearTimeout(timeoutId);
-  // }, [materialSearchQuery, materialSearchType, materials]);
-
-
-   const [formData, setFormData] = useState({
-      categoryId: "",
-      vendorId: "",
-      materialId: "",
-      unit: "",
-      bum: "",
-      price:"",
-      orderUnit: "",
-      buyer: "",
-      taxId: "",
-    });
-    
-    // Add these state variables
-    const [showVendorSearchModal, setShowVendorSearchModal] = useState(false);
-    const [showMaterialSearchModal, setShowMaterialSearchModal] = useState(false);
-    const [vendorSearchResults, setVendorSearchResults] = useState([]);
-    const [materialSearchResults, setMaterialSearchResults] = useState([]);
-    const [vendorSearchType, setVendorSearchType] = useState('vendorId');
-    const [materialSearchType, setMaterialSearchType] = useState('materialId');
-    const [vendorSearchQuery, setVendorSearchQuery] = useState('');
-    const [materialSearchQuery, setMaterialSearchQuery] = useState('');
-    const [categories, setCategories] = useState([]);
-    const [vendors, setVendors] = useState([]);
-    const [materials, setMaterials] = useState([]);
-    const [taxes, setTaxes] = useState([]);
-    const [priceList, setPriceList] = useState([]);
-    const [conversionValue, setConversionValue] = useState(1);
-    const [editingId, setEditingId] = useState(null);
-    const [showForm, setShowForm] = useState(false);
-     const companyId = localStorage.getItem('selectedCompanyId');
-    const financialYear = localStorage.getItem('financialYear');
-    
-    useEffect(() => {
-      fetchCategories();
-      fetchVendors();
-      fetchMaterials();
-      fetchTaxes();
-      fetchPriceList();
-    }, []);
-  
-    const fetchCategories = async () => {
-      try {
-  
-        const res = await fetch("http://localhost:8080/api/vendor-categories");
-        const data = await res.json();
-        setCategories(data);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-  
-    const fetchVendors = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/vendors");
-        const data = await res.json();
-        setVendors(data);
-      } catch (err) {
-        console.error("Error fetching vendors:", err);
-      }
-    };
-  
-    const fetchMaterials = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/material");
-        const data = await res.json();
-        setMaterials(data);
-      } catch (err) {
-        console.error("Error fetching materials:", err);
-      }
-    };
-  
-    const fetchTaxes = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/tax");
-        const data = await res.json();
-        setTaxes(data);
-      } catch (err) {
-        console.error("Error fetching taxes:", err);
-      }
-    };
+  const fetchTaxes = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/tax");
+      const data = await res.json();
+      setTaxes(data);
+    } catch (err) {
+      console.error("Error fetching taxes:", err);
+    }
+  };
   const fetchPriceList = async () => {
     try {
       const companyId = localStorage.getItem('selectedCompanyId');
       const financialYear = localStorage.getItem('financialYear');
       console.log("comanyvendorpl", companyId, financialYear);
-  
+
       const queryParams = new URLSearchParams({
         companyId,
         financialYear
       }).toString();
-  
+
       const res = await fetch(`http://localhost:8080/api/vendor-price-lists?${queryParams}`);
-  
+
       const data = await res.json();
       setPriceList(data);
     } catch (err) {
       console.error("Error fetching price list:", err);
     }
   };
-  
-  
-    const handleChange = async (e) => {
-      const { name, value } = e.target;
-      let updatedForm = { ...formData, [name]: value };
-  
-      if (name === "materialId") {
-        try {
-          const res = await fetch(`http://localhost:8080/api/material/${value}`);
-          const mat = await res.json();
-          const conv = mat.conversionValue || 1;
-          setConversionValue(conv);
-  
-          const bum = parseFloat(formData.bum) || 0;
-          updatedForm.orderUnit = (bum * conv).toFixed(2);
-        } catch (err) {
-          console.error("Error fetching material:", err);
-          setConversionValue(1);
-        }
-      }
-  
-      if (name === "bum") {
-        const bum = parseFloat(value);
-        if (!isNaN(bum)) {
-          updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
-        } else {
-          updatedForm.orderUnit = "";
-        }
-      }
-  
-      setFormData(updatedForm);
-    };
-  
-    const handleSubmit = async () => {
-      const errors = [];
-      if (!formData.unit.trim()) errors.push("Unit (Location) is required.");
-      if (!formData.categoryId) errors.push("Category is required.");
-      if (!formData.vendorId) errors.push("Vendor is required.");
-      if (!formData.materialId) errors.push("Material is required.");
-      if (!formData.bum) errors.push("BUM (Base Unit Multiplier) is required.");
-      if (!formData.buyer.trim()) errors.push("Buyer is required.");
-  
-       const dataToSubmit = {
-        ...formData,
-        companyId,
-        financialYear
-      };
-      if (errors.length > 0) {
-        alert(errors.join("\n"));
-        return;
-      }
-  
+
+
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+    let updatedForm = { ...formData, [name]: value };
+
+    if (name === "materialId") {
       try {
-        if (editingId) {
-          // Update existing record
-          console.log("Updating with ID:", editingId);
-          console.log("Form data:", formData);
-  
-          const res = await fetch(
-            `http://localhost:8080/api/vendor-price-lists/${editingId}`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(dataToSubmit),
-            }
-          );
-  
-          console.log("Update response status:", res.status);
-  
-          if (res.ok) {
-            alert("Vendor Price List Updated Successfully!");
-            setEditingId(null);
-          } else {
-            const errorText = await res.text();
-            console.error("Update failed:", errorText);
-            throw new Error(`Update failed: ${res.status} - ${errorText}`);
-          }
-        } else {
-          // Create new record
-          const res = await fetch(
-            "http://localhost:8080/api/vendor-price-lists",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(dataToSubmit),
-            }
-          );
-  
-          if (res.ok) {
-            alert("Vendor Price List Saved Successfully!");
-          } else {
-            const errorText = await res.text();
-            console.error("Save failed:", errorText);
-            throw new Error(`Save failed: ${res.status} - ${errorText}`);
-          }
-        }
-  
-        resetForm();
-        setShowForm(false);
-        fetchPriceList(); // Refresh the list
-  
-      } catch (error) {
-        console.error("Error saving data:", error);
-        alert("Failed to save Vendor Price List: " + error.message);
-      }
-    };
-  
-    const resetForm = () => {
-      setFormData({
-        categoryId: "",
-        vendorId: "",
-        materialId: "",
-        unit: "",
-        bum: "",
-        price:"",
-        orderUnit: "",
-        buyer: "",
-        taxId: "",
-      });
-      setConversionValue(1);
-      setEditingId(null);
-    };
-  
-    const handleEdit = async (id) => {
-      try {
-        console.log("Editing ID:", id);
-        const res = await fetch(
-          `http://localhost:8080/api/vendor-price-lists/${id}`
-        );
-  
-        if (!res.ok) {
-          throw new Error(`Failed to fetch: ${res.status} - ${res.statusText}`);
-        }
-  
-        const data = await res.json();
-  
-  
-        // Extract ID from ObjectId format or use as string
-        const extractId = (idField) => {
-          if (!idField) return "";
-          if (typeof idField === "string") return idField;
-          if (typeof idField === "object") {
-            return idField.$oid || idField._id || idField.toString();
-          }
-          return idField.toString();
-        };
-  
-        setFormData({
-          categoryId: extractId(data.categoryId),
-          vendorId: extractId(data.vendorId),
-          materialId: extractId(data.materialId),
-          unit: data.unit,
-          bum: data.bum,
-          orderUnit: data.orderUnit,
-          price:data.price,
-          buyer: data.buyer,
-          taxId: extractId(data.taxId),
-        });
-  
-        setEditingId(id);
-        setShowForm(true);
-        setShowModal(true);
+        const res = await fetch(`http://localhost:8080/api/material/${value}`);
+        const mat = await res.json();
+        const conv = mat.conversionValue || 1;
+        setConversionValue(conv);
+
+        const bum = parseFloat(formData.bum) || 0;
+        updatedForm.orderUnit = (bum * conv).toFixed(2);
       } catch (err) {
-        console.error("Error fetching record for edit:", err);
-        alert("Failed to load record for editing: " + err.message);
+        console.error("Error fetching material:", err);
+        setConversionValue(1);
       }
+    }
+
+    if (name === "bum") {
+      const bum = parseFloat(value);
+      if (!isNaN(bum)) {
+        updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
+      } else {
+        updatedForm.orderUnit = "";
+      }
+    }
+
+    setFormData(updatedForm);
+  };
+
+  const handleSubmit = async () => {
+    const errors = [];
+    if (!formData.unit.trim()) errors.push("Unit (Location) is required.");
+    if (!formData.categoryId) errors.push("Category is required.");
+    if (!formData.vendorId) errors.push("Vendor is required.");
+    if (!formData.materialId) errors.push("Material is required.");
+    if (!formData.bum) errors.push("BUM (Base Unit Multiplier) is required.");
+    if (!formData.buyer.trim()) errors.push("Buyer is required.");
+
+    const dataToSubmit = {
+      ...formData,
+      companyId,
+      financialYear
     };
-  
-    const handleDelete = async (id) => {
-      if (window.confirm("Are you sure you want to delete this record?")) {
-        try {
-          const res = await fetch(
-            `http://localhost:8080/api/vendor-price-lists/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
-          if (res.ok) {
-            alert("Record deleted successfully!");
-            fetchPriceList();
-          } else {
-            throw new Error("Delete failed");
+    if (errors.length > 0) {
+      alert(errors.join("\n"));
+      return;
+    }
+
+    try {
+      if (editingId) {
+        // Update existing record
+        console.log("Updating with ID:", editingId);
+        console.log("Form data:", formData);
+
+        const res = await fetch(
+          `http://localhost:8080/api/vendor-price-lists/${editingId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dataToSubmit),
           }
-        } catch (err) {
-          console.error("Error deleting record:", err);
-          alert("Failed to delete record");
+        );
+
+        console.log("Update response status:", res.status);
+
+        if (res.ok) {
+          alert("Vendor Price List Updated Successfully!");
+          setEditingId(null);
+        } else {
+          const errorText = await res.text();
+          console.error("Update failed:", errorText);
+          throw new Error(`Update failed: ${res.status} - ${errorText}`);
+        }
+      } else {
+        // Create new record
+        const res = await fetch(
+          "http://localhost:8080/api/vendor-price-lists",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(dataToSubmit),
+          }
+        );
+
+        if (res.ok) {
+          alert("Vendor Price List Saved Successfully!");
+        } else {
+          const errorText = await res.text();
+          console.error("Save failed:", errorText);
+          throw new Error(`Save failed: ${res.status} - ${errorText}`);
         }
       }
-    };
-  
-    const handleCancel = () => {
+
       resetForm();
       setShowForm(false);
-    };
-  
-    // Helper function to extract ID from ObjectId format
-    const extractId = (idField) => {
-      if (!idField) return null;
-      if (typeof idField === "string") return idField;
-      if (typeof idField === "object") {
-        return idField.$oid || idField._id || idField.toString();
+      fetchPriceList(); // Refresh the list
+
+    } catch (error) {
+      console.error("Error saving data:", error);
+      alert("Failed to save Vendor Price List: " + error.message);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      categoryId: "",
+      vendorId: "",
+      materialId: "",
+      unit: "",
+      bum: "",
+      price: "",
+      orderUnit: "",
+      buyer: "",
+      taxId: "",
+    });
+    setConversionValue(1);
+    setEditingId(null);
+  };
+
+  const handleEdit = async (id) => {
+    try {
+      console.log("Editing ID:", id);
+      const res = await fetch(
+        `http://localhost:8080/api/vendor-price-lists/${id}`
+      );
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch: ${res.status} - ${res.statusText}`);
       }
-      return idField.toString();
-    };
-  
-    const getCategoryName = (categoryId) => {
-      const id = extractId(categoryId);
-      const category = categories.find((cat) => cat._id === id);
-      return category ? category.categoryName : "Unknown";
-    };
-  
-    const getVendorName = (vendorId) => {
-      const id = extractId(vendorId);
-      const vendor = vendors.find((v) => v._id === id);
-      return vendor ? vendor.name1 : "Unknown";
-    };
-  
-    const getMaterialName = (materialId) => {
-      const id = extractId(materialId);
-      const material = materials.find((m) => m._id === id);
-      return material ? material.description : "Unknown";
-    };
-  
-    const getTaxName = (taxId) => {
-      if (!taxId) return "No Tax";
-      const id = extractId(taxId);
-      const tax = taxes.find((t) => t._id === id);
-      return tax ? tax.taxName : "Unknown";
-    };
-  
-    const [showModal, setShowModal] = useState(false);
-  
-  
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
-  
-    const paginatedData = priceList.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
-  
-    const totalPages = Math.ceil(priceList.length / itemsPerPage);
-    const handlePageClick = (page) => {
-      if (page >= 1 && page <= totalPages) {
-        setCurrentPage(page);
+
+      const data = await res.json();
+
+
+      // Extract ID from ObjectId format or use as string
+      const extractId = (idField) => {
+        if (!idField) return "";
+        if (typeof idField === "string") return idField;
+        if (typeof idField === "object") {
+          return idField.$oid || idField._id || idField.toString();
+        }
+        return idField.toString();
+      };
+
+      setFormData({
+        categoryId: extractId(data.categoryId),
+        vendorId: extractId(data.vendorId),
+        materialId: extractId(data.materialId),
+        unit: data.unit,
+        bum: data.bum,
+        orderUnit: data.orderUnit,
+        price: data.price,
+        buyer: data.buyer,
+        taxId: extractId(data.taxId),
+      });
+
+      setEditingId(id);
+      setShowForm(true);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Error fetching record for edit:", err);
+      alert("Failed to load record for editing: " + err.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/vendor-price-lists/${id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (res.ok) {
+          alert("Record deleted successfully!");
+          fetchPriceList();
+        } else {
+          throw new Error("Delete failed");
+        }
+      } catch (err) {
+        console.error("Error deleting record:", err);
+        alert("Failed to delete record");
       }
-    };
-    // Vendor Search Handlers
-    const openVendorSearchModal = () => {
-      setShowVendorSearchModal(true);
-      setVendorSearchQuery('');
+    }
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    setShowForm(false);
+  };
+
+  // Helper function to extract ID from ObjectId format
+  const extractId = (idField) => {
+    if (!idField) return null;
+    if (typeof idField === "string") return idField;
+    if (typeof idField === "object") {
+      return idField.$oid || idField._id || idField.toString();
+    }
+    return idField.toString();
+  };
+
+  const getCategoryName = (categoryId) => {
+    const id = extractId(categoryId);
+    const category = categories.find((cat) => cat._id === id);
+    return category ? category.categoryName : "Unknown";
+  };
+
+  const getVendorName = (vendorId) => {
+    const id = extractId(vendorId);
+    const vendor = vendors.find((v) => v._id === id);
+    return vendor ? vendor.name1 : "Unknown";
+  };
+
+  const getMaterialName = (materialId) => {
+    const id = extractId(materialId);
+    const material = materials.find((m) => m._id === id);
+    return material ? material.description : "Unknown";
+  };
+
+  const getTaxName = (taxId) => {
+    if (!taxId) return "No Tax";
+    const id = extractId(taxId);
+    const tax = taxes.find((t) => t._id === id);
+    return tax ? tax.taxName : "Unknown";
+  };
+
+  const [showModal, setShowModal] = useState(false);
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const paginatedData = priceList.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(priceList.length / itemsPerPage);
+  const handlePageClick = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+  // Vendor Search Handlers
+  const openVendorSearchModal = () => {
+    setShowVendorSearchModal(true);
+    setVendorSearchQuery('');
+    setVendorSearchResults([]);
+  };
+
+  const closeVendorSearchModal = () => {
+    setShowVendorSearchModal(false);
+    setVendorSearchQuery('');
+    setVendorSearchResults([]);
+  };
+
+  const handleVendorSearchInputChange = (e) => {
+    setVendorSearchQuery(e.target.value);
+  };
+
+  const handleVendorSearch = () => {
+    if (!vendorSearchQuery.trim()) {
       setVendorSearchResults([]);
-    };
-  
-    const closeVendorSearchModal = () => {
-      setShowVendorSearchModal(false);
-      setVendorSearchQuery('');
-      setVendorSearchResults([]);
-    };
-  
-    const handleVendorSearchInputChange = (e) => {
-      setVendorSearchQuery(e.target.value);
-    };
-  
-    const handleVendorSearch = () => {
-      if (!vendorSearchQuery.trim()) {
+      return;
+    }
+
+    if (vendorSearchType === 'vendorId') {
+      const filtered = vendors.filter(vendor => {
+        const vendorId = vendor.vendorId || '';
+        return vendorId.toLowerCase().includes(vendorSearchQuery.toLowerCase());
+      });
+      setVendorSearchResults(filtered);
+    } else {
+      const filtered = vendors.filter(vendor => {
+        const name = vendor.name1 || '';
+        return name.toLowerCase().includes(vendorSearchQuery.toLowerCase());
+      });
+      setVendorSearchResults(filtered);
+    }
+  };
+
+  const handleViewAllVendors = () => {
+    setVendorSearchResults(vendors);
+    setVendorSearchQuery('');
+  };
+
+  const handleClearVendorResults = () => {
+    setVendorSearchResults([]);
+    setVendorSearchQuery('');
+  };
+
+  const selectVendorFromSearch = (vendor) => {
+    handleChange({ target: { name: "vendorId", value: vendor._id } });
+    closeVendorSearchModal();
+  };
+
+  // Material Search Handlers
+  const openMaterialSearchModal = () => {
+    setShowMaterialSearchModal(true);
+    setMaterialSearchQuery('');
+    setMaterialSearchResults([]);
+  };
+
+  const closeMaterialSearchModal = () => {
+    setShowMaterialSearchModal(false);
+    setMaterialSearchQuery('');
+    setMaterialSearchResults([]);
+  };
+
+  const handleMaterialSearchInputChange = (e) => {
+    setMaterialSearchQuery(e.target.value);
+  };
+
+  const handleMaterialSearch = () => {
+    if (!materialSearchQuery.trim()) {
+      setMaterialSearchResults([]);
+      return;
+    }
+
+    if (materialSearchType === 'materialId') {
+      const filtered = materials.filter(material => {
+        const materialId = material.materialId || '';
+        return materialId.toLowerCase().includes(materialSearchQuery.toLowerCase());
+      });
+      setMaterialSearchResults(filtered);
+    } else {
+      const filtered = materials.filter(material => {
+        const description = material.description || '';
+        return description.toLowerCase().includes(materialSearchQuery.toLowerCase());
+      });
+      setMaterialSearchResults(filtered);
+    }
+  };
+
+  const handleViewAllMaterials = () => {
+    setMaterialSearchResults(materials);
+    setMaterialSearchQuery('');
+  };
+
+  const handleClearMaterialResults = () => {
+    setMaterialSearchResults([]);
+    setMaterialSearchQuery('');
+  };
+
+  const selectMaterialFromSearch = (material) => {
+    handleChange({ target: { name: "materialId", value: material._id } });
+    closeMaterialSearchModal();
+  };
+
+  // Add these useEffect hooks
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (vendorSearchQuery.trim()) {
+        handleVendorSearch();
+      } else {
         setVendorSearchResults([]);
-        return;
       }
-  
-      if (vendorSearchType === 'vendorId') {
-        const filtered = vendors.filter(vendor => {
-          const vendorId = vendor.vendorId || '';
-          return vendorId.toLowerCase().includes(vendorSearchQuery.toLowerCase());
-        });
-        setVendorSearchResults(filtered);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [vendorSearchQuery, vendorSearchType, vendors]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (materialSearchQuery.trim()) {
+        handleMaterialSearch();
       } else {
-        const filtered = vendors.filter(vendor => {
-          const name = vendor.name1 || '';
-          return name.toLowerCase().includes(vendorSearchQuery.toLowerCase());
-        });
-        setVendorSearchResults(filtered);
-      }
-    };
-  
-    const handleViewAllVendors = () => {
-      setVendorSearchResults(vendors);
-      setVendorSearchQuery('');
-    };
-  
-    const handleClearVendorResults = () => {
-      setVendorSearchResults([]);
-      setVendorSearchQuery('');
-    };
-  
-    const selectVendorFromSearch = (vendor) => {
-      handleChange({ target: { name: "vendorId", value: vendor._id } });
-      closeVendorSearchModal();
-    };
-  
-    // Material Search Handlers
-    const openMaterialSearchModal = () => {
-      setShowMaterialSearchModal(true);
-      setMaterialSearchQuery('');
-      setMaterialSearchResults([]);
-    };
-  
-    const closeMaterialSearchModal = () => {
-      setShowMaterialSearchModal(false);
-      setMaterialSearchQuery('');
-      setMaterialSearchResults([]);
-    };
-  
-    const handleMaterialSearchInputChange = (e) => {
-      setMaterialSearchQuery(e.target.value);
-    };
-  
-    const handleMaterialSearch = () => {
-      if (!materialSearchQuery.trim()) {
         setMaterialSearchResults([]);
-        return;
       }
-  
-      if (materialSearchType === 'materialId') {
-        const filtered = materials.filter(material => {
-          const materialId = material.materialId || '';
-          return materialId.toLowerCase().includes(materialSearchQuery.toLowerCase());
-        });
-        setMaterialSearchResults(filtered);
-      } else {
-        const filtered = materials.filter(material => {
-          const description = material.description || '';
-          return description.toLowerCase().includes(materialSearchQuery.toLowerCase());
-        });
-        setMaterialSearchResults(filtered);
-      }
-    };
-  
-    const handleViewAllMaterials = () => {
-      setMaterialSearchResults(materials);
-      setMaterialSearchQuery('');
-    };
-  
-    const handleClearMaterialResults = () => {
-      setMaterialSearchResults([]);
-      setMaterialSearchQuery('');
-    };
-  
-    const selectMaterialFromSearch = (material) => {
-      handleChange({ target: { name: "materialId", value: material._id } });
-      closeMaterialSearchModal();
-    };
-  
-    // Add these useEffect hooks
-    useEffect(() => {
-      const timeoutId = setTimeout(() => {
-        if (vendorSearchQuery.trim()) {
-          handleVendorSearch();
-        } else {
-          setVendorSearchResults([]);
-        }
-      }, 300);
-  
-      return () => clearTimeout(timeoutId);
-    }, [vendorSearchQuery, vendorSearchType, vendors]);
-  
-    useEffect(() => {
-      const timeoutId = setTimeout(() => {
-        if (materialSearchQuery.trim()) {
-          handleMaterialSearch();
-        } else {
-          setMaterialSearchResults([]);
-        }
-      }, 300);
-  
-      return () => clearTimeout(timeoutId);
-    }, [materialSearchQuery, materialSearchType, materials]);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [materialSearchQuery, materialSearchType, materials]);
+
+  const handleImportSuccess = (result) => {
+    alert(`Import completed: ${result.results.imported} records imported`);
+    setShowDataImportModal(false);
+  };
+
   return (
     <>
-      {/* <div className="content">
-        <div>
-          <h2>Vendor Price List Management</h2>
-
-          {!showForm ? (
-            <div>
-              <button onClick={() => setShowForm(true)}>
-                Add New Price List
-              </button>
-
-              <table>
-                <thead>
-                  <tr>
-                    <th>Customer</th>
-                    <th>Vendor</th>
-                    <th>Material</th>
-                    <th>Unit</th>
-                    <th>BUM</th>
-                    <th>Order Unit</th>
-                    <th>Buyer</th>
-                    <th>Tax</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {priceList.map((item) => (
-                    <tr key={extractId(item._id)}>
-                      <td>{getCategoryName(item.categoryId)}</td>
-                      <td>{getVendorName(item.vendorId)}</td>
-                      <td>{getMaterialName(item.materialId)}</td>
-                      <td>{item.unit}</td>
-                      <td>{item.bum}</td>
-                      <td>{item.orderUnit}</td>
-                      <td>{item.buyer}</td>
-                      <td>{getTaxName(item.taxId)}</td>
-                      <td>
-                        <button onClick={() => handleEdit(extractId(item._id))}>
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div
-              style={{
-                background: "#f4f4f4",
-                padding: "2rem",
-                borderRadius: "10px",
-              }}
-            >
-              <h3>{editingId ? "Edit Price List" : "Add New Price List"}</h3>
-
-              <div onSubmit={handleSubmit}>
-                <label>Unit (Location)</label>
-                <input
-                  type="text"
-                  name="unit"
-                  value={formData.unit}
-                  onChange={handleChange}
-                  required
-                />
-                <label>Category</label>
-                <select
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.categoryName}
-                    </option>
-                  ))}
-                </select>
-
-                <label>Vendor</label>
-                <select
-                  name="vendorId"
-                  value={formData.vendorId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Vendor</option>
-                  {vendors.map((v) => (
-                    <option key={v._id} value={v._id}>
-                      {v.name1}
-                    </option>
-                  ))}
-                </select>
-
-                <label>Material</label>
-                <select
-                  name="materialId"
-                  value={formData.materialId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Material</option>
-                  {materials.map((m) => (
-                    <option key={m._id} value={m._id}>
-                      {m.description}
-                    </option>
-                  ))}
-                </select>
-
-                <label>Base Unit (BUM)</label>
-                <input
-                  type="number"
-                  name="bum"
-                  value={formData.bum}
-                  onChange={handleChange}
-                  required
-                />
-
-                <label>Buyer</label>
-                <input
-                  type="text"
-                  name="buyer"
-                  value={formData.buyer}
-                  onChange={handleChange}
-                  required
-                />
-
-                <label>Order Unit </label>
-                <input
-                  type="text"
-                  name="orderUnit"
-                  value={formData.orderUnit}
-                  readOnly
-                  style={{ ...inputStyle, backgroundColor: "#e9e9e9" }}
-                />
-
-                <label>Tax</label>
-                <select
-                  name="taxId"
-                  value={formData.taxId}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Tax</option>
-                  {taxes.map((tax) => (
-                    <option key={tax._id} value={tax._id}>
-                      {tax.taxName}
-                    </option>
-                  ))}
-                </select>
-
-                <div style={{ marginTop: "20px" }}>
-                  <button type="button" onClick={handleSubmit}>
-                    {editingId ? "Update" : "Save"}
-                  </button>
-                  <button type="button" onClick={handleCancel}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div> */}
-
       <div className="content content-two">
         <h4>Vendor-Price-List</h4>
         <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3 mt-3">
           <div>
-             <div className="input-group">
-                <span className="input-group-text">
-                  <i className="ti ti-search"></i>
-                </span>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search"
-                  
-                />
-              </div>
+            <div className="input-group">
+              <span className="input-group-text">
+                <i className="ti ti-search"></i>
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search"
+
+              />
+            </div>
           </div>
           <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
+            <button
+              className="btn btn-outline-primary d-inline-flex align-items-center"
+              onClick={() => setShowDataImportModal(true)}
+            >
+              <i className="isax isax-import-1 me-1"></i>Import
+            </button>
             <div className="dropdown">
               <a
                 href="javascript:void(0);"
@@ -1174,22 +562,6 @@ function VendorPriceListForm() {
             </div>
           </div>
         </div>
-
-        {/* <div className="mb-3">
-          <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <div className="d-flex align-items-center flex-wrap gap-2">
-              <div className="table-search d-flex align-items-center mb-0">
-                <input
-                  type="search"
-                  placeholder="Search"
-                  className="form-control"
-                />
-              </div>
-            </div>
-           
-          </div>
-        </div> */}
-
         <div className="table-responsive">
           <table className="table table-bordered datatable">
             <thead>
@@ -1208,7 +580,7 @@ function VendorPriceListForm() {
             <tbody>
               {paginatedData.map((item) => (
                 <tr key={extractId(item._id)}>
-                 
+
                   <td>
                     <div className="d-flex align-items-center">
                       <h6 className="fs-14 fw-medium mb-0">
@@ -1231,7 +603,7 @@ function VendorPriceListForm() {
                       onClick={() => handleEdit(extractId(item._id))}
                     >Edit
                     </button>
-                     
+
                   </td>
                 </tr>
               ))}
@@ -1322,155 +694,182 @@ function VendorPriceListForm() {
                 </button>
               </div>
 
-              {/* <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit}>
                 <div className="modal-body">
                   <div className="row">
-                    
-                    <div className="col-md-6">
-                      <label className="form-label">Unit (Location)</label>
-                      <input
-                        type="text"
-                        name="unit"
-                        className="form-control"
-                        value={formData.unit}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-
-                  
-                    <div className="col-md-6">
-                      <label className="form-label">Category</label>
-                      <select
-                        name="categoryId"
-                        className="form-select"
-                        value={formData.categoryId}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="">Select Category</option>
-                        {categories.map((cat) => (
-                          <option key={cat._id} value={cat._id}>
-                            {cat.categoryName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    
-                    <div className="col-md-6">
-                      <label className="form-label">Vendor</label>
-                      <div className="input-group">
-                        <select
-                          name="vendorId"
-                          className="form-control"
-                          value={formData.vendorId}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="">Select Vendor</option>
-                          {vendors.map((v) => (
-                            <option key={v._id} value={v._id}>
-                              {v.name1}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          className="btn btn-outline-info"
-                          onClick={openVendorSearchModal}
-                          title="Search Vendor"
-                        >
-                          <i className="fas fa-search"></i>
-                        </button>
+                    {/* Unit */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Unit (Location):</label></div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="unit"
+                            className="form-control"
+                            placeholder="Enter Unit (Location)"
+                            value={formData.unit}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    
-                    <div className="col-md-6">
-                      <label className="form-label">Material</label>
-                      <div className="input-group">
-                        <select
-                          name="materialId"
-                          className="form-control"
-                          value={formData.materialId}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="">Select Material</option>
-                          {materials.map((m) => (
-                            <option key={m._id} value={m._id}>
-                              {m.description}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          className="btn btn-outline-info"
-                          onClick={openMaterialSearchModal}
-                          title="Search Material"
-                        >
-                          <i className="fas fa-search"></i>
-                        </button>
+                    {/* Category */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Category:</label></div>
+                        <div className="col-8">
+                          <select
+                            name="categoryId"
+                            className="form-select"
+                            value={formData.categoryId}
+                            onChange={handleChange}
+                            required
+                          >
+                            <option value="">Select Category</option>
+                            {categories.map((cat) => (
+                              <option key={cat._id} value={cat._id}>{cat.categoryName}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
-                  
-                    <div className="col-md-6">
-                      <label className="form-label">Base Unit (BUM)</label>
-                      <input
-                        type="number"
-                        name="bum"
-                        className="form-control"
-                        value={formData.bum}
-                        onChange={handleChange}
-                        required
-                      />
+
+                    {/* Vendor */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Vendor:</label></div>
+                        <div className="col-8 d-flex">
+                          <select
+                            name="vendorId"
+                            className="form-select me-2"
+                            value={formData.vendorId}
+                            onChange={handleChange}
+                            required
+                          >
+                            <option value="">Select Vendor</option>
+                            {vendors.map((v) => (
+                              <option key={v._id} value={v._id}>{v.name1}</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={openVendorSearchModal}
+                            title="Search Vendor"
+                          >
+                            <i className="fas fa-search"></i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
-                    
-                    <div className="col-md-6">
-                      <label className="form-label">Buyer</label>
-                      <input
-                        type="text"
-                        name="buyer"
-                        className="form-control"
-                        value={formData.buyer}
-                        onChange={handleChange}
-                        required
-                      />
+                    {/* Material */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Material:</label></div>
+                        <div className="col-8 d-flex">
+                          <select
+                            name="materialId"
+                            className="form-select me-2"
+                            value={formData.materialId}
+                            onChange={handleChange}
+                            required
+                          >
+                            <option value="">Select Material</option>
+                            {materials.map((m) => (
+                              <option key={m._id} value={m._id}>{m.description}</option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={openMaterialSearchModal}
+                            title="Search Material"
+                          >
+                            <i className="fas fa-search"></i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
-                   
-                    <div className="col-md-6">
-                      <label className="form-label">Order Unit</label>
-                      <input
-                        type="text"
-                        name="orderUnit"
-                        className="form-control"
-                        value={formData.orderUnit}
-                        readOnly
-                        style={{ backgroundColor: "#e9e9e9" }}
-                      />
+                    {/* BUM */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Base Unit (BUM):</label></div>
+                        <div className="col-8">
+                          <input
+                            type="number"
+                            name="bum"
+                            className="form-control"
+                            placeholder="Enter Base Unit (BUM)"
+                            value={formData.bum}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                      </div>
                     </div>
 
-                    
-                    <div className="col-md-6">
-                      <label className="form-label">Tax</label>
-                      <select
-                        name="taxId"
-                        className="form-select"
-                        value={formData.taxId}
-                        onChange={handleChange}
-                      >
-                        <option value="">Select Tax</option>
-                        {taxes.map((tax) => (
-                          <option key={tax._id} value={tax._id}>
-                            {tax.taxName}
-                          </option>
-                        ))}
-                      </select>
+                    {/* Buyer */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Buyer:</label></div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="buyer"
+                            className="form-control"
+                            placeholder="Enter Buyer"
+                            value={formData.buyer}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Order Unit */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Order Unit:</label></div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="orderUnit"
+                            className="form-control"
+                            placeholder="Enter Order Unit"
+                            value={formData.orderUnit}
+                            readOnly
+                            style={{ backgroundColor: "#e9e9e9" }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tax */}
+                    <div className="col-md-4 mb-2">
+                      <div className="row">
+                        <div className="col-4"><label className="form-label">Tax:</label></div>
+                        <div className="col-8">
+                          <select
+                            name="taxId"
+                            className="form-select"
+                            value={formData.taxId}
+                            onChange={handleChange}
+                          >
+                            <option value="">Select Tax</option>
+                            {taxes.map((tax) => (
+                              <option key={tax._id} value={tax._id}>{tax.taxName}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
+
                 </div>
 
                 <div className="modal-footer d-flex align-items-center justify-content-between gap-1">
@@ -1485,392 +884,7 @@ function VendorPriceListForm() {
                     {editingId ? "Update" : "Save"}
                   </button>
                 </div>
-              </form> */}
-
-              <form onSubmit={handleSubmit}>
-  <div className="modal-body">
-    {/* <div className="row">
-
-    
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Unit (Location)</label></div>
-          <div className="col-8">
-            <input
-              type="text"
-              name="unit"
-              className="form-control"
-              placeholder="Enter Unit (Location)"
-              value={formData.unit}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-      </div>
-
-     
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Category</label></div>
-          <div className="col-8">
-            <select
-              name="categoryId"
-              className="form-select"
-              value={formData.categoryId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>{cat.categoryName}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-    
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Vendor</label></div>
-          <div className="col-8 d-flex">
-            <select
-              name="vendorId"
-              className="form-select me-2"
-              value={formData.vendorId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Vendor</option>
-              {vendors.map((v) => (
-                <option key={v._id} value={v._id}>{v.name1}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={openVendorSearchModal}
-              title="Search Vendor"
-            >
-              <i className="fas fa-search"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-    
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Material</label></div>
-          <div className="col-8 d-flex">
-            <select
-              name="materialId"
-              className="form-select me-2"
-              value={formData.materialId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Material</option>
-              {materials.map((m) => (
-                <option key={m._id} value={m._id}>{m.description}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={openMaterialSearchModal}
-              title="Search Material"
-            >
-              <i className="fas fa-search"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-    
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Base Unit (BUM)</label></div>
-          <div className="col-8">
-            <input
-              type="number"
-              name="bum"
-              className="form-control"
-              placeholder="Enter Base Unit (BUM)"
-              value={formData.bum}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-      </div>
-
-      
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Buyer</label></div>
-          <div className="col-8">
-            <input
-              type="text"
-              name="buyer"
-              className="form-control"
-              placeholder="Enter Buyer"
-              value={formData.buyer}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-      </div>
-        <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Price</label></div>
-          <div className="col-8">
-            <input
-              type="text"
-              name="price"
-              className="form-control"
-              placeholder="Enter Buyer"
-              value={formData.price}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-      </div>
-
-      
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Order Unit</label></div>
-          <div className="col-8">
-            <input
-              type="text"
-              name="orderUnit"
-              className="form-control"
-              placeholder="Enter Order Unit"
-              value={formData.orderUnit}
-              readOnly
-              style={{ backgroundColor: "#e9e9e9" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      
-      <div className="col-md-6 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Tax</label></div>
-          <div className="col-8">
-            <select
-              name="taxId"
-              className="form-select"
-              value={formData.taxId}
-              onChange={handleChange}
-            >
-              <option value="">Select Tax</option>
-              {taxes.map((tax) => (
-                <option key={tax._id} value={tax._id}>{tax.taxName}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-    </div> */}
-
-
-    <div className="row">
-
-      {/* Unit */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Unit (Location):</label></div>
-          <div className="col-8">
-            <input
-              type="text"
-              name="unit"
-              className="form-control"
-              placeholder="Enter Unit (Location)"
-              value={formData.unit}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Category */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Category:</label></div>
-          <div className="col-8">
-            <select
-              name="categoryId"
-              className="form-select"
-              value={formData.categoryId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>{cat.categoryName}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Vendor */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Vendor:</label></div>
-          <div className="col-8 d-flex">
-            <select
-              name="vendorId"
-              className="form-select me-2"
-              value={formData.vendorId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Vendor</option>
-              {vendors.map((v) => (
-                <option key={v._id} value={v._id}>{v.name1}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm"
-              onClick={openVendorSearchModal}
-              title="Search Vendor"
-            >
-              <i className="fas fa-search"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Material */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Material:</label></div>
-          <div className="col-8 d-flex">
-            <select
-              name="materialId"
-              className="form-select me-2"
-              value={formData.materialId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Material</option>
-              {materials.map((m) => (
-                <option key={m._id} value={m._id}>{m.description}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm"
-              onClick={openMaterialSearchModal}
-              title="Search Material"
-            >
-              <i className="fas fa-search"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* BUM */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Base Unit (BUM):</label></div>
-          <div className="col-8">
-            <input
-              type="number"
-              name="bum"
-              className="form-control"
-              placeholder="Enter Base Unit (BUM)"
-              value={formData.bum}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Buyer */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Buyer:</label></div>
-          <div className="col-8">
-            <input
-              type="text"
-              name="buyer"
-              className="form-control"
-              placeholder="Enter Buyer"
-              value={formData.buyer}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Order Unit */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Order Unit:</label></div>
-          <div className="col-8">
-            <input
-              type="text"
-              name="orderUnit"
-              className="form-control"
-              placeholder="Enter Order Unit"
-              value={formData.orderUnit}
-              readOnly
-              style={{ backgroundColor: "#e9e9e9" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Tax */}
-      <div className="col-md-4 mb-2">
-        <div className="row">
-          <div className="col-4"><label className="form-label">Tax:</label></div>
-          <div className="col-8">
-            <select
-              name="taxId"
-              className="form-select"
-              value={formData.taxId}
-              onChange={handleChange}
-            >
-              <option value="">Select Tax</option>
-              {taxes.map((tax) => (
-                <option key={tax._id} value={tax._id}>{tax.taxName}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-    </div>
-    
-  </div>
-
-  <div className="modal-footer d-flex align-items-center justify-content-between gap-1">
-    <button
-      type="button"
-      className="btn btn-outline-white"
-      onClick={() => setShowModal(false)}
-    >
-      Cancel
-    </button>
-    <button type="submit" className="btn btn-primary">
-      {editingId ? "Update" : "Save"}
-    </button>
-  </div>
-</form>
+              </form>
 
             </div>
           </div>
@@ -2126,6 +1140,12 @@ function VendorPriceListForm() {
             </div>
           </div>
         )}
+        <DataImportModal
+          show={showDataImportModal}
+          onClose={() => setShowDataImportModal(false)}
+          onImportSuccess={handleImportSuccess}
+          masterDataType="vendorPriceList"
+        />
       </div>
     </>
   );

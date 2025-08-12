@@ -94,6 +94,13 @@ import Campaigns from './pages/Campaigns/Campaigns';
 import Analytics from './pages/Campaigns/Analytics';
 
 
+import Employee from './pages/EmployeeandHRMS/Employee';
+import DepartmentForm from './pages/EmployeeandHRMS/Departments/Department';
+import Designation from './pages/EmployeeandHRMS/designation/designation'
+import LeaveRequests from './pages/EmployeeandHRMS/Employeeleaverequest/LeaveRequest';
+import LeaveRequestManagement from './pages/EmployeeandHRMS/LeaveManagment/LeaveManagement'
+import Payroll from './pages/EmployeeandHRMS/Payroll/Payroll';
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const LoginScreenWrapper = () => {
@@ -618,6 +625,19 @@ function App() {
               <Analytics />
             </ProtectedLayout>
           } />
+
+
+
+
+
+
+          {/* HRMS */}
+          <Route path='/employee' element={<ProtectedLayout><Employee /></ProtectedLayout>} />
+          <Route path='/leaverequest' element={<ProtectedLayout><LeaveRequests /></ProtectedLayout>} />
+          <Route path='/leavemanagement' element={<ProtectedLayout><LeaveRequestManagement /></ProtectedLayout>} />
+          <Route path='/payroll' element={<ProtectedLayout><Payroll /></ProtectedLayout>} />
+          <Route path='/departments' element={<ProtectedLayout><DepartmentForm /></ProtectedLayout>} />
+          <Route path='/designation' element={<ProtectedLayout><Designation /></ProtectedLayout>} />
         </Routes>
       </Router>
     </>

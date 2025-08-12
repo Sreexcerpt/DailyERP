@@ -1,37 +1,12 @@
 const Vendor = require('../models/Vendor');
 const VendorCategory = require('../models/VendorCategory');
 const mongoose=require('mongoose')
-// Get next VNNo based on category
-// async function generateVNNo(categoryId) {
-//   const category = await VendorCategory.findById(categoryId);
-//   const count = await Vendor.countDocuments({ categoryId });
-
-//   const nextNum = category.rangeFrom + count;
-//   return `${category.prefix}${nextNum.toString().padStart(3, '0')}`;
-// }
-
-// // Add Vendor
-// exports.createVendor = async (req, res) => {
-//   try {
-//     const vnNo = await generateVNNo(req.body.categoryId);
-
-//     const newVendor = new Vendor({
-//       ...req.body,
-//       vnNo
-//     });
-
-//     await newVendor.save();
-//     res.status(201).json(newVendor);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 async function generateVNNo(categoryId) {
   const category = await VendorCategory.findById(categoryId);
   const count = await Vendor.countDocuments({ categoryId });
   const nextNum = category.rangeFrom + count;
-  return `${category.prefix}${nextNum.toString().padStart(3, '0')}`;
+  return nextNum.toString().padStart(3, '0');
 }
 
 exports.createVendor = async (req, res) => {
