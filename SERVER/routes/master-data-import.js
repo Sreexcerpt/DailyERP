@@ -2,16 +2,16 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 // Import your models
-const Material = require('../models/Material');
-const Customer = require('../models/Customer');
-const Vendor = require('../models/Vendor');
-const VendorPriceList = require('../models/VendorPriceList');
-const CustomerPriceList = require('../models/CustomerPriceList');
-const Tax = require('../models/Tax');
-const Location = require('../models/location');
-const GeneralCondition = require('../models/generalcondition');
-const Process = require('../models/Processlist');
-// Add other models as needed
+const Material = require('../models/masterdata/Material');
+const Customer = require('../models/masterdata/Customer');
+const Vendor = require('../models/masterdata/Vendor');
+const VendorPriceList = require('../models/masterdata/VendorPriceList');
+const CustomerPriceList = require('../models/masterdata/CustomerPriceList');
+const Tax = require('../models/masterdata/Tax');
+const Location = require('../models/masterdata/location');
+const GeneralCondition = require('../models/masterdata/generalcondition');
+const Process = require('../models/masterdata/Processlist'); 
+// Add other models as needed 
 
 // Master data configurations with correct field mappings
 const masterDataConfig = {

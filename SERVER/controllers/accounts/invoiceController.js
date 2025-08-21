@@ -1,5 +1,5 @@
-const Invoice = require('../models/accounts/Invoice');
-const InvoiceCategory = require('../models/categories/InvoiceCategory');
+const Invoice = require('../../models/accounts/Invoice');
+const InvoiceCategory = require('../../models/categories/InvoiceCategory');
 
 // POST /api/invoiceform
 const createInvoice = async (req, res) => {

@@ -1,4 +1,4 @@
-const Source = require('../models/crm/Source');
+const Source = require('../../models/crm/Source');
 
 const sourceController = {
   // Get all sources

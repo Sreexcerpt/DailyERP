@@ -1,4 +1,4 @@
-const GeneralCondition = require('../models/masterdata/generalcondition');
+const GeneralCondition = require('../../models/masterdata/generalcondition');
 
 exports.createGeneralCondition = async (req, res) => {
   try {

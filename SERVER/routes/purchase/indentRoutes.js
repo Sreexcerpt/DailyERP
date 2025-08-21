@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const indentController = require('../controllers/purchase/indentController');
+const indentController = require('../../controllers/purchase/indentController');
 
 router.post('/create', indentController.createIndent);
 // routes/indentRoutes.js

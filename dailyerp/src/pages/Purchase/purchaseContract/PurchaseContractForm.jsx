@@ -48,10 +48,10 @@ function PurchaseContractForm() {
   const [locations, setLocations] = useState([]); // Add this state
   useEffect(() => {
     const companyId = localStorage.getItem('selectedCompanyId');
-  const financialYear = localStorage.getItem('financialYear');
+    const financialYear = localStorage.getItem('financialYear');
 
 
-    axios.get("http://localhost:8080/api/indent/get",{params: { companyId, financialYear }}).then((res) => {
+    axios.get("http://localhost:8080/api/indent/get", { params: { companyId, financialYear } }).then((res) => {
       const activeIndents = res.data.filter(
         (indent) => !indent.isDeleted && !indent.isBlocked
       );
@@ -73,7 +73,7 @@ function PurchaseContractForm() {
       );
     });
 
-    axios.get("http://localhost:8080/api/vendors",{params: { companyId, financialYear }}).then((res) => {
+    axios.get("http://localhost:8080/api/vendors", { params: { companyId, financialYear } }).then((res) => {
       const activeVendors = res.data.filter(
         (vendor) => !vendor.isDeleted && !vendor.isBlocked
       );
@@ -88,7 +88,7 @@ function PurchaseContractForm() {
     });
 
 
-    axios.get("http://localhost:8080/api/locations",{params: { companyId, financialYear }}).then((res) => {
+    axios.get("http://localhost:8080/api/locations", { params: { companyId, financialYear } }).then((res) => {
       console.log("Locations API response:", res.data); // Add this to debug
       // Handle different response structures
       if (Array.isArray(res.data)) {
@@ -105,7 +105,7 @@ function PurchaseContractForm() {
 
 
     axios
-      .get("http://localhost:8080/api/material",{params: { companyId, financialYear }})
+      .get("http://localhost:8080/api/material", { params: { companyId, financialYear } })
       .then((res) => {
         console.log("Fetched materials:", res.data);
         const filteredMaterials = res.data.filter(
@@ -178,9 +178,9 @@ function PurchaseContractForm() {
 
   // Add this new function to handle the final submission
   const handleFinalSubmit = async () => {
-    
- const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-      const financialYear = localStorage.getItem('financialYear');
+
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    const financialYear = localStorage.getItem('financialYear');
 
 
     const payload = {
@@ -192,8 +192,8 @@ function PurchaseContractForm() {
       contractReference,
       validityFDate,
       validityTDate,
-        companyId: selectedCompanyId,
-        financialYear: financialYear,
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
       vnNo,
       note,
       buyerGroup,
@@ -328,11 +328,19 @@ function PurchaseContractForm() {
       </div>
     );
   };
+  const openMaterialModal = (itemIndex) => {
+  console.log('Opening modal for item at index:', itemIndex); // Debug log
+  setSelectedItemIndex(itemIndex);
+  setShowModal(true);
+};
   const MaterialModal = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [searchType, setSearchType] = useState("materialId");
+    const [materialSearch, setMaterialSearch] = useState("");
 
-    const [materialSearch, setMaterialSearch] = useState(""); // ✅ Add this line
+    // Remove this line - don't change selectedItemIndex here
+    // const selectmaterial=(material,idx)=>{selectMaterialFromSearch(material),setSelectedItemIndex(idx)}
+
     const handleSearchInputChange = (e) => {
       const value = e.target.value;
       setMaterialSearch(value);
@@ -357,25 +365,35 @@ function PurchaseContractForm() {
     };
 
     const selectMaterialFromSearch = (material) => {
-      const updatedItems = [...items];
-      updatedItems[selectedItemIndex] = {
-        ...updatedItems[selectedItemIndex],
-        materialId: material.materialId,
-        description: material.description,
-        baseUnit: material.baseUnit,
-        unit: material.unit,
-        price: material.price,
-      };
-      setItems(updatedItems);
+      console.log('selectedItemIndex when selecting:', selectedItemIndex); // Debug log
+
+      if (selectedItemIndex === null || selectedItemIndex === undefined) {
+        console.error('No item selected for update');
+        return;
+      }
+
+      setItems(prevItems => {
+        console.log('Previous items:', prevItems); // Debug log
+        const updatedItems = [...prevItems];
+        updatedItems[selectedItemIndex] = {
+          ...updatedItems[selectedItemIndex],
+          materialId: material.materialId,
+          description: material.description,
+          materialGroup: material.materialgroup || "",
+          baseUnit: material.baseUnit,
+          orderUnit: material.orderUnit,
+        };
+        console.log('Updated items:', updatedItems); // Debug log
+        return updatedItems;
+      });
+
       setShowModal(false);
+      // Don't reset selectedItemIndex here if you need it elsewhere
+      // setSelectedItemIndex(null);
     };
 
     return (
-      <div
-        className="modal show d-block"
-        tabIndex="-1"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      >
+      <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
         <div className="modal-dialog modal-xl">
           <div className="modal-content">
             <div className="modal-header bg-primary text-white">
@@ -390,7 +408,7 @@ function PurchaseContractForm() {
             </div>
 
             <div className="modal-body">
-              {/* Search Controls */}
+              {/* Search Controls - same as your code */}
               <div className="row mb-3">
                 <div className="col-md-3">
                   <label className="form-label">Search Type</label>
@@ -449,23 +467,17 @@ function PurchaseContractForm() {
                         <th>Material ID</th>
                         <th>Description</th>
                         <th>Base Unit</th>
-                        <th>Unit</th>
-                        <th>Price</th>
+                        <th>Order Unit</th>
                         <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {searchResults.map((material, idx) => (
                         <tr key={idx}>
-                          <td>
-                            <span className="badge bg-secondary">
-                              {material.materialId}
-                            </span>
-                          </td>
+                          <td>{material.materialId}</td>
                           <td>{material.description}</td>
                           <td>{material.baseUnit}</td>
-                          <td>{material.unit}</td>
-                          <td>{material.price}</td>
+                          <td>{material.orderUnit}</td>
                           <td>
                             <button
                               className="btn btn-success btn-sm"
@@ -1013,7 +1025,7 @@ function PurchaseContractForm() {
                               }
                             /></div>
                         </div>
-                             <div className="col-lg-3 row">
+                        <div className="col-lg-3 row">
                           <div className="col-xl-5">
                             <label className="form-label">
                               Validity Till
@@ -1100,11 +1112,19 @@ function PurchaseContractForm() {
                                   <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>
+                                      <div className="input-group">
                                       <input
                                         className="form-control form-control-sm"
-                                        value={item.materialId}
+                                        value={item.materialId} 
                                         readOnly
                                       />
+                                      <button
+                                          type="button"
+                                          className="btn btn-link btn-sm btn-outline-info"
+                                          onClick={() => openMaterialModal(index)}
+                                        >
+                                          <i className="fas fa-search"></i>
+                                        </button></div>
                                     </td>
                                     <td>
                                       <input
@@ -1258,7 +1278,7 @@ function PurchaseContractForm() {
 
           {showIndentModal && <IndentModal />}
           {showVendorModal && <VendorModal />}
-{showContractModal && <ContractNumberModal />}
+          {showContractModal && <ContractNumberModal />}
         </div>
       </div>
     </>

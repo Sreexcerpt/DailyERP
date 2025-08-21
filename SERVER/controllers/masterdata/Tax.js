@@ -1,15 +1,15 @@
-const Tax = require('../models/masterdata/Tax');
+const Tax = require('../../models/masterdata/Tax');
 
 // Create new tax entry
 exports.createTax = async (req, res) => {
   try {
-    const { taxCode, taxName, cgst, sgst, igst } = req.body;
-
-    if (!taxCode || !taxName || !cgst || !sgst || !igst) {
+    const { taxCode, taxName, cgst, sgst, igst, companyId, financialYear } = req.body;
+    console.log("Creating tax entry:", req.body);
+    if (!taxCode || !taxName || !cgst || !sgst || !igst || !companyId || !financialYear) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const tax = new Tax({ taxCode, taxName, cgst, sgst, igst });
+    const tax = new Tax({ taxCode, taxName, cgst, sgst, igst, companyId, financialYear });
     await tax.save();
     res.status(201).json({ message: 'Tax added successfully', tax });
   } catch (err) {
@@ -21,9 +21,10 @@ exports.createTax = async (req, res) => {
 // Get all tax entries
 exports.getTaxes = async (req, res) => {
   try {
-    const taxes = await Tax.find().sort({ createdAt: -1 });
+    const { companyId, financialYear } = req.query;
+    const taxes = await Tax.find({ companyId, financialYear }).sort({ createdAt: -1 });
     res.json(taxes);
-  } catch (err) {
+  } catch (err) { 
     console.error('Get Taxes Error:', err);
     res.status(500).json({ error: 'Failed to fetch taxes' });
   }

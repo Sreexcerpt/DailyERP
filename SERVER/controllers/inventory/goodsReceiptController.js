@@ -1,6 +1,6 @@
-const GoodsReceipt = require('../models/inventry/GoodsReceipt');
-const GoodsReceiptCategory =require('../models/categories/GoodsReceiptCategory')// reused for receipt category
-const StockItem = require('../models/inventry/StockItemModel'); // Assuming you have a StockItem model
+const GoodsReceipt = require('../../models/inventry/GoodsReceipt');
+const GoodsReceiptCategory =require('../../models/categories/GoodsReceiptCategory')// reused for receipt category
+const StockItem = require('../../models/inventry/StockItemModel'); // Assuming you have a StockItem model
 // POST /api/goodsreceipt
 const createGoodsReceipt = async (req, res) => {
   try {

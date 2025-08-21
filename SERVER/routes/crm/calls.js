@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const callController = require('../controllers/crm/callController');
+const callController = require('../../controllers/crm/callController');
 
 // GET /api/crm/calls - Get all calls
 router.get('/', callController.getCalls);

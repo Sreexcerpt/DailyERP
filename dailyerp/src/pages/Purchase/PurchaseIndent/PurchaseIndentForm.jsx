@@ -499,7 +499,7 @@ const PurchaseIndent = () => {
                       <div className="col-xl-3  row">
                         <div className="col-xl-6 col-lg-6 ">
                           <label className="form-label-sm">Purchase Category<span className="text-danger">*</span></label></div>
-                        <div className="col-xl-5">
+                        <div className="col-xl-6">
                           <select
                             className="form-select form-select-sm"
                             value={selectedCategory}
@@ -513,13 +513,13 @@ const PurchaseIndent = () => {
                             ))}
                           </select></div>
                       </div>
-                      <div className="col-md-2 row">
-                        <div className="col-xl-6">
+                      <div className="col-md-3 row">
+                        <div className="col-xl-4">
                           <label className="form-label-sm">Doc Date <span className="text-danger">*</span></label></div>
-                        <div className="col-xl-6">
+                        <div className="col-xl-8">
                           <input
                             type="date"
-                            className="form-control form-control-sm"
+                            className="form-control form-control-date-sm"
                             value={documentDate}
                             onChange={(e) => setDocumentDate(e.target.value)}
                           />
@@ -531,7 +531,7 @@ const PurchaseIndent = () => {
                         </div>
                         <div className="col-xl-7 ">
                           <select
-                            className="form-control form-control-sm"
+                            className="form-select form-select-sm"
                             value={commonLocation}
                             onChange={(e) => setCommonLocation(e.target.value)}
                           >
@@ -550,7 +550,7 @@ const PurchaseIndent = () => {
                         <div className="col-xl-7 ">
                           <input
                             type="text"
-                            className="form-control form-control-sm"
+                            className="form-control form-control"
                             value={commonBuyerGroup}
                             onChange={(e) => setCommonBuyerGroup(e.target.value)}
                             placeholder="Buyer Group"

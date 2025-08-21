@@ -1,4 +1,4 @@
-const StockItem = require('../models/inventry/StockItemModel');
+const StockItem = require('../../models/inventry/StockItemModel');
 
 // Controller to get all items
 const getAllItems = async (req, res) => {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const lostReasonController = require('../controllers/crm/lostReasonController');
+const lostReasonController = require('../../controllers/crm/lostReasonController');
 
 // GET /api/crm/lost-reasons - Get all lost reasons
 router.get('/', lostReasonController.getLostReasons);

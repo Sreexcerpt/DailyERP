@@ -8,7 +8,7 @@ const {
     deleteProposal,
     getProposalStats,
     submitProposal
-} = require('../controllers/crm/ProposalController');
+} = require('../../controllers/crm/ProposalController');
 
 const router = express.Router();
 

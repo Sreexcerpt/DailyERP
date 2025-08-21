@@ -2,11 +2,11 @@ const Employee = require("../../models/hrms/employee");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
-
+const UserCompany = require('../../models/UserCompany');
 
 exports.createFaculty = async (req, res) => {
   try {
-    let { email, password, branches, employeeId, ...otherData } = req.body;
+    let { email, password, branches, employeeId,companyId, ...otherData } = req.body;
     const plainPassword = password;
 console.log('emp',req.body)
     if (typeof otherData.role === 'string') {
@@ -31,6 +31,7 @@ console.log('emp',req.body)
     const profilePhoto = req.file ? `profile/${req.file.filename}` : null;
     const branchId = branches;
 
+         
     const faculty = new Employee({
       ...otherData,
       email,
@@ -41,7 +42,13 @@ console.log('emp',req.body)
     });
 
     await faculty.save();
+     
+ const userCompany = new UserCompany({
+      userId: faculty._id, // employee's ObjectId
+      companyId
+    });
 
+    await userCompany.save();
     // if (email && plainPassword && (otherData.name || otherData.firstName)) {
     //   try {
     //     await sendWelcomeEmail(email, plainPassword, otherData.name || otherData.firstName);
@@ -109,8 +116,14 @@ exports.updateFaculty = async (req, res) => {
 
 exports.getAllFaculties = async (req, res) => {
   try {
-    const { branchId } = req.query;
-    const faculties = branchId ? await Employee.find({ branchId }) : await Employee.find();
+   const { companyId} = req.query;
+console.log("faculty companyid", companyId)
+    const filter = {};
+     if (companyId) filter.companyId = companyId;
+    // if (financialYear) filter.financialYear = financialYear;
+
+    const faculties =  await Employee.find(filter)
+    console.log("comapnies", faculties)
     res.json(faculties);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch faculties" });

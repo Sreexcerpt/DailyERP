@@ -4,9 +4,11 @@ import axios from 'axios';
 const Purchaserequestcat = () => {
   const [formData, setFormData] = useState({
     categoryName: '',
-    prefix: '',
+    // prefix: '',
     rangeStart: '',
-    rangeEnd: ''
+    rangeEnd: '',
+        companyId:  localStorage.getItem('selectedCompanyId'),
+       financialYear : localStorage.getItem('financialYear')
   });
 
   const [errors, setErrors] = useState({});
@@ -23,7 +25,11 @@ const Purchaserequestcat = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/purchasecategory');
+       const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+ 
+
+      const res = await axios.get('http://localhost:8080/api/purchasecategory',{     params: { companyId, financialYear }});
       setCategories(res.data);
     } catch (err) {
       console.error('Failed to fetch categories', err);
@@ -36,10 +42,10 @@ const Purchaserequestcat = () => {
         if (!value) return 'Category name is required';
         if (!alphaRegex.test(value)) return 'Only alphabets (max 100 characters)';
         break;
-      case 'prefix':
-        if (!value) return 'Prefix is required';
-        if (!alphaNumericRegex.test(value)) return 'Alphanumeric (max 8 characters)';
-        break;
+      // case 'prefix':
+      //   if (!value) return 'Prefix is required';
+      //   if (!alphaNumericRegex.test(value)) return 'Alphanumeric (max 8 characters)';
+      //   break;
       case 'rangeStart':
       case 'rangeEnd':
         if (!value) return `${name} is required`;
@@ -64,13 +70,13 @@ const Purchaserequestcat = () => {
           limitMsg = 'Maximum 100 characters allowed';
         }
         break;
-      case 'prefix':
-        cleanedValue = value.replace(/[^A-Za-z0-9]/g, '');
-        if (cleanedValue.length > 8) {
-          cleanedValue = cleanedValue.slice(0, 8);
-          limitMsg = 'Maximum 8 characters allowed';
-        }
-        break;
+      // case 'prefix':
+      //   cleanedValue = value.replace(/[^A-Za-z0-9]/g, '');
+      //   if (cleanedValue.length > 8) {
+      //     cleanedValue = cleanedValue.slice(0, 8);
+      //     limitMsg = 'Maximum 8 characters allowed';
+      //   }
+      //   break;
       case 'rangeStart':
       case 'rangeEnd':
         cleanedValue = value.replace(/[^0-9]/g, '');
@@ -93,7 +99,7 @@ const Purchaserequestcat = () => {
   const isFormValid = () => {
     return (
       !validateField('categoryName', formData.categoryName) &&
-      !validateField('prefix', formData.prefix) &&
+      // !validateField('prefix', formData.prefix) &&
       !validateField('rangeStart', formData.rangeStart) &&
       !validateField('rangeEnd', formData.rangeEnd)
     );
@@ -120,7 +126,7 @@ const Purchaserequestcat = () => {
       }
 
       fetchCategories();
-      setFormData({ categoryName: '', prefix: '', rangeStart: '', rangeEnd: '' });
+      setFormData({ categoryName: '',  rangeStart: '', rangeEnd: '' });
       setEditingId(null);
     } catch (err) {
       console.error(err);
@@ -165,7 +171,7 @@ const Purchaserequestcat = () => {
             </ul>
           </div>
           <div>
-            <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>Material Category</a>
+            <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>Purchase Request  Category</a>
           </div>
         </div>
       </div>
@@ -182,13 +188,12 @@ const Purchaserequestcat = () => {
 
                   <form onSubmit={handleSubmit}>
                     <div className="row">
-                      {['categoryName', 'prefix', 'rangeStart', 'rangeEnd'].map((field) => (
+                      {['categoryName',  'rangeStart', 'rangeEnd'].map((field) => (
                         <div className=" col-xl-3 mb-3" key={field}>
                           <label className="form-label">
                             {field === 'categoryName'
                               ? 'Category Name'
-                              : field === 'prefix'
-                                ? 'Prefix'
+                              
                                 : field === 'rangeStart'
                                   ? 'Range Start'
                                   : 'Range End'}
@@ -220,7 +225,7 @@ const Purchaserequestcat = () => {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Prefix</th>
+              {/* <th>Prefix</th> */}
               <th>Start</th>
               <th>End</th>
               <th>Actions</th>
@@ -230,7 +235,7 @@ const Purchaserequestcat = () => {
             {categories.map((cat) => (
               <tr key={cat._id}>
                 <td>{cat.categoryName}</td>
-                <td>{cat.prefix}</td>
+                {/* <td>{cat.prefix}</td> */}
                 <td>{cat.rangeStart}</td>
                 <td>{cat.rangeEnd}</td>
                 <td>

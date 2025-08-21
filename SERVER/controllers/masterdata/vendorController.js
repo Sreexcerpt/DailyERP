@@ -1,5 +1,5 @@
-const Vendor = require('../models/masterdata/Vendor');
-const VendorCategory = require('../models/categories/VendorCategory');
+const Vendor = require('../../models/masterdata/Vendor');
+const VendorCategory = require('../../models/categories/VendorCategory');
 const mongoose=require('mongoose')
 
 async function generateVNNo(categoryId) {

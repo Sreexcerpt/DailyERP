@@ -1,5 +1,5 @@
-const Material = require('../models/masterdata/Material');
-const MaterialCategory = require('../models/categories/MaterialCategory');
+const Material = require('../../models/masterdata/Material');
+const MaterialCategory = require('../../models/categories/MaterialCategory');
 
 exports.generateMaterialId = async (req, res) => {
   try {

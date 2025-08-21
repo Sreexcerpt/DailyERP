@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const industryController = require('../controllers/crm/industryController');
+const industryController = require('../../controllers/crm/industryController');
 
 // GET /api/crm/industries - Get all industries
 router.get('/', industryController.getIndustries);

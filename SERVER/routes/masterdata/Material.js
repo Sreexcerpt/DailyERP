@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const materialController = require('../controllers/masterdata/Material');
+const materialController = require('../../controllers/masterdata/Material');
 router.get('/byId/:materialId', materialController.getMaterialByMaterialId);
 router.post('/generate-id', materialController.generateMaterialId);
 router.post('/', materialController.createMaterial);

@@ -1,4 +1,4 @@
-const Industry = require('../models/crm/Industry');
+const Industry = require('../../models/crm/Industry');
 
 const industryController = {
   // Get all industries

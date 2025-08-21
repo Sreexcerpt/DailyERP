@@ -1,4 +1,4 @@
-const LostReason = require('../models/crm/LostReason');
+const LostReason = require('../../models/crm/LostReason');
 
 const lostReasonController = {
   // Get all lost reasons

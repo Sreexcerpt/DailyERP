@@ -8,7 +8,7 @@ const {
   updatePayment,
   deletePayment,
   getPaymentSummary
-} = require('../controllers/accounts/paymentController');
+} = require('../../controllers/accounts/paymentController');
 
 
 router.get('/payment', getAllPayments);

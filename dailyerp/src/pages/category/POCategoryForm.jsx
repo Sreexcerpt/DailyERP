@@ -4,9 +4,11 @@ import axios from 'axios';
 function POCategoryForm() {
   const [formData, setFormData] = useState({
     categoryName: '',
-    prefix: '',
+    
     rangeFrom: '',
-    rangeTo: ''
+    rangeTo: '',
+        companyId:  localStorage.getItem('selectedCompanyId'),
+       financialYear : localStorage.getItem('financialYear')
   });
 
   const [categories, setCategories] = useState([]);
@@ -18,7 +20,7 @@ function POCategoryForm() {
     const sixDigitRegex = /^\d{6}$/;
 
     temp.categoryName = formData.categoryName ? '' : 'Required';
-    temp.prefix = formData.prefix ? '' : 'Required';
+   
 
     temp.rangeFrom = formData.rangeFrom
       ? sixDigitRegex.test(formData.rangeFrom)
@@ -60,7 +62,11 @@ function POCategoryForm() {
   };
 
   const fetchCategories = async () => {
-    const res = await axios.get('http://localhost:8080/api/po-categories');
+     const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+     
+
+    const res = await axios.get('http://localhost:8080/api/po-categories',{ params: { companyId, financialYear }});
     setCategories(res.data);
   };
 
@@ -73,7 +79,7 @@ function POCategoryForm() {
   const resetForm = () => {
     setFormData({
       categoryName: '',
-      prefix: '',
+      
       rangeFrom: '',
       rangeTo: ''
     });
@@ -113,7 +119,14 @@ function POCategoryForm() {
             </ul>
           </div>
           <div>
-            <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>PO Category</a>
+           <button
+  type="button"
+  onClick={handleOpenModal}
+  className="btn btn-primary d-flex align-items-center"
+>
+  <i className="isax isax-add-circle5 me-1"></i>PO Category
+</button>
+
           </div>
         </div>
       </div>
@@ -141,7 +154,7 @@ function POCategoryForm() {
                       <div style={{ color: 'red' }}>{errors.categoryName}</div>
                     </div>
 
-                    <div className='col-xl-3 mb-2'>
+                    {/* <div className='col-xl-3 mb-2'>
                       <input
                         name="prefix"
                         value={formData.prefix}
@@ -150,7 +163,7 @@ function POCategoryForm() {
                         className='form-control'
                       />
                       <div style={{ color: 'red' }}>{errors.prefix}</div>
-                    </div>
+                    </div> */}
 
                     <div className='col-xl-3 mb-2'>
                       <input
@@ -196,7 +209,7 @@ function POCategoryForm() {
             <tr>
               <th>#</th>
               <th>Category</th>
-              <th>Prefix</th>
+              {/* <th>Prefix</th> */}
               <th>RangeFrom</th>
               <th>RangeTo</th>
               <th>Action</th>
@@ -207,7 +220,7 @@ function POCategoryForm() {
               <tr key={cat._id}>
                 <td>{index + 1}</td>
                 <td>{cat.categoryName}</td>
-                <td>{cat.prefix}</td>
+                {/* <td>{cat.prefix}</td> */}
                 <td>{cat.rangeFrom}</td>
                 <td>{cat.rangeTo}</td>
                 <td>

@@ -1,5 +1,5 @@
-const GoodsTransfer = require('../models/inventry/GoodsTransfer');
-const GoodsTransferCategory = require('../models/categories/GoodsTransferCategory');
+const GoodsTransfer = require('../../models/inventry/GoodsTransfer');
+const GoodsTransferCategory = require('../../models/categories/GoodsTransferCategory');
 
 // POST /api/goodstransfer
 const createGoodsTransfer = async (req, res) => {

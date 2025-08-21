@@ -1,5 +1,5 @@
-const Lead = require('../models/crm/Lead');
-const Campaign = require('../models/crm/Campaign');
+const Lead = require('../../models/crm/Lead');
+const Campaign = require('../../models/crm/Campaign');
 
 const leadController = {
   // Get all leads

@@ -1,5 +1,5 @@
-const Billing = require('../models/accounts/Billing');
-const BillingCategory = require('../models/categories/BillingCategory');
+const Billing = require('../../models/accounts/Billing');
+const BillingCategory = require('../../models/categories/BillingCategory');
 
 // POST /api/Billingform
 const createBilling = async (req, res) => {

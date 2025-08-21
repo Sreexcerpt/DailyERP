@@ -4,7 +4,7 @@ const {
   createGoodsIssue,
   getAllGoodsIssues,
   updateGoodsIssue
-} = require('../controllers/inventory/goodsIssueController');
+} = require('../../controllers/inventory/goodsIssueController');
 
 router.post('/', createGoodsIssue);
 router.get('/', getAllGoodsIssues);

@@ -6,7 +6,9 @@ const MaterialCategory = () => {
     categoryName: '',
     // prefix: '',
     rangeStart: '',
-    rangeEnd: ''
+    rangeEnd: '',
+    companyId:  localStorage.getItem('selectedCompanyId'),
+       financialYear : localStorage.getItem('financialYear')
   });
 
   const [errors, setErrors] = useState({});
@@ -23,7 +25,10 @@ const MaterialCategory = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/category');
+       const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+    
+      const res = await axios.get('http://localhost:8080/api/category',{  params: { companyId, financialYear }});
       setCategories(res.data);
     } catch (err) {
       console.error('Failed to fetch categories', err);

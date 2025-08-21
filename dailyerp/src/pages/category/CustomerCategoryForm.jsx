@@ -4,21 +4,37 @@ import axios from 'axios';
 function CustomerCategoryForm() {
   const [formData, setFormData] = useState({
     categoryName: '',
-    prefix: '',
+    // prefix: '',
     rangeFrom: '',
-    rangeTo: ''
+    rangeTo: '',
+        companyId:  localStorage.getItem('selectedCompanyId'),
+       financialYear : localStorage.getItem('financialYear')
   });
 
   const [customerCategories, setCustomerCategories] = useState([]);
   const [editingId, setEditingId] = useState(null); // 🆕
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  
+  if (name === 'rangeFrom' || name === 'rangeTo') {
+    // Remove any non-digit characters
+    const cleanValue = value.replace(/\D/g, '');
+    
+    // Check if it's exactly 6 digits and within range
+    if (cleanValue.length <= 6) {
+      const numValue = parseInt(cleanValue);
+      if (cleanValue.length === 6 && numValue >= 100000 && numValue <= 999999) {
+        setFormData(prev => ({ ...prev, [name]: cleanValue }));
+      } else if (cleanValue.length < 6) {
+        // Allow partial input while typing
+        setFormData(prev => ({ ...prev, [name]: cleanValue }));
+      }
+    }
+  } else {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +55,7 @@ function CustomerCategoryForm() {
         setCustomerCategories([...customerCategories, res.data]);
       }
 
-      setFormData({ categoryName: '', prefix: '', rangeFrom: '', rangeTo: '' });
+      setFormData({ categoryName: '', rangeFrom: '', rangeTo: '' });
       handleClosedropdown()
     } catch (error) {
       console.error(error);
@@ -49,7 +65,11 @@ function CustomerCategoryForm() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/customer-categories');
+       const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+      
+
+      const res = await axios.get('http://localhost:8080/api/customer-categories',{params: { companyId, financialYear }});
       setCustomerCategories(res.data);
     } catch (error) {
       console.error(error);
@@ -63,7 +83,7 @@ function CustomerCategoryForm() {
   const handleEdit = (category) => {
     setFormData({
       categoryName: category.categoryName,
-      prefix: category.prefix,
+      // prefix: category.prefix,
       rangeFrom: category.rangeFrom,
       rangeTo: category.rangeTo
     });
@@ -114,7 +134,7 @@ function CustomerCategoryForm() {
                     <div className="modal-content">
                       <div className="modal-header">
                         <h4 className="modal-title" id="myLargeModalLabel"> {editingId ? 'Edit Customer Category' : 'Add Customer Category'}</h4>
-                        <button type="button" className="btn-close" onClick={() => { setEditingId(null); handleCloseModal(), setFormData({ categoryName: '', prefix: '', rangeFrom: '', rangeTo: '' }); }} aria-label="Close"></button>
+                        <button type="button" className="btn-close" onClick={() => { setEditingId(null); handleCloseModal(), setFormData({ categoryName: '', rangeFrom: '', rangeTo: '' }); }} aria-label="Close"></button>
                       </div>
                       <div className="modal-body">
                         <form onSubmit={handleSubmit}>
@@ -128,9 +148,10 @@ function CustomerCategoryForm() {
                                 value={formData.categoryName}
                                 onChange={handleChange}
                                 required
-                                 className='form-control'
+                                className='form-control'
                               />
-                            </div><div className="col-xl-3 mb-2">
+                            </div>
+                            {/* <div className="col-xl-3 mb-2">
                               <label>Prefix</label>
                               <input
                                 type="text"
@@ -141,33 +162,38 @@ function CustomerCategoryForm() {
                                 required
                                  className='form-control'
                               />
-                            </div><div className="col-xl-3 mb-2">
+                            </div> */}
+                            <div className="col-xl-3 mb-2">
                               <label>Range From</label>
                               <input
                                 type="number"
                                 name="rangeFrom"
-                                placeholder="e.g., 1000"
+                                placeholder="e.g., 100000"
+                                min="100000"
+                                max="999999"
                                 value={formData.rangeFrom}
                                 onChange={handleChange}
                                 required
-                                 className='form-control'
+                                pattern="\d{6}"
+                                className="form-control"
                               />
                             </div><div className="col-xl-3 mb-2 ">
                               <label>Range To</label>
                               <input
                                 type="number"
                                 name="rangeTo"
+                                max={formData.rangeFrom ? formData.rangeFrom + 9999 : 1999}
                                 placeholder="e.g., 1999"
                                 value={formData.rangeTo}
                                 onChange={handleChange}
                                 required
                                 className='form-control'
                               /></div>
-                            </div>
-                            <button type="submit" className='btn btn-sm btn-primary'>
-                              {editingId ? 'Update Category' : 'Add Category'}
-                            </button>
-                          </form>
+                          </div>
+                          <button type="submit" className='btn btn-sm btn-primary'>
+                            {editingId ? 'Update Category' : 'Add Category'}
+                          </button>
+                        </form>
                       </div>
                     </div>
                   </div>
@@ -180,7 +206,7 @@ function CustomerCategoryForm() {
                 <thead>
                   <tr>
                     <th>Category Name</th>
-                    <th>Prefix</th>
+                    {/* <th>Prefix</th> */}
                     <th>Range From</th>
                     <th>Range To</th>
                     <th>Actions</th>
@@ -190,7 +216,7 @@ function CustomerCategoryForm() {
                   {customerCategories.map(cat => (
                     <tr key={cat._id}>
                       <td>{cat.categoryName}</td>
-                      <td>{cat.prefix}</td>
+                      {/* <td>{cat.prefix}</td> */}
                       <td>{cat.rangeFrom}</td>
                       <td>{cat.rangeTo}</td>
                       <td>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/masterdata/customerPriceListController');
+const controller = require('../../controllers/masterdata/customerPriceListController');
 
 router.post('/', controller.createCustomerPrice);
 router.get('/', controller.getCustomerPrices);

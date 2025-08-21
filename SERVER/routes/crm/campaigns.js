@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const campaignController = require('../controllers/crm/campaignController');
+const campaignController = require('../../controllers/crm/campaignController');
 
 // GET /api/campaigns - Get all campaigns
 router.get('/', campaignController.getCampaigns);

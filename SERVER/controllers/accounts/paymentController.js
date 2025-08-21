@@ -569,9 +569,9 @@
 //   getPaymentSummary
 // };
 
-const Payment = require('../models/accounts/Payments');
-const Invoice = require('../models/accounts/Invoice');
-const Billing = require('../models/accounts/Billing');
+const Payment = require('../../models/accounts/Payments');
+const Invoice = require('../../models/accounts/Invoice');
+const Billing = require('../../models/accounts/Billing');
 
 // Helper function to get current financial year
 function getCurrentFinancialYear() {

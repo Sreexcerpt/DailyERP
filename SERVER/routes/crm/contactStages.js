@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const contactStageController = require('../controllers/crm/contactStageController');
+const contactStageController = require('../../controllers/crm/contactStageController');
 
 // GET /api/crm/contact-stages - Get all contact stages
 router.get('/', contactStageController.getContactStages);

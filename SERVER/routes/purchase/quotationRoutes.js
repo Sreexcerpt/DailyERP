@@ -1,7 +1,7 @@
 // routes/quotationRoutes.js
 const express = require('express');
 const router = express.Router();
-const quotationController = require('../controllers/purchase/quotationController');
+const quotationController = require('../../controllers/purchase/quotationController');
 
 router.post('/create', quotationController.createQuotation);
 router.get('/get', quotationController.getAllQuotations);

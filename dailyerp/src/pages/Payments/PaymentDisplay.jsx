@@ -62,7 +62,7 @@ function PaymentDisplay() {
             Object.entries(filters).forEach(([key, value]) => {
                 if (value) queryParams.append(key, value);
             });
-
+            console.log("Fetching payments with filters:", companyId, financialYear);
             const response = await axios.get(`http://localhost:8080/api/payment?${queryParams}`, {
                 params: { companyId, financialYear }
             });
@@ -77,12 +77,21 @@ function PaymentDisplay() {
 
     const fetchSummary = async () => {
         try {
+            console.log("Fetching summary for:", { companyId, financialYear });
             const response = await axios.get("http://localhost:8080/api/payment-summary", {
-                params: { companyId, financialYear }
+                params: {
+                    companyId: companyId,
+                    financialYear: financialYear
+                }
             });
+            console.log("Summary response:", response.data);
             setSummary(response.data);
         } catch (error) {
             console.error("Error fetching summary:", error);
+            setMessage({
+                type: "error",
+                text: "Failed to fetch payment summary."
+            });
         }
     };
 

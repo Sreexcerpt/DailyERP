@@ -2,57 +2,57 @@ const express = require('express');
 const mongoose = require('mongoose');
 const fs = require('fs')
 const cors = require('cors');
-const categoryRoutes = require('./routes/MaterialcategoryRoutes');
+const categoryRoutes = require('./routes/categories/MaterialcategoryRoutes');
 const connectDB = require('./config/db');
-const materialRoutes = require('./routes/Material');
-const vendorCategoryRoutes = require('./routes/vendorCategoryRoutes');
-const vendorRoutes = require('./routes/vendorRoutes');
-const customerCategoryRoutes = require('./routes/customerCategoryRoutes');
-const customerRoutes = require('./routes/customerRoutes');
-const vendorPriceRoutes = require('./routes/vendorPriceListRoutes');
-const taxRoutes = require('./routes/Tax');
-const customerPriceRoutes = require('./routes/customerPriceListRoutes');
-const purchaserequest = require('./routes/purchaserequest') // Ensure this is the correct path
-const indentRoutes = require('./routes/indentRoutes');
-const rfqCategoryRoutes = require('./routes/quotationCategoryRoutes');
-const quotationRoutes = require('./routes/quotationRoutes');
-const contractRoutes = require("./routes/contractRoutes");
-const salecategoryRoutes = require('./routes/Salecategory');
-const paymentRoutes = require('./routes/paymentRoutes');
-const salesRequestRoutes = require('./routes/Salesrequest');
-const saleQuotationCategoryRoutes = require('./routes/saleQuotationCategoryRoutes');
-const salesQuotationRoutes = require('./routes/salesQuotationRoutes');
+const materialRoutes = require('./routes/masterdata/Material');
+const vendorCategoryRoutes = require('./routes/categories/vendorCategoryRoutes');
+const vendorRoutes = require('./routes/masterdata/vendorRoutes');
+const customerCategoryRoutes = require('./routes/categories/customerCategoryRoutes');
+const customerRoutes = require('./routes/masterdata/customerRoutes');
+const vendorPriceRoutes = require('./routes/masterdata/vendorPriceListRoutes');
+const taxRoutes = require('./routes/masterdata/Tax');
+const customerPriceRoutes = require('./routes/masterdata/customerPriceListRoutes');
+const purchaserequest = require('./routes/purchase/purchaserequest') // Ensure this is the correct path
+const indentRoutes = require('./routes/purchase/indentRoutes');
+const rfqCategoryRoutes = require('./routes/categories/quotationCategoryRoutes');
+const quotationRoutes = require('./routes/purchase/quotationRoutes');
+const contractRoutes = require("./routes/purchase/contractRoutes");
+const salecategoryRoutes = require('./routes/categories/Salecategory');
+const paymentRoutes = require('./routes/accounts/paymentRoutes');
+const salesRequestRoutes = require('./routes/sales/Salesrequest');
+const saleQuotationCategoryRoutes = require('./routes/categories/saleQuotationCategoryRoutes');
+const salesQuotationRoutes = require('./routes/sales/salesQuotationRoutes');
 const path = require('path');
-const poCategoryRoutes = require('./routes/poCategoryRoutes');
-const purchaseOrderRoutes = require('./routes/purchaseOrderRoutes');
-const salesOrderCategoryRoutes = require('./routes/salesOrderCategoryRoutes');
-const salesOrderRoutes = require('./routes/salesOrderRoutes');
-const goodsIssueCategoryRoutes = require('./routes/goodsIssueCategoryRoutes');
-const goodsIssueRoutes = require('./routes/goodsissue');
-const goodsTransferCategoryRoutes = require('./routes/goodsTransferCategoryRoutes');
-const goodsTransferRoutes = require('./routes/goodsTransferRoutes');
-const goodsReceiptRoutes = require('./routes/goodsReceiptRoutes');
-const goodsReceiptCategoryRoutes = require('./routes/goodsReceiptCategoryRoutes');
-const locationRoutes = require('./routes/locationRoutes'); // Ensure this is the correct path
-const invoiceCategoryRoutes = require('./routes/invoiceCategoryRoutes');
-const billingCategoryRoutes = require('./routes/billingCategoryRoutes');
-const invoiceRoutes = require('./routes/invoiceRoutes');
-const billingRoutes = require('./routes/billingRoutes');
-const stockRoutes = require('./routes/stockRoute'); // Ensure this is the correct path
+const poCategoryRoutes = require('./routes/categories/poCategoryRoutes');
+const purchaseOrderRoutes = require('./routes/purchase/purchaseOrderRoutes');
+const salesOrderCategoryRoutes = require('./routes/categories/salesOrderCategoryRoutes');
+const salesOrderRoutes = require('./routes/sales/salesOrderRoutes');
+const goodsIssueCategoryRoutes = require('./routes/categories/goodsIssueCategoryRoutes');
+const goodsIssueRoutes = require('./routes/inventory/goodsissue');
+const goodsTransferCategoryRoutes = require('./routes/categories/goodsTransferCategoryRoutes');
+const goodsTransferRoutes = require('./routes/inventory/goodsTransferRoutes');
+const goodsReceiptRoutes = require('./routes/inventory/goodsReceiptRoutes');
+const goodsReceiptCategoryRoutes = require('./routes/categories/goodsReceiptCategoryRoutes');
+const locationRoutes = require('./routes/masterdata/locationRoutes'); // Ensure this is the correct path
+const invoiceCategoryRoutes = require('./routes/categories/invoiceCategoryRoutes');
+const billingCategoryRoutes = require('./routes/categories/billingCategoryRoutes');
+const invoiceRoutes = require('./routes/accounts/invoiceRoutes');
+const billingRoutes = require('./routes/accounts/billingRoutes');
+const stockRoutes = require('./routes/inventory/stockRoute'); // Ensure this is the correct path
 const userRoutes = require('./routes/userRoutes'); // Ensure this is the correct path
-const companyRoutes = require('./routes/companyRoutes'); // Ensure this is the correct path
+const companyRoutes = require('./routes/crm/companyRoutes'); // Ensure this is the correct path
 const roleRoutes = require('./routes/Rolebased'); // Ensure this is the correct path
 const permissionroutes = require('./routes/permissionRoutes'); // Ensure this is the correct path
-const generalConditionRoutes = require('./routes/Generalcondition');
-const processRoutes = require('./routes/Processlist');
-const saleContractCategoryRoutes = require('./routes/saleContractCategoryRoutes');
-const salesContractRoutes = require('./routes/salesContractRoutes');
+const generalConditionRoutes = require('./routes/masterdata/Generalcondition');
+const processRoutes = require('./routes/masterdata/Processlist');
+const saleContractCategoryRoutes = require('./routes/categories/saleContractCategoryRoutes');
+const salesContractRoutes = require('./routes/categories/salesContractRoutes');
 
 
 //CRM
-const contactRoutes = require('./routes/contactRoutes'); // Ensure this is the correct path
-const leadRoutes = require('./routes/leadRoutes');
-const proposalRoutes = require('./routes/ProposalRoutes');
+const contactRoutes = require('./routes/crm/contactRoutes'); // Ensure this is the correct path
+const leadRoutes = require('./routes/crm/leadRoutes');
+const proposalRoutes = require('./routes/crm/ProposalRoutes');
 
 
 
@@ -147,7 +147,7 @@ app.use('/api/billingcategory', billingCategoryRoutes);
 app.use('/api', invoiceRoutes);
 app.use('/api', stockRoutes); // Ensure this is the correct path for stock routes
 app.use('/api', billingRoutes);
-app.use('/api/purchase-contract-categories', require('./routes/PurchaseContractCategoryRoutes'));
+app.use('/api/purchase-contract-categories', require('./routes/categories/PurchaseContractCategoryRoutes'));
 app.use('/api/companies', companyRoutes); // Ensure this is the correct path for company routes
 
 app.use('/api/roles', roleRoutes);
@@ -163,16 +163,16 @@ app.use('/api/processes', processRoutes);
 app.use('/api/contacts', contactRoutes); // Ensure this is the correct path for contact routes
 app.use('/api/leads', leadRoutes);
 app.use('/api/proposals', proposalRoutes);
-app.use('/api/crm/sources', require('./routes/sources'));
-app.use('/api/crm/lost-reasons', require('./routes/lostReasons'));
-app.use('/api/crm/contact-stages', require('./routes/contactStages'));
-app.use('/api/crm/industries', require('./routes/industries'));
-app.use('/api/crm/calls', require('./routes/calls'));
-app.use('/api/projects', require('./routes/projects'));
-app.use('/api/tasks', require('./routes/tasks'));
-app.use('/api/milestones', require('./routes/milestones'));
-app.use('/api/time-entries', require('./routes/timeEntries'));
-app.use('/api/campaigns', require('./routes/campaigns'));
+app.use('/api/crm/sources', require('./routes/crm/sources'));
+app.use('/api/crm/lost-reasons', require('./routes/crm/lostReasons'));
+app.use('/api/crm/contact-stages', require('./routes/crm/contactStages'));
+app.use('/api/crm/industries', require('./routes/crm/industries'));
+app.use('/api/crm/calls', require('./routes/crm/calls'));
+app.use('/api/projects', require('./routes/crm/projects'));
+app.use('/api/tasks', require('./routes/crm/tasks'));
+app.use('/api/milestones', require('./routes/crm/milestones'));
+app.use('/api/time-entries', require('./routes/crm/timeEntries'));
+app.use('/api/campaigns', require('./routes/crm/campaigns'));
 
 
 
@@ -193,7 +193,7 @@ app.use('/api/leave', leaveRoutes);
 
 app.use("/api/salary-records", salaryRoutes);
 
-
+ 
 
 
 const masterDataImportRoutes = require('./routes/master-data-import');

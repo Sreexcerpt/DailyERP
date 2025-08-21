@@ -110,7 +110,7 @@
 
 const express = require('express');
 const router = express.Router();
-const leadController = require('../controllers/crm/leadController');
+const leadController = require('../../controllers/crm/leadController');
 
 // GET /api/leads - Get all leads
 router.get('/', leadController.getLeads);

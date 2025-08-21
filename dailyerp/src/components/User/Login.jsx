@@ -208,23 +208,14 @@ const LoginForm = () => {
                 <h1 className="fw-bold text-primary mb-1" style={{ fontSize: '1.5rem' }}>
                   Jyothi Cloud ERP
                 </h1>
-                <h2 className="h5 fw-semibold text-dark mb-1">Welcome Back</h2>
-                <p className="text-muted mb-0 small">Enter your credentials to access your account</p>
+                {/* <h2 className="h5 fw-semibold text-dark mb-1">Welcome Back</h2> */}
                 <p style={{ textAlign: 'center' }}>(Endless Possibilities)</p>
+                <p className="text-muted mb-0 small">Enter your credentials to access your account</p>
+                
               </div>
 
               {/* ERP Quote Section */}
-              <div className="text-center mb-3">
-                <div className="bg-light border border-primary border-opacity-25 rounded-3 p-3">
-                  <blockquote className="blockquote mb-2">
-                    <p className="mb-1 text-dark small font-italic">
-                      {/* <i className="ti ti-quote text-primary me-1"></i> */}
-                      "{randomQuote.text}"
-                      {/* <i className="ti ti-quote text-primary ms-1"></i> */}
-                    </p>
-                  </blockquote>
-                </div>
-              </div>
+              {/*  */}
 
               <form onSubmit={handleLogin}>
                 {/* Email/Phone Input */}
@@ -322,19 +313,19 @@ const LoginForm = () => {
 
             {/* Footer - Compact */}
             <div className="card-footer bg-light border-0 text-center py-3">
-              <p className="text-muted small mb-1">
+              {/* <p className="text-muted small mb-1">
                 © 2025 Jyothi Cloud ERP. All rights reserved.
-              </p>
+              </p> */}
               <p className="text-muted small mb-0">
-                By{' '}
+                 Designed and Developed By{' '}
                 <Link 
                   to="https://excerptech.com/" 
                   className="text-primary text-decoration-none fw-semibold"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Excerpt Technologies
-                </Link>
+                  Excerpt Technologies Pvt Ltd
+                </Link> @ 2025
               </p>
             </div>
           </div>

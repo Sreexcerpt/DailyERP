@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import * as XLSX from 'xlsx';
+
 const baseUnits = ["Piece", "Box", "Kg", "Ltr"];
 import DataImportModal from "../../components/DataImportModal";
+
 const MaterialPage = () => {
   const [categories, setCategories] = useState([]);
-
   const [materials, setMaterials] = useState([]);
   const [showImportModal, setShowImportModal] = useState(false);
   const [filteredMaterials, setFilteredMaterials] = useState([]);
@@ -71,14 +73,16 @@ const MaterialPage = () => {
   }, [searchTerm, materials]);
 
   const fetchCategories = async () => {
-    const res = await axios.get('http://localhost:8080/api/category');
+    const res = await axios.get('http://localhost:8080/api/category', {
+      params: { companyId, financialYear }
+    });
     setCategories(res.data);
   };
+
   const companyId = localStorage.getItem('selectedCompanyId');
   const financialYear = localStorage.getItem('financialYear');
+
   const fetchMaterials = async () => {
-
-
     const res = await axios.get('http://localhost:8080/api/material', {
       params: { companyId, financialYear }
     });
@@ -215,6 +219,74 @@ const MaterialPage = () => {
     }
   };
 
+  // Export to Excel Function
+  const exportToExcel = () => {
+    // Prepare data for Excel
+    const excelData = filteredMaterials.map(material => ({
+      'Material ID': material.materialId || '',
+      'Description': material.description || '',
+      'Base Unit': material.baseUnit || '',
+      'Order Unit': material.orderUnit || '',
+      'Conversion Value': material.conversionValue || '',
+      'Dimension': material.dimension || '',
+      'MPN': material.mpn || '',
+      'HSN': material.hsn || '',
+      'Min Stock': material.minstock || '',
+      'Safety Stock': material.safetyStock || '',
+      'Max Stock': material.maxstock || '',
+      'PDT': material.pdt || '',
+      'Location': material.location || '',
+      'Material Group': material.materialgroup || '',
+      'Is Deleted': material.isDeleted ? 'Yes' : 'No',
+      'Is Blocked': material.isBlocked ? 'Yes' : 'No',
+      'Created Date': material.createdAt ? new Date(material.createdAt).toLocaleDateString() : '',
+      'Updated Date': material.updatedAt ? new Date(material.updatedAt).toLocaleDateString() : ''
+    }));
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    const colWidths = [
+      { wch: 15 }, // Material ID
+      { wch: 30 }, // Description
+      { wch: 12 }, // Base Unit
+      { wch: 12 }, // Order Unit
+      { wch: 15 }, // Conversion Value
+      { wch: 20 }, // Dimension
+      { wch: 15 }, // MPN
+      { wch: 15 }, // HSN
+      { wch: 12 }, // Min Stock
+      { wch: 15 }, // Safety Stock
+      { wch: 12 }, // Max Stock
+      { wch: 10 }, // PDT
+      { wch: 20 }, // Location
+      { wch: 20 }, // Material Group
+      { wch: 12 }, // Is Deleted
+      { wch: 12 }, // Is Blocked
+      { wch: 15 }, // Created Date
+      { wch: 15 }  // Updated Date
+    ];
+    ws['!cols'] = colWidths;
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Materials');
+
+    // Generate filename with current date and time
+    const now = new Date();
+    const currentDate = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // DD-MM-YYYY format
+    const currentTime = now.toLocaleTimeString('en-GB', { hour12: false }).replace(/:/g, '-'); // HH-MM-SS format
+    const filename = `Material-Master-${currentDate}-${currentTime}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+    handleClosedropdown();
+
+    // Show success message
+
+  };
+
   // Modal functions
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => {
@@ -293,192 +365,195 @@ const MaterialPage = () => {
     return pageNumbers;
   };
 
-
   const handleImportSuccess = (result) => {
     alert(`Import completed: ${result.results.imported} records imported`);
     fetchMaterials(); // Refresh the data
     setShowImportModal(false); // Close the modal
   };
+
   return (
     <div className="content">
-
-
-      <h4>Material Master</h4>
-      <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2 mt-3">
-        <div>
-          <div className="input-group">
-            <span className="input-group-text">
-              <i className="ti ti-search"></i>
-            </span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search materials..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </div>
+      {/* Header Section */}
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
+        <div className="my-auto mb-2">
+          <h2 className="mb-1">Material Master</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Master
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Material Master</li>
+            </ol>
+          </nav>
         </div>
 
-        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-          <button
-            className="btn btn-outline-info me-2"
-            onClick={() => setShowImportModal(true)}
-          >
-            Import Materials
-          </button>
-          <div className="dropdown">
-            <a
-              href="#"
-              onClick={handleOpendropdown}
-              className="btn btn-outline-primary d-inline-flex align-items-center"
-              data-bs-toggle="dropdown"
-            >
-              <i className="isax isax-export-1 me-1"></i>Export
-            </a>
-            <ul
-              className={showdropdown ? `dropdown-menu show` : "dropdown-menu"}
-            >
-              <li>
-                <a
-                  className="dropdown-item"
-                  href="#"
-                  onClick={handleClosedropdown}
-                >
-                  Download as PDF
-                </a>
-              </li>
-              <li>
-                <a
-                  className="dropdown-item"
-                  href="#"
-                  onClick={handleClosedropdown}
-                >
-                  Download as Excel
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <a
-              onClick={() => {
-                handleOpenModal();
-                cancelEdit();
-              }}
-              className="btn btn-primary d-flex align-items-center"
-            >
-              <i className="isax isax-add-circle5 me-1"></i>New Material
-            </a>
-          </div>
-        </div>
       </div>
-      <div className="table-responsive">
-        <table className="table table-sm table-bordered">
-          <thead>
-            <tr>
-              <th>Material ID</th>
-              <th>Description</th>
-              <th>Base</th>
-              <th>Order</th>
-              <th>Conversion</th>
-              <th>Dimension</th>
-              <th>MPN</th>
-              <th>HSN</th>
-              <th>Min Stock</th>
-              <th>safety Stock</th>
-              <th>Max Stock</th>
-              <th>PDT</th>
-              <th>Location</th>
-              <th>Delete</th>
-              <th>Block</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentItems.length === 0 ? (
-              <tr>
-                <td colSpan="12" className="text-center">
-                  {searchTerm
-                    ? "No materials found matching your search"
-                    : "No materials found"}
-                </td>
-              </tr>
-            ) : (
-              currentItems.map((mat) => (
-                <tr key={mat._id}>
-                  <td>{mat.materialId}</td>
-                  <td>{mat.description}</td>
-                  <td>{mat.baseUnit}</td>
-                  <td>{mat.orderUnit}</td>
-                  <td>{mat.conversionValue || "-"}</td>
-                  <td>{mat.dimension || "-"}</td>
-                  <td>{mat.mpn || "_"}</td>
-                  <td>{mat.hsn || "_"}</td>
-                  <td>{mat.minstock || "_"}</td>
-                  <td>{mat.safetyStock || "_"}</td>
-                  <td>{mat.maxstock || "_"}</td>
-                  <td>{mat.pdt || "_"}</td>
-                  <td>{mat.location || "_"}</td>
-                  <td>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        style={{ borderColor: "black" }}
-                        checked={mat.isDeleted || false}
-                        onChange={(e) =>
-                          handleStatusChange(
-                            mat._id,
-                            "isDeleted",
-                            e.target.checked
-                          )
-                        }
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        style={{ borderColor: "black" }}
-                        checked={mat.isBlocked || false}
-                        onChange={(e) =>
-                          handleStatusChange(
-                            mat._id,
-                            "isBlocked",
-                            e.target.checked
-                          )
-                        }
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={() => {
-                        startEdit(mat);
-                        handleOpenModal();
-                      }}
-                    >
-                      Edit
-                    </button>
-                  </td>
+
+
+
+      <div className="card">
+        <div className="card-header">
+          <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+              <div className="input-group">
+                <span className="input-group-text">
+                  <i className="ti ti-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search materials..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+              </div>
+            </div>
+
+            <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
+              <button
+                className="btn btn-outline-info btn-sm me-2"
+                onClick={() => setShowImportModal(true)}
+              >
+                <i className="ti ti-file-import me-1"></i>
+                Import
+              </button>
+
+              {/* Updated Export Button - Direct Excel Export */}
+              <button
+                className="btn btn-outline-success btn-sm"
+                onClick={exportToExcel}
+                title="Export to Excel"
+              >
+                <i className="ti ti-file-export me-1"></i>Export
+              </button>
+
+              <div>
+                <a
+                  onClick={() => {
+                    handleOpenModal();
+                    cancelEdit();
+                  }}
+                  className="btn btn-primary btn-sm"
+                >
+                  <i className="ti ti-plus me-1"></i>New Material
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-sm table-bordered">
+              <thead>
+                <tr>
+                  <th>Material ID</th>
+                  <th>Description</th>
+                  <th>Base</th>
+                  <th>Order</th>
+                  <th>Conversion</th>
+                  <th>Dimension</th>
+                  <th>MPN</th>
+                  <th>HSN</th>
+                  <th>Min Stock</th>
+                  <th>safety Stock</th>
+                  <th>Max Stock</th>
+                  <th>PDT</th>
+                  <th>Location</th>
+                  <th>Delete</th>
+                  <th>Block</th>
+                  <th>Action</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {currentItems.length === 0 ? (
+                  <tr>
+                    <td colSpan="16" className="text-center">
+                      {searchTerm
+                        ? "No materials found matching your search"
+                        : "No materials found"}
+                    </td>
+                  </tr>
+                ) : (
+                  currentItems.map((mat) => (
+                    <tr key={mat._id}>
+                      <td>{mat.materialId}</td>
+                      <td className="text-wrap">{mat.description}</td>
+                      <td>{mat.baseUnit}</td>
+                      <td>{mat.orderUnit}</td>
+                      <td>{mat.conversionValue || "-"}</td>
+                      <td className="text-wrap">{mat.dimension || "-"}</td>
+                      <td>{mat.mpn || "_"}</td>
+                      <td>{mat.hsn || "_"}</td>
+                      <td>{mat.minstock || "_"}</td>
+                      <td>{mat.safetyStock || "_"}</td>
+                      <td>{mat.maxstock || "_"}</td>
+                      <td>{mat.pdt || "_"}</td>
+                      <td className="text-wrap">{mat.location || "_"}</td>
+                      <td>
+                        <div className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            style={{ borderColor: "black" }}
+                            checked={mat.isDeleted || false}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                mat._id,
+                                "isDeleted",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        <div className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            style={{ borderColor: "black" }}
+                            checked={mat.isBlocked || false}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                mat._id,
+                                "isBlocked",
+                                e.target.checked
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={() => {
+                            startEdit(mat);
+                            handleOpenModal();
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div className="col-md-8 d-flex align-items-center">
+      {/* <div className="col-md-8 d-flex align-items-center">
         <span className="text-muted">
           Showing {indexOfFirstItem + 1} to{" "}
           {Math.min(indexOfLastItem, filteredMaterials.length)} of{" "}
           {filteredMaterials.length} entries
           {searchTerm && ` (filtered from ${materials.length} total entries)`}
         </span>
-      </div>
+      </div> */}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -596,32 +671,32 @@ const MaterialPage = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center">
-                      <div className="d-flex justify-content-center gap-3">
+
+                    <div className="row">
+                      <div className="col-xl-6">
                         <button
-                          className="btn btn-primary btn-lg"
+                          className="btn btn-primary btn-md"
                           onClick={() =>
                             handleMaterialIdTypeSelection("internal")
                           }
                         >
-                          <i className="isax isax-setting-2 me-2"></i>
-                          Internal
-                          <small className="d-block mt-1">
-                            Auto-generated ID
-                          </small>
+                          <i className="ti ti-settings me-2"></i>
+                          Internal (Auto-generated ID)
                         </button>
+                      </div>
+                      <div className="col-xl-6">
                         <button
-                          className="btn btn-secondary btn-lg"
+                          className="btn btn-secondary btn-md"
                           onClick={() =>
                             handleMaterialIdTypeSelection("external")
                           }
                         >
-                          <i className="isax isax-edit me-2"></i>
-                          External
-                          <small className="d-block mt-1">Custom ID</small>
+                          <i className="ti ti-edit me-2"></i>
+                          External (Custom ID)
                         </button>
                       </div>
                     </div>
+
                   )}
                 </div>
               </div>
@@ -670,7 +745,6 @@ const MaterialPage = () => {
                                 value={formData.categoryId}
                                 onChange={handleChange}
                                 className="form-select"
-
                                 placeholder="Select Category"
                                 required
                               >
@@ -920,8 +994,6 @@ const MaterialPage = () => {
                           </div>
                         </div>
                       </div>
-
-
                     </div>
 
                     <div className="modal-footer d-flex justify-content-between">
@@ -943,6 +1015,7 @@ const MaterialPage = () => {
           </div>
         </>
       )}
+
       <DataImportModal
         show={showImportModal}
         onClose={() => setShowImportModal(false)}
@@ -950,8 +1023,6 @@ const MaterialPage = () => {
         masterDataType="material"
         apiEndpoint="materials"
       />
-
-
     </div>
   );
 };

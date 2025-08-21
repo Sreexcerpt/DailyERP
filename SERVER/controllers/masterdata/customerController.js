@@ -1,5 +1,5 @@
-const Customer = require('../models/masterdata/Customer');
-const CustomerCategory = require('../models/categories/CustomerCategory');
+const Customer = require('../../models/masterdata/Customer');
+const CustomerCategory = require('../../models/categories/CustomerCategory');
 
 // // Generate next CNNo based on category
 // async function generateCNNo(categoryId) {

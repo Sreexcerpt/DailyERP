@@ -4,9 +4,11 @@ import axios from 'axios';
 function SalesOrderCategoryForm() {
   const [formData, setFormData] = useState({
     categoryName: '',
-    prefix: '',
+    // prefix: '',
     rangeFrom: '',
-    rangeTo: ''
+    rangeTo: '',
+        companyId:  localStorage.getItem('selectedCompanyId'),
+       financialYear : localStorage.getItem('financialYear')
   });
 
   const [categories, setCategories] = useState([]);
@@ -18,8 +20,8 @@ function SalesOrderCategoryForm() {
     const sixDigitRegex = /^\d{6}$/;
 
     temp.categoryName = formData.categoryName ? '' : 'Required';
-    temp.prefix = formData.prefix ? '' : 'Required';
-
+    // temp.prefix = formData.prefix ? '' : 'Required';
+// 
     temp.rangeFrom = formData.rangeFrom
       ? sixDigitRegex.test(formData.rangeFrom)
         ? ''
@@ -60,7 +62,11 @@ function SalesOrderCategoryForm() {
   };
 
   const fetchCategories = async () => {
-    const res = await axios.get('http://localhost:8080/api/sales-order-categories');
+     const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+      
+
+    const res = await axios.get('http://localhost:8080/api/sales-order-categories',{params: { companyId, financialYear }});
     setCategories(res.data);
   };
 
@@ -73,7 +79,7 @@ function SalesOrderCategoryForm() {
   const resetForm = () => {
     setFormData({
       categoryName: '',
-      prefix: '',
+      // prefix: '',
       rangeFrom: '',
       rangeTo: ''
     });
@@ -140,7 +146,7 @@ function SalesOrderCategoryForm() {
                       <div style={{ color: 'red' }}>{errors.categoryName}</div>
                     </div>
 
-                    <div className='col-xl-3'>
+                    {/* <div className='col-xl-3'>
                       <input
                         name="prefix"
                         value={formData.prefix}
@@ -149,7 +155,7 @@ function SalesOrderCategoryForm() {
                         className='form-control'
                       />
                       <div style={{ color: 'red' }}>{errors.prefix}</div>
-                    </div>
+                    </div> */}
 
                     <div className='col-xl-3'>
                       <input
@@ -195,7 +201,7 @@ function SalesOrderCategoryForm() {
           <tr>
             <th>#</th>
             <th>Category</th>
-            <th>Prefix</th>
+            {/* <th>Prefix</th> */}
             <th>RangeFrom</th>
             <th>RangeTo</th>
             <th>Action</th>
@@ -206,7 +212,7 @@ function SalesOrderCategoryForm() {
             <tr key={cat._id}>
               <td>{index + 1}</td>
               <td>{cat.categoryName}</td>
-              <td>{cat.prefix}</td>
+              {/* <td>{cat.prefix}</td> */}
               <td>{cat.rangeFrom}</td>
               <td>{cat.rangeTo}</td>
               <td>

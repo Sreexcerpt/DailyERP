@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import * as XLSX from 'xlsx';
 import DataImportModal from "../../components/DataImportModal";
+import axios from "axios";
 function VendorPriceListForm() {
   const [formData, setFormData] = useState({
     categoryId: "",
@@ -14,6 +16,7 @@ function VendorPriceListForm() {
   });
 
   // Add these state variables
+  const [locations, setLocations] = useState([]);
   const [showVendorSearchModal, setShowVendorSearchModal] = useState(false);
   const [showMaterialSearchModal, setShowMaterialSearchModal] = useState(false);
   const [vendorSearchResults, setVendorSearchResults] = useState([]);
@@ -33,20 +36,89 @@ function VendorPriceListForm() {
   const companyId = localStorage.getItem('selectedCompanyId');
   const financialYear = localStorage.getItem('financialYear');
   const [showDataImportModal, setShowDataImportModal] = useState(false);
+
   useEffect(() => {
     fetchCategories();
     fetchVendors();
     fetchMaterials();
     fetchTaxes();
     fetchPriceList();
+    axios
+      .get("http://localhost:8080/api/locations", {
+        params: { companyId, financialYear }
+      })
+      .then((res) => setLocations(res.data));
   }, []);
+
+  // Export to Excel Function
+  const exportToExcel = () => {
+    // Prepare data for Excel
+    const excelData = priceList.map(item => ({
+      'Category': getCategoryName(item.categoryId),
+      'Vendor Name': getVendorName(item.vendorId),
+      'Vendor ID': getVendorId(item.vendorId),
+      'Material ID': getMaterialId(item.materialId),
+      'Material Description': getMaterialName(item.materialId),
+      'Unit (Location)': item.unit || '',
+      'BUM (Base Unit Measure)': item.bum || '',
+      'Order Unit': item.orderUnit || '',
+      'Price': item.price || '',
+      'Buyer': item.buyer || '',
+      'Tax Name': getTaxName(item.taxId),
+      'Tax Details': getTaxDetails(item.taxId),
+      'Company ID': item.companyId || '',
+      'Financial Year': item.financialYear || '',
+      'Created Date': item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '',
+      'Updated Date': item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : ''
+    }));
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    const colWidths = [
+      { wch: 20 }, // Category
+      { wch: 25 }, // Vendor Name
+      { wch: 15 }, // Vendor ID
+      { wch: 20 }, // Material ID
+      { wch: 35 }, // Material Description
+      { wch: 15 }, // Unit (Location)
+      { wch: 15 }, // BUM
+      { wch: 15 }, // Order Unit
+      { wch: 12 }, // Price
+      { wch: 20 }, // Buyer
+      { wch: 15 }, // Tax Name
+      { wch: 25 }, // Tax Details
+      { wch: 15 }, // Company ID
+      { wch: 15 }, // Financial Year
+      { wch: 15 }, // Created Date
+      { wch: 15 }  // Updated Date
+    ];
+    ws['!cols'] = colWidths;
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Vendor Price List');
+
+    // Generate filename with current date and time
+    const now = new Date();
+    const currentDate = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // DD-MM-YYYY format
+    const currentTime = now.toLocaleTimeString('en-GB', { hour12: false }).replace(/:/g, '-'); // HH-MM-SS format
+    const filename = `Vendor-Price-List-${currentDate}-${currentTime}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    // Show success message
+    alert(`Excel file exported successfully as: ${filename}`);
+  };
 
   const fetchCategories = async () => {
     try {
-
-      const res = await fetch("http://localhost:8080/api/vendor-categories");
-      const data = await res.json();
-      setCategories(data);
+      const res = await axios.get("http://localhost:8080/api/vendor-categories", {
+        params: { companyId, financialYear }
+      });
+      setCategories(res.data);
     } catch (err) {
       console.error("Error fetching categories:", err);
     }
@@ -54,9 +126,10 @@ function VendorPriceListForm() {
 
   const fetchVendors = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/vendors");
-      const data = await res.json();
-      setVendors(data);
+      const res = await axios.get("http://localhost:8080/api/vendors", {
+        params: { companyId, financialYear }
+      });
+      setVendors(res.data);
     } catch (err) {
       console.error("Error fetching vendors:", err);
     }
@@ -64,9 +137,10 @@ function VendorPriceListForm() {
 
   const fetchMaterials = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/material");
-      const data = await res.json();
-      setMaterials(data);
+      const res = await axios.get("http://localhost:8080/api/material", {
+        params: { companyId, financialYear }
+      });
+      setMaterials(res.data);
     } catch (err) {
       console.error("Error fetching materials:", err);
     }
@@ -74,13 +148,16 @@ function VendorPriceListForm() {
 
   const fetchTaxes = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/tax");
+      const res = await fetch("http://localhost:8080/api/tax", {
+        params: { companyId, financialYear }
+      });
       const data = await res.json();
       setTaxes(data);
     } catch (err) {
       console.error("Error fetching taxes:", err);
     }
   };
+
   const fetchPriceList = async () => {
     try {
       const companyId = localStorage.getItem('selectedCompanyId');
@@ -101,7 +178,6 @@ function VendorPriceListForm() {
     }
   };
 
-
   const handleChange = async (e) => {
     const { name, value } = e.target;
     let updatedForm = { ...formData, [name]: value };
@@ -112,28 +188,20 @@ function VendorPriceListForm() {
         const mat = await res.json();
         const conv = mat.conversionValue || 1;
         setConversionValue(conv);
-
-        const bum = parseFloat(formData.bum) || 0;
-        updatedForm.orderUnit = (bum * conv).toFixed(2);
       } catch (err) {
         console.error("Error fetching material:", err);
         setConversionValue(1);
       }
     }
 
-    if (name === "bum") {
-      const bum = parseFloat(value);
-      if (!isNaN(bum)) {
-        updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
-      } else {
-        updatedForm.orderUnit = "";
-      }
-    }
+
 
     setFormData(updatedForm);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     const errors = [];
     if (!formData.unit.trim()) errors.push("Unit (Location) is required.");
     if (!formData.categoryId) errors.push("Category is required.");
@@ -147,6 +215,7 @@ function VendorPriceListForm() {
       companyId,
       financialYear
     };
+
     if (errors.length > 0) {
       alert(errors.join("\n"));
       return;
@@ -203,6 +272,7 @@ function VendorPriceListForm() {
 
       resetForm();
       setShowForm(false);
+      setShowModal(false);
       fetchPriceList(); // Refresh the list
 
     } catch (error) {
@@ -239,7 +309,6 @@ function VendorPriceListForm() {
       }
 
       const data = await res.json();
-
 
       // Extract ID from ObjectId format or use as string
       const extractId = (idField) => {
@@ -321,10 +390,22 @@ function VendorPriceListForm() {
     return vendor ? vendor.name1 : "Unknown";
   };
 
+  const getVendorId = (vendorId) => {
+    const id = extractId(vendorId);
+    const vendor = vendors.find((v) => v._id === id);
+    return vendor ? vendor.vnNo || vendor.vendorId : "Unknown";
+  };
+
   const getMaterialName = (materialId) => {
     const id = extractId(materialId);
     const material = materials.find((m) => m._id === id);
     return material ? material.description : "Unknown";
+  };
+
+  const getMaterialId = (materialId) => {
+    const id = extractId(materialId);
+    const material = materials.find((m) => m._id === id);
+    return material ? material.materialId : "Unknown";
   };
 
   const getTaxName = (taxId) => {
@@ -334,9 +415,14 @@ function VendorPriceListForm() {
     return tax ? tax.taxName : "Unknown";
   };
 
+  const getTaxDetails = (taxId) => {
+    if (!taxId) return "No Tax";
+    const id = extractId(taxId);
+    const tax = taxes.find((t) => t._id === id);
+    return tax ? `CGST: ${tax.cgst}%, SGST: ${tax.sgst}%, IGST: ${tax.igst}%` : "Unknown";
+  };
+
   const [showModal, setShowModal] = useState(false);
-
-
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -351,6 +437,7 @@ function VendorPriceListForm() {
       setCurrentPage(page);
     }
   };
+
   // Vendor Search Handlers
   const openVendorSearchModal = () => {
     setShowVendorSearchModal(true);
@@ -489,152 +576,133 @@ function VendorPriceListForm() {
 
   return (
     <>
-      <div className="content content-two">
-        <h4>Vendor-Price-List</h4>
-        <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3 mt-3">
-          <div>
-            <div className="input-group">
-              <span className="input-group-text">
-                <i className="ti ti-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search"
-
-              />
-            </div>
-          </div>
-          <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-            <button
-              className="btn btn-outline-primary d-inline-flex align-items-center"
-              onClick={() => setShowDataImportModal(true)}
-            >
-              <i className="isax isax-import-1 me-1"></i>Import
-            </button>
-            <div className="dropdown">
-              <a
-                href="javascript:void(0);"
-                className="btn btn-outline-primary d-inline-flex align-items-center"
-                data-bs-toggle="dropdown"
-              >
-                <i className="isax isax-export-1 me-1"></i>Export
-              </a>
-              <ul className="dropdown-menu">
-                <li>
-                  <a className="dropdown-item" href="javascript:void(0);">
-                    Download as PDF
-                  </a>
+      <div className="content">
+        {/* Header Section */}
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
+          <div className="my-auto mb-2">
+            <h2 className="mb-1">Vendor Price List</h2>
+            <nav>
+              <ol className="breadcrumb mb-0">
+                <li className="breadcrumb-item">
+                  <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
                 </li>
-                <li>
-                  <a className="dropdown-item" href="javascript:void(0);">
-                    Download as Excel
-                  </a>
+                <li className="breadcrumb-item">
+                  Master
                 </li>
-              </ul>
-            </div>
-            <div>
-              <a
-                href="javascript:void(0);"
-                className="btn btn-primary d-flex align-items-center"
-                data-bs-toggle="modal"
-                data-bs-target="#add_modal"
-                onClick={() => {
-                  setShowModal(true);
-                  setFormData((prev) => ({
-                    ...prev,
-                    categoryId: "",
-                    customerId: "",
-                    materialId: "",
-                    unit: "",
-                    bum: "",
-                    orderUnit: "",
-                    salesGroup: "",
-                    taxId: "",
-                    tandc: "",
-                  }));
-
-                  setEditingId(null);
-                }}
-              >
-                <i className="isax isax-add-circle5 me-1"></i>New Price List
-              </a>
-            </div>
+                <li className="breadcrumb-item active" aria-current="page">Vendor Price List</li>
+              </ol>
+            </nav>
           </div>
         </div>
-        <div className="table-responsive">
-          <table className="table table-bordered datatable">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Vendor</th>
-                <th>Material</th>
-                <th>Unit</th>
-                <th>BUM</th>
-                <th>Order Unit</th>
-                <th>Buyer</th>
-                <th>Tax</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((item) => (
-                <tr key={extractId(item._id)}>
 
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <h6 className="fs-14 fw-medium mb-0">
-                        <a href="javascript:void(0);">
-                          {getCategoryName(item.categoryId)}
-                        </a>
-                      </h6>
-                    </div>
-                  </td>
-                  <td>{getVendorName(item.vendorId)}</td>
-                  <td>{getMaterialName(item.materialId)}</td>
-                  <td className="text-dark">{item.unit}</td>
-                  <td className="text-dark">{item.bum}</td>
-                  <td className="text-dark">{item.orderUnit}</td>
-                  <td className="text-dark">{item.buyer}</td>
-                  <td className="text-dark">{getTaxName(item.taxId)}</td>
-                  <td style={{ cursor: "pointer" }}>
-                    <button
-                      className="btn btn-primary btn-sm me-2"
-                      onClick={() => handleEdit(extractId(item._id))}
-                    >Edit
-                    </button>
-
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div
-            className="dataTables_paginate paging_simple_numbers"
-            id="DataTables_Table_0_paginate"
-          >
-            <ul className="pagination">
-              <li
-                className={`paginate_button page-item previous ${currentPage === 1 ? "disabled" : ""
-                  }`}
-              >
-                <a
-                  href="#"
-                  className="page-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageClick(currentPage - 1);
-                  }}
+        <div className="card">
+          <div className="card-header">
+            <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3">
+              <div>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="ti ti-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search"
+                  />
+                </div>
+              </div>
+              <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
+                <button
+                  className="btn btn-outline-primary btn-sm"
+                  onClick={() => setShowDataImportModal(true)}
                 >
-                  <i className="isax isax-arrow-left"></i>
-                </a>
-              </li>
+                  <i className="ti ti-file-import me-1"></i>Import
+                </button>
 
-              {Array.from({ length: totalPages }, (_, i) => (
+                {/* Updated Export Button - Direct Excel Export */}
+                <button
+                  className="btn btn-outline-success btn-sm"
+                  onClick={exportToExcel}
+                  title="Export to Excel"
+                >
+                  <i className="ti ti-file-export me-1"></i>Export
+                </button>
+
+                <div>
+                  <a
+                    href="javascript:void(0);"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                      setShowModal(true);
+                      setFormData({
+                        categoryId: "",
+                        vendorId: "",
+                        materialId: "",
+                        unit: "",
+                        bum: "",
+                        price: "",
+                        orderUnit: "",
+                        buyer: "",
+                        taxId: "",
+                      });
+                      setEditingId(null);
+                    }}
+                  >
+                    <i className="ti ti-circle-plus me-1"></i>Add New Vendor Price List
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="table table-sm table-bordered datatable">
+                <thead>
+                  <tr>
+                    <th>Vendor</th>
+                    <th>Category</th>
+                    <th>Material</th>
+                    <th>Unit</th>
+                    <th>BUM</th>
+                    <th>Order Unit</th>
+                    <th>Price</th>
+                    <th>Buyer</th>
+                    <th>Tax</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.map((item) => (
+                    <tr key={extractId(item._id)}>
+                      <td>{getVendorName(item.vendorId)}</td>
+                      <td>{getCategoryName(item.categoryId)}</td>
+
+                      <td>{getMaterialName(item.materialId)}</td>
+                      <td className="text-wrap">{item.unit}</td>
+                      <td className="text-wrap">{item.bum}</td>
+                      <td className="text-wrap">{item.orderUnit}</td>
+                      <td className="text-wrap">Rs{item.price || 0}</td>
+                      <td className="text-wrap">{item.buyer}</td>
+                      <td className="text-wrap">{getTaxName(item.taxId)}</td>
+                      <td style={{ cursor: "pointer" }}>
+                        <button
+                          className="btn btn-primary btn-sm me-2"
+                          onClick={() => handleEdit(extractId(item._id))}
+                        >Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div
+              className="dataTables_paginate paging_simple_numbers"
+              id="DataTables_Table_0_paginate"
+            >
+              <ul className="pagination">
                 <li
-                  key={i}
-                  className={`paginate_button page-item ${currentPage === i + 1 ? "active" : ""
+                  className={`paginate_button page-item previous ${currentPage === 1 ? "disabled" : ""
                     }`}
                 >
                   <a
@@ -642,254 +710,301 @@ function VendorPriceListForm() {
                     className="page-link"
                     onClick={(e) => {
                       e.preventDefault();
-                      handlePageClick(i + 1);
+                      handlePageClick(currentPage - 1);
                     }}
                   >
-                    {i + 1}
+                    <i className="ti ti-arrow-left"></i>
                   </a>
                 </li>
-              ))}
 
-              <li
-                className={`paginate_button page-item next ${currentPage === totalPages ? "disabled" : ""
-                  }`}
-              >
-                <a
-                  href="#"
-                  className="page-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageClick(currentPage + 1);
-                  }}
-                >
-                  <i className="isax isax-arrow-right-1"></i>
-                </a>
-              </li>
-            </ul>
-          </div>
-
-        </div>
-
-        <div
-          id="add_modal"
-          className={`modal fade ${showModal ? "show" : ""}`}
-          style={{ display: showModal ? "block" : "none" }}
-          role="dialog"
-          aria-hidden={!showModal}
-        >
-          <div className="modal-dialog modal-dialog-centered modal-xl">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">
-                  {editingId ? "Edit Entry" : "Add New Entry"}
-                </h4>
-                <button
-                  type="button"
-                  className="btn-close custom-btn-close btn-close-modal"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  onClick={() => setShowModal(false)}
-                >
-                  <i className="fa-solid fa-x"></i>
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit}>
-                <div className="modal-body">
-                  <div className="row">
-                    {/* Unit */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Unit (Location):</label></div>
-                        <div className="col-8">
-                          <input
-                            type="text"
-                            name="unit"
-                            className="form-control"
-                            placeholder="Enter Unit (Location)"
-                            value={formData.unit}
-                            onChange={handleChange}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Category */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Category:</label></div>
-                        <div className="col-8">
-                          <select
-                            name="categoryId"
-                            className="form-select"
-                            value={formData.categoryId}
-                            onChange={handleChange}
-                            required
-                          >
-                            <option value="">Select Category</option>
-                            {categories.map((cat) => (
-                              <option key={cat._id} value={cat._id}>{cat.categoryName}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Vendor */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Vendor:</label></div>
-                        <div className="col-8 d-flex">
-                          <select
-                            name="vendorId"
-                            className="form-select me-2"
-                            value={formData.vendorId}
-                            onChange={handleChange}
-                            required
-                          >
-                            <option value="">Select Vendor</option>
-                            {vendors.map((v) => (
-                              <option key={v._id} value={v._id}>{v.name1}</option>
-                            ))}
-                          </select>
-                          <button
-                            type="button"
-                            className="btn btn-outline-primary btn-sm"
-                            onClick={openVendorSearchModal}
-                            title="Search Vendor"
-                          >
-                            <i className="fas fa-search"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Material */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Material:</label></div>
-                        <div className="col-8 d-flex">
-                          <select
-                            name="materialId"
-                            className="form-select me-2"
-                            value={formData.materialId}
-                            onChange={handleChange}
-                            required
-                          >
-                            <option value="">Select Material</option>
-                            {materials.map((m) => (
-                              <option key={m._id} value={m._id}>{m.description}</option>
-                            ))}
-                          </select>
-                          <button
-                            type="button"
-                            className="btn btn-outline-primary btn-sm"
-                            onClick={openMaterialSearchModal}
-                            title="Search Material"
-                          >
-                            <i className="fas fa-search"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* BUM */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Base Unit (BUM):</label></div>
-                        <div className="col-8">
-                          <input
-                            type="number"
-                            name="bum"
-                            className="form-control"
-                            placeholder="Enter Base Unit (BUM)"
-                            value={formData.bum}
-                            onChange={handleChange}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Buyer */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Buyer:</label></div>
-                        <div className="col-8">
-                          <input
-                            type="text"
-                            name="buyer"
-                            className="form-control"
-                            placeholder="Enter Buyer"
-                            value={formData.buyer}
-                            onChange={handleChange}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Order Unit */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Order Unit:</label></div>
-                        <div className="col-8">
-                          <input
-                            type="text"
-                            name="orderUnit"
-                            className="form-control"
-                            placeholder="Enter Order Unit"
-                            value={formData.orderUnit}
-                            readOnly
-                            style={{ backgroundColor: "#e9e9e9" }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tax */}
-                    <div className="col-md-4 mb-2">
-                      <div className="row">
-                        <div className="col-4"><label className="form-label">Tax:</label></div>
-                        <div className="col-8">
-                          <select
-                            name="taxId"
-                            className="form-select"
-                            value={formData.taxId}
-                            onChange={handleChange}
-                          >
-                            <option value="">Select Tax</option>
-                            {taxes.map((tax) => (
-                              <option key={tax._id} value={tax._id}>{tax.taxName}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-
-                <div className="modal-footer d-flex align-items-center justify-content-between gap-1">
-                  <button
-                    type="button"
-                    className="btn btn-outline-white"
-                    onClick={() => setShowModal(false)}
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <li
+                    key={i}
+                    className={`paginate_button page-item ${currentPage === i + 1 ? "active" : ""
+                      }`}
                   >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    {editingId ? "Update" : "Save"}
-                  </button>
-                </div>
-              </form>
+                    <a
+                      href="#"
+                      className="page-link"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageClick(i + 1);
+                      }}
+                    >
+                      {i + 1}
+                    </a>
+                  </li>
+                ))}
 
+                <li
+                  className={`paginate_button page-item next ${currentPage === totalPages ? "disabled" : ""
+                    }`}
+                >
+                  <a
+                    href="#"
+                    className="page-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageClick(currentPage + 1);
+                    }}
+                  >
+                    <i className="ti ti-arrow-right"></i>
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
 
+        {showModal && (
+          <>
+            <div className="modal-backdrop fade show"></div>
+            <div
+              className="modal fade show"
+              style={{ display: "block" }}
+              tabIndex="-1"
+              aria-labelledby="myLargeModalLabel"
+              aria-modal="true"
+              role="dialog"
+            >
+              <div className="modal-dialog modal-dialog-centered modal-xl">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h4 className="modal-title">
+                      {editingId ? "Edit Entry" : "Add New Entry"}
+                    </h4>
+                    <button
+                      type="button"
+                      className="btn-close custom-btn-close btn-close-modal"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                      onClick={() => setShowModal(false)}
+                    >
+                      <i className="fa-solid fa-x"></i>
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSubmit}>
+                    <div className="modal-body">
+                      <div className="row">
+                        {/* Unit */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Unit (Location):</label></div>
+                            <div className="col-8">
+                              <select
+                                name="unit"
+                                className="form-select form-select-sm"
+                                value={formData.unit}
+                                onChange={handleChange}
+                                required
+                              >
+                                <option value="">Select</option>
+                                {locations.map((loc) => (
+                                  <option key={loc.name} value={loc.name}>
+                                    {loc.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Category */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Category:</label></div>
+                            <div className="col-8">
+                              <select
+                                name="categoryId"
+                                className="form-select"
+                                value={formData.categoryId}
+                                onChange={handleChange}
+                                required
+                              >
+                                <option value="">Select Category</option>
+                                {categories.map((cat) => (
+                                  <option key={cat._id} value={cat._id}>{cat.categoryName}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Vendor */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Vendor:</label></div>
+                            <div className="col-8 d-flex">
+                              <select
+                                name="vendorId"
+                                className="form-select me-2"
+                                value={formData.vendorId}
+                                onChange={handleChange}
+                                required
+                              >
+                                <option value="">Select Vendor</option>
+                                {vendors.map((v) => (
+                                  <option key={v._id} value={v._id}>{v.name1}</option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={openVendorSearchModal}
+                                title="Search Vendor"
+                              >
+                                <i className="fas fa-search"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Material */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Material:</label></div>
+                            <div className="col-8 d-flex">
+                              <select
+                                name="materialId"
+                                className="form-select me-2"
+                                value={formData.materialId}
+                                onChange={handleChange}
+                                required
+                              >
+                                <option value="">Select Material</option>
+                                {materials.map((m) => (
+                                  <option key={m._id} value={m._id}>{m.description}</option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={openMaterialSearchModal}
+                                title="Search Material"
+                              >
+                                <i className="fas fa-search"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* BUM */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-5"><label className="form-label">Base Unit (BUM):</label></div>
+                            <div className="col-7">
+                              <input
+                                type="number"
+                                name="bum"
+                                className="form-control"
+                                placeholder="Enter Base Unit (BUM)"
+                                value={formData.bum}
+                                onChange={(e) => {
+                                  e.target.value = Math.max(0, e.target.value);
+                                  handleChange(e);
+                                }}
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Price */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Price:</label></div>
+                            <div className="col-8">
+                              <input
+                                type="number"
+                                step="0.01"
+                                name="price"
+                                className="form-control"
+                                placeholder="Enter Price"
+                                value={formData.price}
+                                onChange={handleChange}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Buyer */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Buyer:</label></div>
+                            <div className="col-8">
+                              <input
+                                type="text"
+                                name="buyer"
+                                className="form-control"
+                                placeholder="Enter Buyer"
+                                value={formData.buyer}
+                                onChange={handleChange}
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Order Unit */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Order Unit:</label></div>
+                            <div className="col-8">
+                              <input
+                                type="number"
+                                name="orderUnit"
+                                className="form-control"
+                                placeholder="Auto-calculated"
+                                value={formData.orderUnit}
+                                onChange={(e) => {
+                                  e.target.value = Math.max(0, e.target.value);
+                                  handleChange(e);
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Tax */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4"><label className="form-label">Tax:</label></div>
+                            <div className="col-8">
+                              <select
+                                name="taxId"
+                                className="form-select"
+                                value={formData.taxId}
+                                onChange={handleChange}
+                              >
+                                <option value="">Select Tax</option>
+                                {taxes.map((tax) => (
+                                  <option key={tax._id} value={tax._id}>{tax.taxName}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="modal-footer d-flex align-items-center justify-content-between gap-1">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowModal(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn btn-primary">
+                        {editingId ? "Update" : "Save"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </>)}
         {/* Vendor Search Modal */}
         {showVendorSearchModal && (
           <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -956,7 +1071,7 @@ function VendorPriceListForm() {
                   {/* Search Results */}
                   <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     {vendorSearchResults.length > 0 ? (
-                      <table className="table table-hover">
+                      <table className="table table-sm table-bordered">
                         <thead className="table-light sticky-top">
                           <tr>
                             <th>Vendor ID</th>
@@ -969,10 +1084,10 @@ function VendorPriceListForm() {
                         <tbody>
                           {vendorSearchResults.map((vendor, idx) => (
                             <tr key={idx}>
-                              <td><span className="badge">{vendor.vendorId}</span></td>
-                              <td>{vendor.name1}</td>
-                              <td>{vendor.contact}</td>
-                              <td>{vendor.location}</td>
+                              <td className="text-wrap">{vendor.vnNo}</td>
+                              <td className="text-wrap">{vendor.name1}</td>
+                              <td className="text-wrap">{vendor.contactNo}</td>
+                              <td className="text-wrap">{vendor.city}</td>
                               <td>
                                 <button
                                   className="btn btn-success btn-sm"
@@ -1014,7 +1129,6 @@ function VendorPriceListForm() {
           </div>
         )}
 
-        {/* Material Search Modal */}
         {/* Material Search Modal */}
         {showMaterialSearchModal && (
           <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -1081,7 +1195,7 @@ function VendorPriceListForm() {
                   {/* Search Results */}
                   <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                     {materialSearchResults.length > 0 ? (
-                      <table className="table table-hover">
+                      <table className="table table-sm table-bordered">
                         <thead className="table-light sticky-top">
                           <tr>
                             <th>Material ID</th>
@@ -1095,11 +1209,11 @@ function VendorPriceListForm() {
                         <tbody>
                           {materialSearchResults.map((material, idx) => (
                             <tr key={idx}>
-                              <td><span className="badge">{material.materialId}</span></td>
-                              <td>{material.description}</td>
-                              <td><span className="badge bg-secondary">{material.baseUnit}</span></td>
-                              <td>{material.location}</td>
-                              <td><span className="badge bg-info">{material.materialgroup}</span></td>
+                              <td className="text-wrap">{material.materialId}</td>
+                              <td className="text-wrap">{material.description}</td>
+                              <td className="text-wrap">{material.baseUnit}</td>
+                              <td className="text-wrap">{material.location}</td>
+                              <td className="text-wrap">{material.materialgroup}</td>
                               <td>
                                 <button
                                   className="btn btn-success btn-sm"
@@ -1140,6 +1254,7 @@ function VendorPriceListForm() {
             </div>
           </div>
         )}
+
         <DataImportModal
           show={showDataImportModal}
           onClose={() => setShowDataImportModal(false)}

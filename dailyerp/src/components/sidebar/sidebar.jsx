@@ -1124,10 +1124,10 @@ const Sidebar = () => {
     const handleToggle = (key) => {
         setOpenSubmenus(prevState => {
             const newState = { ...prevState };
-            
+
             // Check if this is a nested submenu (submenu-two)
             const parentKey = submenuRelationships[key];
-            
+
             if (parentKey) {
                 // For nested submenus, close all others but keep parent open
                 Object.keys(newState).forEach(submenuKey => {
@@ -1149,7 +1149,7 @@ const Sidebar = () => {
                 // Toggle the current submenu
                 newState[key] = !prevState[key];
             }
-            
+
             // Save to localStorage
             localStorage.setItem('openSubmenus', JSON.stringify(newState));
             return newState;
@@ -1262,7 +1262,7 @@ const Sidebar = () => {
                     </a>
                 </div>
                 {/* <!-- /Logo --> */}
-                <div className="modern-profile p-3 pb-0">
+                {/* <div className="modern-profile p-3 pb-0">
                     <div className="text-center rounded bg-light p-3 mb-4 user-profile">
                         <div className="avatar avatar-lg online mb-3">
                             <img src="assets/img/profiles/avatar-02.jpg" alt="Img" className="img-fluid rounded-circle" />
@@ -1321,7 +1321,7 @@ const Sidebar = () => {
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> */}
                 <div className="sidebar-inner slimscroll">
                     <div id="sidebar-menu" className="sidebar-menu">
                         <ul>
@@ -1917,7 +1917,17 @@ const Sidebar = () => {
                                     </ul>
                                 </li>
                             )}
-
+                            {hasPermission("Dashboard") && (
+                                <li>
+                                    <ul>
+                                        <li className="submenu">
+                                            <a target="_blank" href="https://ewaybillgst.gov.in/login.aspx">
+                                                <i className="ti ti-smart-home"></i><span>E-Way Bill</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            )}
                             {/* CRM Section */}
                             {hasPermission("CRM") && (
                                 <li>
@@ -2071,7 +2081,7 @@ const Sidebar = () => {
                                                     handleToggle("campaigns");
                                                 }}
                                             >
-                                             <i className="ti ti-brand-campaignmonitor"></i>  <span>Campaigns</span><span className="menu-arrow"></span>
+                                                <i className="ti ti-brand-campaignmonitor"></i>  <span>Campaigns</span><span className="menu-arrow"></span>
                                             </a>
                                             <ul style={{ display: openSubmenus.campaigns ? "block" : "none" }}>
                                                 {hasSubPermission("Campaigns", "Campaigns") && (

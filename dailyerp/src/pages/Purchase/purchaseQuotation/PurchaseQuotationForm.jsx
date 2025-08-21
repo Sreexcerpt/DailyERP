@@ -27,7 +27,7 @@ function QuotationForm() {
   const [indentSearch, setIndentSearch] = useState("");
   const [vendorSearch, setVendorSearch] = useState("");
   const [materialSearch, setMaterialSearch] = useState("");
-  
+
   const [searchIndent, setSearchIndent] = useState("");
   const [modalIndentSearch, setModalIndentSearch] = useState("");
   // const [selectedIndent, setSelectedIndent] = useState(null);
@@ -46,36 +46,36 @@ function QuotationForm() {
   }, [modalIndentSearch]);
   const [locations, setLocations] = useState([]); // Add this state
   useEffect(() => {
-  const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-  const financialYear = localStorage.getItem('financialYear');
-  const commonParams = {
-    params: {
-      companyId: selectedCompanyId,
-      financialYear: financialYear,
-    },
-  };
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    const financialYear = localStorage.getItem('financialYear');
+    const commonParams = {
+      params: {
+        companyId: selectedCompanyId,
+        financialYear: financialYear,
+      },
+    };
 
-  axios
-    .get("http://localhost:8080/api/indent/get", commonParams)
-    .then((res) => {
-      const activeIndents = res.data.filter(
-        (indent) => !indent.isDeleted && !indent.isBlocked
-      );
+    axios
+      .get("http://localhost:8080/api/indent/get", commonParams)
+      .then((res) => {
+        const activeIndents = res.data.filter(
+          (indent) => !indent.isDeleted && !indent.isBlocked
+        );
 
-      setIndents(
-        activeIndents.map((indent) => ({
-          label: `${indent.indentId} (${indent.categoryName})`,
-          value: indent,
-        }))
-      );
-    
-      setIndents(
-        activeIndents.map((indent) => ({
-          label: `${indent.indentId} (${indent.categoryName})`,
-          value: indent,
-        }))
-      );
-    });
+        setIndents(
+          activeIndents.map((indent) => ({
+            label: `${indent.indentId} (${indent.categoryName})`,
+            value: indent,
+          }))
+        );
+
+        setIndents(
+          activeIndents.map((indent) => ({
+            label: `${indent.indentId} (${indent.categoryName})`,
+            value: indent,
+          }))
+        );
+      });
 
     axios.get("http://localhost:8080/api/rfq-categories").then((res) => {
       setCategories(
@@ -86,7 +86,7 @@ function QuotationForm() {
       );
     });
 
-    axios.get("http://localhost:8080/api/vendors",commonParams).then((res) => {
+    axios.get("http://localhost:8080/api/vendors", commonParams).then((res) => {
       const activeVendors = res.data.filter(
         (vendor) => !vendor.isDeleted && !vendor.isBlocked
       );
@@ -101,7 +101,7 @@ function QuotationForm() {
     });
 
 
-    axios.get("http://localhost:8080/api/locations",  commonParams).then((res) => {
+    axios.get("http://localhost:8080/api/locations", commonParams).then((res) => {
       console.log("Locations API response:", res.data); // Add this to debug
       // Handle different response structures
       if (Array.isArray(res.data)) {
@@ -118,7 +118,7 @@ function QuotationForm() {
 
 
     axios
-      .get("http://localhost:8080/api/material",commonParams)
+      .get("http://localhost:8080/api/material", commonParams)
       .then((res) => {
         console.log("Fetched materials:", res.data);
         const filteredMaterials = res.data.filter(
@@ -151,7 +151,11 @@ function QuotationForm() {
     updatedItems[index][field] = value;
     setItems(updatedItems);
   };
-
+const openMaterialModal = (itemIndex) => {
+  console.log('Opening modal for item at index:', itemIndex); // Debug log
+  setSelectedItemIndex(itemIndex);
+  setShowModal(true);
+};
   const addItem = () => {
     setItems([
       ...items,
@@ -220,8 +224,8 @@ function QuotationForm() {
   // Add this new function to handle the final submission
   const handleFinalSubmit = async () => {
     const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-      const financialYear = localStorage.getItem('financialYear');
-  
+    const financialYear = localStorage.getItem('financialYear');
+
     const payload = {
       indentId: selectedIndent?.value?.indentId, // Changed from selectedIndent.indentId
       categoryId: selectedIndent?.value?.categoryId, // Changed from selectedIndent.categoryId
@@ -232,7 +236,7 @@ function QuotationForm() {
       validityDate,
       vnNo,
       companyId: selectedCompanyId,
-        financialYear: financialYear,
+      financialYear: financialYear,
       note,
       buyerGroup,
       location,
@@ -250,12 +254,13 @@ function QuotationForm() {
       alert("Quotation Created Successfully");
       console.log(res.data);
       setShowQuotationModal(false);
-      navigate("/quotations-display");
     } catch (err) {
       console.error(err);
       alert("Failed to create quotation");
     }
   };
+
+
 
   // Add this new QuotationNumberModal component before your return statement
   const QuotationNumberModal = () => {
@@ -367,185 +372,391 @@ function QuotationForm() {
       </div>
     );
   };
-  const MaterialModal = () => {
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchType, setSearchType] = useState("materialId");
+  // const MaterialModal = () => {
+  //   const [searchResults, setSearchResults] = useState([]);
+  //   const [searchType, setSearchType] = useState("materialId");
+  // const selectmaterial=(material,idx)=>{selectMaterialFromSearch(material),setSelectedItemIndex(idx)}
+  //   const [materialSearch, setMaterialSearch] = useState(""); // ✅ Add this line
+  //   const handleSearchInputChange = (e) => {
+  //     const value = e.target.value;
+  //     setMaterialSearch(value);
 
-    const [materialSearch, setMaterialSearch] = useState(""); // ✅ Add this line
-    const handleSearchInputChange = (e) => {
-      const value = e.target.value;
-      setMaterialSearch(value);
+  //     const filtered = materials.filter((mat) => {
+  //       const target =
+  //         searchType === "materialId" ? mat.materialId : mat.description;
+  //       return target?.toLowerCase().includes(value.toLowerCase());
+  //     });
 
-      const filtered = materials.filter((mat) => {
-        const target =
-          searchType === "materialId" ? mat.materialId : mat.description;
-        return target?.toLowerCase().includes(value.toLowerCase());
-      });
+  //     setSearchResults(filtered);
+  //   };
 
-      setSearchResults(filtered);
-    };
+  //   const handleViewAll = () => {
+  //     setSearchResults(materials);
+  //     setMaterialSearch("");
+  //   };
 
-    const handleViewAll = () => {
-      setSearchResults(materials);
-      setMaterialSearch("");
-    };
+  //   const handleClearResults = () => {
+  //     setSearchResults([]);
+  //     setMaterialSearch("");
+  //   };
 
-    const handleClearResults = () => {
-      setSearchResults([]);
-      setMaterialSearch("");
-    };
+  //   // const selectMaterialFromSearch = (material) => {
+  //   //   const updatedItems = [...items];
+  //   //   updatedItems[selectedItemIndex] = {
+  //   //     ...updatedItems[selectedItemIndex],
+  //   //     materialId: material.materialId,
+  //   //     description: material.description,
+  //   //     baseUnit: material.baseUnit,
+  //   //     orderUnit: material.orderUnit,
+  //   //   };
+  //   //   setItems(updatedItems);
+  //   //   setShowModal(false);
+  //   // };
 
-    const selectMaterialFromSearch = (material) => {
-      const updatedItems = [...items];
+
+  // const selectMaterialFromSearch = (material) => {
+  //   if (selectedItemIndex === null || selectedItemIndex === undefined) {
+  //     console.error('No item selected for update');
+  //     return;
+  //   }
+
+  //   setItems(prevItems => {
+  //     const updatedItems = [...prevItems];
+  //     updatedItems[selectedItemIndex] = {
+  //       ...updatedItems[selectedItemIndex],
+  //       materialId: material.materialId,
+  //       description: material.description,
+  //       materialGroup: material.materialgroup || "",
+  //       baseUnit: material.baseUnit,
+  //       orderUnit: material.orderUnit,
+  //     };
+  //     return updatedItems;
+  //   });
+    
+  //   setShowModal(false);
+  //   setSelectedItemIndex(null);
+  // };
+
+  //   return (
+  //     <div
+  //       className="modal show d-block"
+  //       tabIndex="-1"
+  //       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+  //     >
+  //       <div className="modal-dialog modal-xl">
+  //         <div className="modal-content">
+  //           <div className="modal-header bg-primary text-white">
+  //             <h5 className="modal-title">
+  //               <i className="fas fa-search me-2"></i>Search Materials
+  //             </h5>
+  //             <button
+  //               type="button"
+  //               className="btn-close btn-close-white"
+  //               onClick={() => setShowModal(false)}
+  //             ></button>
+  //           </div>
+
+  //           <div className="modal-body">
+  //             {/* Search Controls */}
+  //             <div className="row mb-3">
+  //               <div className="col-md-3">
+  //                 <label className="form-label">Search Type</label>
+  //                 <select
+  //                   className="form-select"
+  //                   value={searchType}
+  //                   onChange={(e) => setSearchType(e.target.value)}
+  //                 >
+  //                   <option value="materialId">Material ID</option>
+  //                   <option value="description">Description</option>
+  //                 </select>
+  //               </div>
+  //               <div className="col-md-6">
+  //                 <label className="form-label">Search Query</label>
+  //                 <div className="input-group">
+  //                   <span className="input-group-text">
+  //                     <i className="fas fa-search"></i>
+  //                   </span>
+  //                   <input
+  //                     type="text"
+  //                     className="form-control"
+  //                     placeholder={
+  //                       searchType === "materialId"
+  //                         ? "Enter Material ID (e.g., MMNR-100001)"
+  //                         : "Search by Description..."
+  //                     }
+  //                     value={materialSearch}
+  //                     onChange={handleSearchInputChange}
+  //                   />
+  //                 </div>
+  //               </div>
+  //               <div className="col-md-3">
+  //                 <label className="form-label">&nbsp;</label>
+  //                 <div className="d-flex gap-2">
+  //                   <button className="btn btn-info" onClick={handleViewAll}>
+  //                     <i className="fas fa-list me-1"></i>View All
+  //                   </button>
+  //                   {searchResults.length > 0 && (
+  //                     <button
+  //                       className="btn btn-outline-secondary"
+  //                       onClick={handleClearResults}
+  //                     >
+  //                       <i className="fas fa-times me-1"></i>Clear
+  //                     </button>
+  //                   )}
+  //                 </div>
+  //               </div>
+  //             </div>
+
+  //             {/* Search Results */}
+  //             <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+  //               {searchResults.length > 0 ? (
+  //                 <table className="table table-hover">
+  //                   <thead className="table-light sticky-top">
+  //                     <tr>
+  //                       <th>Material ID</th>
+  //                       <th>Description</th>
+  //                       <th>Base Unit</th>
+  //                       <th>Order Unit</th>
+  //                       <th>Action</th>
+  //                     </tr>
+  //                   </thead>
+  //                   <tbody>
+  //                     {searchResults.map((material, idx) => (
+  //                       <tr key={idx}>
+  //                         <td>{material.materialId}</td>
+  //                         <td>{material.description}</td>
+  //                         <td>{material.baseUnit}</td>
+  //                         <td>{material.orderUnit}</td>
+  //                         <td>
+  //                           <button
+  //                             className="btn btn-success btn-sm"
+  //                             onClick={() => {selectmaterial(material,idx)}}
+  //                           >
+  //                             <i className="fas fa-check me-1"></i>Select
+  //                           </button>
+  //                         </td>
+  //                       </tr>
+  //                     ))}
+  //                   </tbody>
+  //                 </table>
+  //               ) : (
+  //                 <div className="text-center py-4">
+  //                   <i className="fas fa-search fa-3x text-muted mb-3"></i>
+  //                   <p className="text-muted">
+  //                     {materials.length === 0
+  //                       ? "No materials loaded from API"
+  //                       : materialSearch
+  //                         ? `No materials found matching "${materialSearch}"`
+  //                         : 'Enter search term or click "View All"'}
+  //                   </p>
+  //                 </div>
+  //               )}
+  //             </div>
+  //           </div>
+
+  //           <div className="modal-footer">
+  //             <button
+  //               type="button"
+  //               className="btn btn-secondary"
+  //               onClick={() => setShowModal(false)}
+  //             >
+  //               <i className="fas fa-times me-1"></i>Close
+  //             </button>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+const MaterialModal = () => {
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchType, setSearchType] = useState("materialId");
+  const [materialSearch, setMaterialSearch] = useState("");
+
+  // Remove this line - don't change selectedItemIndex here
+  // const selectmaterial=(material,idx)=>{selectMaterialFromSearch(material),setSelectedItemIndex(idx)}
+
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setMaterialSearch(value);
+
+    const filtered = materials.filter((mat) => {
+      const target =
+        searchType === "materialId" ? mat.materialId : mat.description;
+      return target?.toLowerCase().includes(value.toLowerCase());
+    });
+
+    setSearchResults(filtered);
+  };
+
+  const handleViewAll = () => {
+    setSearchResults(materials);
+    setMaterialSearch("");
+  };
+
+  const handleClearResults = () => {
+    setSearchResults([]);
+    setMaterialSearch("");
+  };
+
+  const selectMaterialFromSearch = (material) => {
+    console.log('selectedItemIndex when selecting:', selectedItemIndex); // Debug log
+    
+    if (selectedItemIndex === null || selectedItemIndex === undefined) {
+      console.error('No item selected for update');
+      return;
+    }
+
+    setItems(prevItems => {
+      console.log('Previous items:', prevItems); // Debug log
+      const updatedItems = [...prevItems];
       updatedItems[selectedItemIndex] = {
         ...updatedItems[selectedItemIndex],
         materialId: material.materialId,
         description: material.description,
+        materialGroup: material.materialgroup || "",
         baseUnit: material.baseUnit,
-        unit: material.unit,
-        price: material.price,
+        orderUnit: material.orderUnit,
       };
-      setItems(updatedItems);
-      setShowModal(false);
-    };
+      console.log('Updated items:', updatedItems); // Debug log
+      return updatedItems;
+    });
+    
+    setShowModal(false);
+    // Don't reset selectedItemIndex here if you need it elsewhere
+    // setSelectedItemIndex(null);
+  };
 
-    return (
-      <div
-        className="modal show d-block"
-        tabIndex="-1"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      >
-        <div className="modal-dialog modal-xl">
-          <div className="modal-content">
-            <div className="modal-header bg-primary text-white">
-              <h5 className="modal-title">
-                <i className="fas fa-search me-2"></i>Search Materials
-              </h5>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={() => setShowModal(false)}
-              ></button>
-            </div>
+  return (
+    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div className="modal-dialog modal-xl">
+        <div className="modal-content">
+          <div className="modal-header bg-primary text-white">
+            <h5 className="modal-title">
+              <i className="fas fa-search me-2"></i>Search Materials
+            </h5>
+            <button
+              type="button"
+              className="btn-close btn-close-white"
+              onClick={() => setShowModal(false)}
+            ></button>
+          </div>
 
-            <div className="modal-body">
-              {/* Search Controls */}
-              <div className="row mb-3">
-                <div className="col-md-3">
-                  <label className="form-label">Search Type</label>
-                  <select
-                    className="form-select"
-                    value={searchType}
-                    onChange={(e) => setSearchType(e.target.value)}
-                  >
-                    <option value="materialId">Material ID</option>
-                    <option value="description">Description</option>
-                  </select>
+          <div className="modal-body">
+            {/* Search Controls - same as your code */}
+            <div className="row mb-3">
+              <div className="col-md-3">
+                <label className="form-label">Search Type</label>
+                <select
+                  className="form-select"
+                  value={searchType}
+                  onChange={(e) => setSearchType(e.target.value)}
+                >
+                  <option value="materialId">Material ID</option>
+                  <option value="description">Description</option>
+                </select>
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Search Query</label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="fas fa-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder={
+                      searchType === "materialId"
+                        ? "Enter Material ID (e.g., MMNR-100001)"
+                        : "Search by Description..."
+                    }
+                    value={materialSearch}
+                    onChange={handleSearchInputChange}
+                  />
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label">Search Query</label>
-                  <div className="input-group">
-                    <span className="input-group-text">
-                      <i className="fas fa-search"></i>
-                    </span>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder={
-                        searchType === "materialId"
-                          ? "Enter Material ID (e.g., MMNR-100001)"
-                          : "Search by Description..."
-                      }
-                      value={materialSearch}
-                      onChange={handleSearchInputChange}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-3">
-                  <label className="form-label">&nbsp;</label>
-                  <div className="d-flex gap-2">
-                    <button className="btn btn-info" onClick={handleViewAll}>
-                      <i className="fas fa-list me-1"></i>View All
+              </div>
+              <div className="col-md-3">
+                <label className="form-label">&nbsp;</label>
+                <div className="d-flex gap-2">
+                  <button className="btn btn-info" onClick={handleViewAll}>
+                    <i className="fas fa-list me-1"></i>View All
+                  </button>
+                  {searchResults.length > 0 && (
+                    <button
+                      className="btn btn-outline-secondary"
+                      onClick={handleClearResults}
+                    >
+                      <i className="fas fa-times me-1"></i>Clear
                     </button>
-                    {searchResults.length > 0 && (
-                      <button
-                        className="btn btn-outline-secondary"
-                        onClick={handleClearResults}
-                      >
-                        <i className="fas fa-times me-1"></i>Clear
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              {/* Search Results */}
-              <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-                {searchResults.length > 0 ? (
-                  <table className="table table-hover">
-                    <thead className="table-light sticky-top">
-                      <tr>
-                        <th>Material ID</th>
-                        <th>Description</th>
-                        <th>Base Unit</th>
-                        <th>Unit</th>
-                        <th>Price</th>
-                        <th>Action</th>
+            {/* Search Results */}
+            <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+              {searchResults.length > 0 ? (
+                <table className="table table-hover">
+                  <thead className="table-light sticky-top">
+                    <tr>
+                      <th>Material ID</th>
+                      <th>Description</th>
+                      <th>Base Unit</th>
+                      <th>Order Unit</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResults.map((material, idx) => (
+                      <tr key={idx}>
+                        <td>{material.materialId}</td>
+                        <td>{material.description}</td>
+                        <td>{material.baseUnit}</td>
+                        <td>{material.orderUnit}</td>
+                        <td>
+                          <button
+                            className="btn btn-success btn-sm"
+                            onClick={() => selectMaterialFromSearch(material)}
+                          >
+                            <i className="fas fa-check me-1"></i>Select
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {searchResults.map((material, idx) => (
-                        <tr key={idx}>
-                          <td>
-                            <span className="badge bg-secondary">
-                              {material.materialId}
-                            </span>
-                          </td>
-                          <td>{material.description}</td>
-                          <td>{material.baseUnit}</td>
-                          <td>{material.unit}</td>
-                          <td>{material.price}</td>
-                          <td>
-                            <button
-                              className="btn btn-success btn-sm"
-                              onClick={() => selectMaterialFromSearch(material)}
-                            >
-                              <i className="fas fa-check me-1"></i>Select
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="text-center py-4">
-                    <i className="fas fa-search fa-3x text-muted mb-3"></i>
-                    <p className="text-muted">
-                      {materials.length === 0
-                        ? "No materials loaded from API"
-                        : materialSearch
-                          ? `No materials found matching "${materialSearch}"`
-                          : 'Enter search term or click "View All"'}
-                    </p>
-                  </div>
-                )}
-              </div>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="text-center py-4">
+                  <i className="fas fa-search fa-3x text-muted mb-3"></i>
+                  <p className="text-muted">
+                    {materials.length === 0
+                      ? "No materials loaded from API"
+                      : materialSearch
+                        ? `No materials found matching "${materialSearch}"`
+                        : 'Enter search term or click "View All"'}
+                  </p>
+                </div>
+              )}
             </div>
+          </div>
 
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowModal(false)}
-              >
-                <i className="fas fa-times me-1"></i>Close
-              </button>
-            </div>
+          <div className="modal-footer">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setShowModal(false)}
+            >
+              <i className="fas fa-times me-1"></i>Close
+            </button>
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
+
+
 
   const IndentModal = () => {
     const [indentSearchType, setIndentSearchType] = useState("indentId");
@@ -991,22 +1202,22 @@ function QuotationForm() {
                           </div>
                         </div>
                         <div className="col-xl-3 row">
-                           <div className="col-xl-4">
-                          <label className="form-label">Reference</label></div>
-                           <div className="col-xl-8">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter Quotation Reference"
-                            value={quotationReference}
-                            onChange={(e) => setQuotationReference(e.target.value)}
-                          /></div>
+                          <div className="col-xl-4">
+                            <label className="form-label">Reference</label></div>
+                          <div className="col-xl-8">
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="Enter Quotation Reference"
+                              value={quotationReference}
+                              onChange={(e) => setQuotationReference(e.target.value)}
+                            /></div>
                         </div>
                         <div className="col-lg-3 row">
 
                           <div className="col-lg-3">
                             <label className="form-label">Location</label></div>
-                             <div className="col-xl-9">
+                          <div className="col-xl-9">
                             <select
                               className="form-select form-select-sm "
                               value={location}
@@ -1022,19 +1233,19 @@ function QuotationForm() {
                           </div>
                         </div>
                         <div className="col-lg-3 row">
-                           <div className="col-xl-5">
-                          <label className="form-label">
-                            Buyer Group
-                          </label></div>
-                           <div className="col-xl-7">
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={buyerGroup}
-                            onChange={(e) =>
-                              setBuyerGroup(e.target.value)
-                            }
-                          /></div>
+                          <div className="col-xl-5">
+                            <label className="form-label">
+                              Buyer Group
+                            </label></div>
+                          <div className="col-xl-7">
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={buyerGroup}
+                              onChange={(e) =>
+                                setBuyerGroup(e.target.value)
+                              }
+                            /></div>
                         </div>
 
                         <div className="col-lg-3 row">
@@ -1124,11 +1335,19 @@ function QuotationForm() {
                                   <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>
-                                      <input
-                                        className="form-control form-control-sm"
-                                        value={item.materialId}
-                                       
-                                      />
+                                      <div className="input-group">
+                                        <input
+                                          className="form-control form-control-sm"
+                                          value={item.materialId}
+
+                                        />
+                                        <button
+                                          type="button"
+                                          className="btn btn-link btn-sm btn-outline-info"
+                                          onClick={() => openMaterialModal(index)}
+                                        >
+                                          <i className="fas fa-search"></i>
+                                        </button></div>
                                     </td>
                                     <td>
                                       <input
@@ -1267,7 +1486,7 @@ function QuotationForm() {
 
 
 
-                      {showModal && <MaterialModal />}
+
                     </div>
                     <div className="col-xl-2 ms-auto  bg-light p-3 rounded">
                       <h6 className="mb-0">Total Price: <span className="text-primary">₹{totalPrice.toFixed(2)}</span></h6>
@@ -1279,10 +1498,10 @@ function QuotationForm() {
               </div>
             </div>
           </div>
-
+          {showModal && <MaterialModal />}
           {showIndentModal && <IndentModal />}
           {showVendorModal && <VendorModal />}
-{showQuotationModal && <QuotationNumberModal />}
+          {showQuotationModal && <QuotationNumberModal />}
         </div>
       </div>
     </>

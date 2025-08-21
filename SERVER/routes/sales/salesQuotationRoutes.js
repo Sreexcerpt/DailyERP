@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/sales/salesQuotationController');
+const controller = require('../../controllers/sales/salesQuotationController');
 
 router.post('/', controller.createQuotation);
 router.get('/', controller.getAllQuotations);

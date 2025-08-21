@@ -25,6 +25,7 @@ const employeeSchema = new mongoose.Schema({
   profilePhoto: String,
   resetCode: String,
   resetCodeExpiry: Date,
+     companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
   Feedbacks: [{
     studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Registration" },
     course: String,

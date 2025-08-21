@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const sourceController = require('../controllers/crm/sourceController');
+const sourceController = require('../../controllers/crm/sourceController');
 
 // GET /api/crm/sources - Get all sources
 router.get('/', sourceController.getSources);

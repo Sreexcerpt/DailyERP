@@ -766,11 +766,11 @@ function SalesOrderForm() {
 
     // Choose the right display fields
     const getNumber = (item) =>
-      item.quotationNumber || item.enquiryNumber || item.contractNumber || '';
+      item.quotationNumber || item.indentId || item.contractNumber || '';
     const getCustomer = (item) =>
       item.customerName || item.name1 || '';
     const getDate = (item) =>
-      item.date || item.validityDate || item.createdAt || '';
+      new Date(item.date || item.validityDate || item.createdAt || '').toLocaleDateString();
 
     return show ? (
       <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -829,7 +829,7 @@ function SalesOrderForm() {
                     <thead className="table-light sticky-top">
                       <tr>
                         <th>Number</th>
-                        <th>Customer Name</th>
+                        {/* <th>Customer Name</th> */}
                         <th>Date</th>
                         <th>Action</th>
                       </tr>
@@ -840,7 +840,7 @@ function SalesOrderForm() {
                           <td>
                             <span className="badge bg-info">{getNumber(item)}</span>
                           </td>
-                          <td>{getCustomer(item)}</td>
+                          {/* <td>{getCustomer(item)}</td> */}
                           <td>{getDate(item)}</td>
                           <td>
                             <button

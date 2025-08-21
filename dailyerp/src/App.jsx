@@ -142,6 +142,11 @@ function App() {
               <Dashboard />
             </ProtectedLayout>
           } />
+          <Route path='/eway' element={
+            <ProtectedLayout>
+              <EWayBillForm />
+            </ProtectedLayout>
+          } />
           <Route path='/MaterialCategory' element={
             <ProtectedLayout>
               <MaterialCategory />

@@ -1,4 +1,4 @@
-const Milestone = require('../models/crm/Milestone');
+const Milestone = require('../../models/crm/Milestone');
 
 const milestoneController = {
   // Get all milestones

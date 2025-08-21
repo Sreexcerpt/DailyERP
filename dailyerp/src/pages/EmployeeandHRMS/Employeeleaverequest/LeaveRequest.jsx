@@ -14,22 +14,30 @@ const FacultyLeaveRequests = () => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Mock user data - replace with your actual user data source
-  const mockUser = {
-    employeeId: "EMP001",
-    firstName: "John",
-    lastName: "Doe"
-  };
 
-  // Initialize form with user data on component mount
-  useEffect(() => {
-    const fullName = `${mockUser.firstName} ${mockUser.lastName}`;
-    setFormData(prev => ({
-      ...prev,
-      employeeId: mockUser.employeeId,
-      name: fullName
-    }));
-  }, []);
+
+useEffect(() => {
+  // Get stored user from localStorage
+  const storedUser = localStorage.getItem('user');
+
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      console.log('User data from localStorage:', user);
+
+      
+
+      setFormData(prev => ({
+        ...prev,
+        employeeId: user.employeeId || '',
+        name: user.username
+      }));
+    } catch (error) {
+      console.error('Error parsing user from localStorage:', error);
+    }
+  }
+}, []);
+
 
 
 // Replace submitLeaveRequest function
@@ -40,8 +48,10 @@ const submitLeaveRequest = async (requestData) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(requestData)
+
   });
   return await response.json();
+ 
 };
 
 // Replace fetchLeaveRequests function  
@@ -94,14 +104,26 @@ const fetchLeaveRequests = async (employeeId) => {
     }
   };
 
-  // Fetch leave requests when component mounts
-  useEffect(() => {
-    if (mockUser.employeeId) {
-      fetchLeaveRequests(mockUser.employeeId)
-        .then(requests => setLeaveRequests(requests))
-        .catch(error => console.error("Error fetching leave requests:", error));
+useEffect(() => {
+  // Get stored user from localStorage
+  const storedUser = localStorage.getItem('user');
+
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      console.log('User data from localStorage:', user);
+
+      if (user.employeeId) {
+        fetchLeaveRequests(user.employeeId)
+          .then(requests => setLeaveRequests(requests))
+          .catch(error => console.error("Error fetching leave requests:", error));
+      }
+    } catch (error) {
+      console.error("Error parsing user from localStorage:", error);
     }
-  }, []);
+  }
+}, []);
+
 
   // Prevent body scrolling when modal is open
   useEffect(() => {
@@ -330,7 +352,7 @@ const fetchLeaveRequests = async (employeeId) => {
                       />
                     </div>
 
-                    <div className="form-group mb-3" style={{ marginBottom: '1rem' }}>
+                    <div className="form-group mb-3" style={{ marginBottom: '3rem' }}>
                       <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
                         Leave Type
                       </label>
@@ -338,7 +360,7 @@ const fetchLeaveRequests = async (employeeId) => {
                         name="leaveType"
                         value={formData.leaveType}
                         onChange={handleChange}
-                        className="form-control"
+                        //className="form-control"
                         required
                         style={{
                           width: '100%',

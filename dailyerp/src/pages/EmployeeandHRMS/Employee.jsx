@@ -16,6 +16,7 @@ const Employee = () => {
   });
   
   const [facultyData, setFacultyData] = useState({
+    companyId:'',
     firstName: "",
     lastName: "",
     email: "",
@@ -53,7 +54,8 @@ const Employee = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/departments');
+      const response = await axios.get('http://localhost:8080/api/departments'
+     );
       setDepartments(response.data);
     } catch (error) {
       console.error('Error fetching departments:', error);
@@ -93,7 +95,10 @@ const Employee = () => {
 
   const fetchFaculties = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/faculties");
+        const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+      const response = await axios.get("http://localhost:8080/api/faculties",{
+      params: { companyId, financialYear }});
       setFaculties(response.data);
       
       // Calculate current counter for employee ID generation
@@ -308,8 +313,12 @@ const Employee = () => {
     if (!phoneNumber.startsWith("+91")) {
       phoneNumber = "+91" + phoneNumber;
     }
+ let materialId;
+      const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
 
     const submitData = {
+      companyId:selectedCompanyId,
     firstName: facultyData.firstName,
     lastName: facultyData.lastName,
     email: facultyData.email,

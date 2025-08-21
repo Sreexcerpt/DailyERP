@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const milestoneController = require('../controllers/crm/MilestoneController');
+const milestoneController = require('../../controllers/crm/MilestoneController');
 
 // GET /api/milestones - Get all milestones
 router.get('/', milestoneController.getMilestones);

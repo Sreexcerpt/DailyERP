@@ -1,4 +1,4 @@
-const VendorPriceList = require('../models/masterdata/VendorPriceList');
+const VendorPriceList = require('../../models/masterdata/VendorPriceList');
 
 // Create Vendor Price List
 exports.createVendorPrice = async (req, res) => {

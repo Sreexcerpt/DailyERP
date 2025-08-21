@@ -17268,6 +17268,8 @@ button.swal2-cancel {
 .sidebar .sidebar-logo {
     position: fixed;
     height: 50px;
+    background-color: white;
+    z-index: 1000;
     width: 252px;
     padding: 16px 16px 0;
 }

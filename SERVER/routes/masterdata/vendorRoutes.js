@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const vendorController = require('../controllers/masterdata/vendorController');
+const vendorController = require('../../controllers/masterdata/vendorController');
 
 router.post('/', vendorController.createVendor);
 router.get('/', vendorController.getVendors);

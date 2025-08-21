@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const timeEntryController = require('../controllers/crm/timeEntryController');
+const timeEntryController = require('../../controllers/crm/timeEntryController');
 
 // GET /api/time-entries - Get all time entries
 router.get('/', timeEntryController.getTimeEntries);

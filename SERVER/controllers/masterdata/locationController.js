@@ -1,4 +1,4 @@
-const Location = require('../models/masterdata/location');
+const Location = require('../../models/masterdata/location');
 
 // Create a new location (POST)
 exports.createLocation = async (req, res) => {

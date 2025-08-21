@@ -5,7 +5,7 @@ const {
   getAllInvoices,
   updateInvoice,
   getInvoiceById
-} = require('../controllers/accounts/invoiceController');
+} = require('../../controllers/accounts/invoiceController');
 
 router.post('/invoiceform', createInvoice);
 router.get('/invoiceform', getAllInvoices);

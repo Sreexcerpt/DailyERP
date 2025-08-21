@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import * as XLSX from 'xlsx';
 import DataImportModal from "../../components/DataImportModal";
+
 function CustomerPriceListForm() {
+  // Constants
+  const MATERIAL_PREFIX = "MMNR-"; // Define the material prefix
+  const [locations, setLocations] = useState([]);
   const [showDataImportModal, setShowDataImportModal] = useState(false);
   const [formData, setFormData] = useState({
     _id: "", // for edit tracking
@@ -16,6 +21,7 @@ function CustomerPriceListForm() {
     taxId: "",
     tandc: "",
   });
+
   const companyId = localStorage.getItem('selectedCompanyId');
   const financialYear = localStorage.getItem('financialYear');
   const [conversionValue, setConversionValue] = useState(1);
@@ -28,10 +34,96 @@ function CustomerPriceListForm() {
   const [searchResults, setSearchResults] = useState([]);
   const [searchType, setSearchType] = useState('materialId');
   const [currentEditIndex, setCurrentEditIndex] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showdropdown, setShowdropdown] = useState(false);
+  const [showCustomerSearchModal, setShowCustomerSearchModal] = useState(false);
+  const [customerSearchResults, setCustomerSearchResults] = useState([]);
+  const [customerSearchType, setCustomerSearchType] = useState('customerId');
+  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+
   const handleImportSuccess = (result) => {
     alert(`Import completed: ${result.results.imported} records imported`);
     setShowDataImportModal(false);
   };
+
+  // Export to Excel Function
+  const exportToExcel = () => {
+    // Prepare data for Excel
+    const excelData = filteredData.map(item => ({
+      'Customer Name': item.customerId?.name1 || '',
+      'Customer ID': item.customerId?.cnNo || '',
+      'Category': item.categoryId?.categoryName || '',
+      'Material ID': item.materialId?.materialId || '',
+      'Material Description': item.materialId?.description || '',
+      'Unit': item.unit || '',
+      'BUM (Base Unit Measure)': item.bum || '',
+      'Order Unit': item.orderUnit || '',
+      'Price': item.price || '',
+      'Sales Group': item.salesGroup || '',
+      'Tax Name': item.taxId?.taxName || '',
+      'CGST %': item.taxId?.cgst || '',
+      'SGST %': item.taxId?.sgst || '',
+      'IGST %': item.taxId?.igst || '',
+      'Terms & Conditions': item.tandc || '',
+      'Company ID': item.companyId || '',
+      'Financial Year': item.financialYear || '',
+      'Created Date': item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '',
+      'Updated Date': item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : ''
+    }));
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Set column widths
+    const colWidths = [
+      { wch: 25 }, // Customer Name
+      { wch: 15 }, // Customer ID
+      { wch: 20 }, // Category
+      { wch: 20 }, // Material ID
+      { wch: 35 }, // Material Description
+      { wch: 10 }, // Unit
+      { wch: 15 }, // BUM
+      { wch: 15 }, // Order Unit
+      { wch: 12 }, // Price
+      { wch: 15 }, // Sales Group
+      { wch: 15 }, // Tax Name
+      { wch: 10 }, // CGST %
+      { wch: 10 }, // SGST %
+      { wch: 10 }, // IGST %
+      { wch: 25 }, // Terms & Conditions
+      { wch: 15 }, // Company ID
+      { wch: 15 }, // Financial Year
+      { wch: 15 }, // Created Date
+      { wch: 15 }  // Updated Date
+    ];
+    ws['!cols'] = colWidths;
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Customer Price List');
+
+    // Generate filename with current date and time
+    const now = new Date();
+    const currentDate = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // DD-MM-YYYY format
+    const currentTime = now.toLocaleTimeString('en-GB', { hour12: false }).replace(/:/g, '-'); // HH-MM-SS format
+    const filename = `Customer-Price-List-${currentDate}-${currentTime}.xlsx`;
+
+    // Save the file
+    XLSX.writeFile(wb, filename);
+
+    // Show success message
+    alert(`Excel file exported successfully as: ${filename}`);
+  };
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/locations", {
+        params: { companyId, financialYear }
+      })
+      .then((res) => setLocations(res.data));
+  }, []);
   useEffect(() => {
     fetchCategories();
     fetchCustomers();
@@ -41,35 +133,65 @@ function CustomerPriceListForm() {
   }, []);
 
   const fetchCategories = async () => {
-    const res = await axios.get(
-      "http://localhost:8080/api/customer-categories"
-    );
-    setCategories(res.data);
+    try {
+      const res = await axios.get("http://localhost:8080/api/customer-categories", {
+        params: { companyId, financialYear }
+      });
+      setCategories(res.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      alert("Error loading categories");
+    }
   };
 
   const fetchCustomers = async () => {
-    const res = await axios.get("http://localhost:8080/api/customers");
-    setCustomers(res.data);
-    console.log("cut", res.data);
+    try {
+      const res = await axios.get("http://localhost:8080/api/customers", {
+        params: { companyId, financialYear }
+      });
+      setCustomers(res.data);
+      console.log("customers", res.data);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      alert("Error loading customers");
+    }
   };
 
   const fetchMaterials = async () => {
-    const res = await axios.get("http://localhost:8080/api/material");
-    setMaterials(res.data);
+    try {
+      const res = await axios.get("http://localhost:8080/api/material", {
+        params: { companyId, financialYear }
+      });
+      setMaterials(res.data);
+    } catch (error) {
+      console.error("Error fetching materials:", error);
+      alert("Error loading materials");
+    }
   };
 
   const fetchTaxes = async () => {
-    const res = await axios.get("http://localhost:8080/api/tax");
-    setTaxes(res.data);
+    try {
+      const res = await axios.get("http://localhost:8080/api/tax", {
+        params: { companyId, financialYear }
+      });
+      setTaxes(res.data);
+    } catch (error) {
+      console.error("Error fetching taxes:", error);
+      alert("Error loading taxes");
+    }
   };
 
   const fetchAllPriceLists = async () => {
-    const res = await axios.get(
-      "http://localhost:8080/api/customer-price-lists", {
-      params: { companyId, financialYear }
+    try {
+      const res = await axios.get(
+        "http://localhost:8080/api/customer-price-lists", {
+        params: { companyId, financialYear }
+      });
+      setAllData(res.data);
+    } catch (error) {
+      console.error("Error fetching price lists:", error);
+      alert("Error loading price lists");
     }
-    );
-    setAllData(res.data);
   };
 
   const handleChange = async (e) => {
@@ -78,27 +200,14 @@ function CustomerPriceListForm() {
 
     if (name === "materialId") {
       try {
-        const res = await axios.get(
-          `http://localhost:8080/api/material/${value}`
-        );
+        const res = await axios.get(`http://localhost:8080/api/material/${value}`);
         const conv = res.data.conversionValue || 1;
         setConversionValue(conv);
-        const bum = parseFloat(formData.bum) || 0;
-        updatedForm.orderUnit = (bum * conv).toFixed(2);
-      } catch {
+      } catch (error) {
+        console.error("Error fetching material conversion:", error);
         setConversionValue(1);
       }
     }
-
-    if (name === "bum") {
-      const bum = parseFloat(value);
-      if (!isNaN(bum)) {
-        updatedForm.orderUnit = (bum * conversionValue).toFixed(2);
-      } else {
-        updatedForm.orderUnit = "";
-      }
-    }
-
     setFormData(updatedForm);
   };
 
@@ -146,8 +255,8 @@ function CustomerPriceListForm() {
       console.error("Submit error:", err);
     }
   };
-  const handleEdit = (item) => {
 
+  const handleEdit = (item) => {
     // Helper function to safely extract ID
     const extractId = (field) => {
       if (!field) return ""; // Handle null, undefined, or empty values
@@ -174,7 +283,7 @@ function CustomerPriceListForm() {
       salesGroup: item.salesGroup || "",
       taxId: taxId,
       tandc: tandc,
-      price: price,
+      price: item.price || "", // Fixed: use item.price instead of undefined price
     };
 
     setFormData(newFormData);
@@ -196,25 +305,7 @@ function CustomerPriceListForm() {
     }
   };
 
-  const [showModal, setShowModal] = useState(false);
-
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  const paginatedData = allData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const totalPages = Math.ceil(allData.length / itemsPerPage);
-  const handlePageClick = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-  const [searchQuery, setSearchQuery] = useState("");
-
+  // Filter data based on search query
   const filteredData = allData.filter((item) => {
     const customerName = item.customerId?.name1?.toLowerCase() || "";
     const categoryName = item.categoryId?.categoryName?.toLowerCase() || "";
@@ -227,53 +318,75 @@ function CustomerPriceListForm() {
     );
   });
 
+  // Calculate paginated data from filtered data
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handlePageClick = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
-  const [showdropdown, setShowdropdown] = useState(false);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setFormData({
+      _id: "",
+      categoryId: "",
+      customerId: "",
+      materialId: "",
+      unit: "", // Fixed: use unit instead of location
+      bum: "",
+      orderUnit: "",
+      price: "",
+      salesGroup: "",
+      taxId: "",
+      tandc: "",
+    });
+  };
 
-  const handleOpendropdown = () => setShowdropdown(true);
-  const handleClosedropdown = () => setShowdropdown(false);
+
 
   const openSearchModal = () => {
-    setCurrentEditIndex();
+    setCurrentEditIndex(null);
     setShowSearchModal(true);
-    setSearchQuery('');
-    // handleCloseModal();
     setSearchResults([]);
   };
 
   const closeSearchModal = () => {
     setShowSearchModal(false);
     setCurrentEditIndex(null);
-    setSearchQuery('');
     setSearchResults([]);
   };
+
   const selectMaterialFromSearch = (material) => {
     console.log("Selected material:", material);
-    // Trigger handleChange with name as "materialId" and value as material._id
     handleChange({ target: { name: "materialId", value: material._id } });
-
     closeSearchModal();
   };
-  const handleSearchInputChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-  };
+
+
+
   const handleSearch = () => {
-    if (!searchQuery.trim()) {
+    const query = searchQuery.trim();
+    if (!query) {
       setSearchResults([]);
       return;
     }
 
-    console.log('Searching with query:', searchQuery, 'Type:', searchType);
+    console.log('Searching with query:', query, 'Type:', searchType);
     console.log('Available materials:', materials);
 
     if (searchType === 'materialId') {
-      let searchTerm = searchQuery;
+      let searchTerm = query;
 
-      if (/^\d+$/.test(searchQuery)) {
-        searchTerm = MATERIAL_PREFIX + searchQuery;
+      if (/^\d+$/.test(query)) {
+        searchTerm = MATERIAL_PREFIX + query;
       }
 
       const filtered = materials.filter(material => {
@@ -286,13 +399,15 @@ function CustomerPriceListForm() {
     } else {
       const filtered = materials.filter(material => {
         const description = material.description || '';
-        return description.toLowerCase().includes(searchQuery.toLowerCase());
+        return description.toLowerCase().includes(query.toLowerCase());
       });
 
       console.log('Filtered results for description:', filtered);
       setSearchResults(filtered);
     }
   };
+
+  // Fixed useEffect for material search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim()) {
@@ -303,7 +418,7 @@ function CustomerPriceListForm() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchType, materials]);
+  }, [searchQuery, searchType]); // Removed materials dependency to avoid infinite loop
 
   const handleViewAll = () => {
     setSearchResults(materials);
@@ -314,10 +429,8 @@ function CustomerPriceListForm() {
     setSearchResults([]);
     setSearchQuery('');
   };
-  const [showCustomerSearchModal, setShowCustomerSearchModal] = useState(false);
-  const [customerSearchResults, setCustomerSearchResults] = useState([]);
-  const [customerSearchType, setCustomerSearchType] = useState('customerId');
-  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+
+  // Customer search functions
   const openCustomerSearchModal = () => {
     setShowCustomerSearchModal(true);
     setCustomerSearchQuery('');
@@ -370,6 +483,8 @@ function CustomerPriceListForm() {
     handleChange({ target: { name: "customerId", value: customer._id } });
     closeCustomerSearchModal();
   };
+
+  // Fixed useEffect for customer search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (customerSearchQuery.trim()) {
@@ -380,183 +495,172 @@ function CustomerPriceListForm() {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [customerSearchQuery, customerSearchType, customers]);
+  }, [customerSearchQuery, customerSearchType]); // Removed customers dependency
+
   return (
-    <div className="content content-two">
-      <h4>Customer-Price-List</h4>
-      <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3 mt-3">
-        <div>
-          <button className="btn btn-outline-primary" onClick={() => setShowDataImportModal(true)}>
-            <i className="isax isax-import me-1"></i>Import
-          </button>
-        </div>
-        <div>
-          <div className="input-group">
-            <span className="input-group-text">
-              <i className="ti ti-search"></i>
-            </span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search materials..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-          <div className="dropdown">
-            <a
-              href="#"
-              className="btn btn-outline-primary d-inline-flex align-items-center"
-              data-bs-toggle="dropdown"
-            >
-              <i className="isax isax-export-1 me-1"></i>Export
-            </a>
-            <ul className="dropdown-menu">
-              <li>
-                <a className="dropdown-item" href="#">
-                  Download as PDF
-                </a>
+    <div className="content">
+      {/* Header Section */}
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto mb-2">
+          <h2 className="mb-1">Customer Price List</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
               </li>
-              <li>
-                <a className="dropdown-item" href="#">
-                  Download as Excel
-                </a>
+              <li className="breadcrumb-item">
+                Master
               </li>
-            </ul>
-          </div>
-          <div>
-            <div>
-              <a
-                onClick={() => {
-                  handleOpenModal();
-                }}
-                className="btn btn-primary d-flex align-items-center"
-              >
-                <i className="isax isax-add-circle5 me-1"></i>New Customer Price
-                List
-              </a>
-            </div>
-          </div>
+              <li className="breadcrumb-item active" aria-current="page">Customer Price List</li>
+            </ol>
+          </nav>
         </div>
       </div>
 
-      <DataImportModal
-        show={showDataImportModal}
-        onClose={() => setShowDataImportModal(false)}
-        onImportSuccess={handleImportSuccess}
-        masterDataType="customerPriceList"
-      />
+      <div className="card">
+        <div className="card-header">
+          <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+              <div className="input-group">
+                <span className="input-group-text">
+                  <i className="ti ti-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search materials..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
+              <div>
+                <button className="btn btn-outline-primary btn-sm" onClick={() => setShowDataImportModal(true)}>
+                  <i className="ti ti-file-import me-1"></i>Import
+                </button>
+              </div>
 
-      <div className="table-responsive">
-        <table className="table table-bordered datatable">
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Category</th>
-              <th>Material</th>
-              <th>Location</th>
-              <th>BUM</th>
-              <th>Order Unit</th>
-              <th>Price</th>
-              <th>Sales Group</th>
-              <th>Tax</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((row) => (
-              <tr key={row._id}>
-                <td>
-                  <div className="d-flex align-items-center">
-                    <div>
-                      <h6 className="fs-14 fw-medium mb-0">
-                        <a href="#">{row.customerId?.name1}</a>
-                      </h6>
-                    </div>
-                  </div>
-                </td>
-                <td>{row.categoryId?.categoryName}</td>
-                <td>{row.materialId?.description}</td>
-                <td className="text-dark">{row.unit}</td>
-                <td className="text-dark">{row.bum}</td>
-                <td className="text-dark">{row.orderUnit}</td>
-                <td className="text-dark">{row.orderUnit}</td>
-                <td className="text-dark">{row.salesGroup}</td>
-                <td className="text-dark">{row.taxId?.taxName}</td>
-                <td style={{ cursor: "pointer" }}>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={() => {
-                      handleEdit(row);
-                      handleOpenModal();
-                    }}
+              {/* Updated Export Button - Direct Excel Export */}
+              <button
+                className="btn btn-outline-success btn-sm"
+                onClick={exportToExcel}
+                title="Export to Excel"
+              >
+                <i className="ti ti-file-export me-1"></i>Export
+              </button>
+
+              <div>
+                <div>
+                  <a
+                    onClick={handleOpenModal}
+                    className="btn btn-primary btn-sm"
                   >
-                    Edit
-                  </button>
-                </td>
+                    <i className="ti ti-circle-plus me-1"></i>Add New Customer Price List
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="card-body">
+          <table className="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Category</th>
+                <th>Material</th>
+                <th>Unit</th>
+                <th>BUM</th>
+                <th>Order Unit</th>
+                <th>Price</th>
+                <th>Sales Group</th>
+                <th>Tax</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedData.map((row) => (
+                <tr key={row._id}>
+                  <td>
+                    <div className="d-flex align-items-center">
+                      <div>
+                        <h6 className="fs-14 fw-medium mb-0">
+                          <a href="#">{row.customerId?.name1}</a>
+                        </h6>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{row.categoryId?.categoryName}</td>
+                  <td>{row.materialId?.description}</td>
+                  <td className="text-dark">{row.unit}</td>
+                  <td className="text-dark">{row.bum}</td>
+                  <td className="text-dark">{row.orderUnit}</td>
+                  <td className="text-dark">Rs{row.price}</td> {/* Fixed: show price instead of orderUnit */}
+                  <td className="text-dark">{row.salesGroup}</td>
+                  <td className="text-dark">{row.taxId?.taxName}</td>
+                  <td style={{ cursor: "pointer" }}>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => {
+                        handleEdit(row);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-        <div
-          className="dataTables_paginate paging_simple_numbers"
-          id="DataTables_Table_0_paginate"
-        >
-          <ul className="pagination">
-            <li
-              className={`paginate_button page-item previous ${currentPage === 1 ? "disabled" : ""
-                }`}
-            >
-              <a
-                href="#"
-                className="page-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePageClick(currentPage - 1);
-                }}
-              >
-                <i className="isax isax-arrow-left"></i>
-              </a>
-            </li>
-
-            {Array.from({ length: totalPages }, (_, i) => (
-              <li
-                key={i}
-                className={`paginate_button page-item ${currentPage === i + 1 ? "active" : ""
-                  }`}
-              >
+          <div className="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate">
+            <ul className="pagination">
+              <li className={`paginate_button page-item previous ${currentPage === 1 ? "disabled" : ""}`}>
                 <a
                   href="#"
                   className="page-link"
                   onClick={(e) => {
                     e.preventDefault();
-                    handlePageClick(i + 1);
+                    handlePageClick(currentPage - 1);
                   }}
                 >
-                  {i + 1}
+                  <i className="ti ti-arrow-left"></i>
                 </a>
               </li>
-            ))}
 
-            <li
-              className={`paginate_button page-item next ${currentPage === totalPages ? "disabled" : ""
-                }`}
-            >
-              <a
-                href="#"
-                className="page-link"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePageClick(currentPage + 1);
-                }}
-              >
-                <i className="isax isax-arrow-right-1"></i>
-              </a>
-            </li>
-          </ul>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <li
+                  key={i}
+                  className={`paginate_button page-item ${currentPage === i + 1 ? "active" : ""}`}
+                >
+                  <a
+                    href="#"
+                    className="page-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageClick(i + 1);
+                    }}
+                  >
+                    {i + 1}
+                  </a>
+                </li>
+              ))}
+
+              <li className={`paginate_button page-item next ${currentPage === totalPages ? "disabled" : ""}`}>
+                <a
+                  href="#"
+                  className="page-link"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageClick(currentPage + 1);
+                  }}
+                >
+                  <i className="ti ti-arrow-right"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -580,22 +684,7 @@ function CustomerPriceListForm() {
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={() => {
-                      handleCloseModal();
-                      setFormData({
-                        _id: "",
-                        categoryId: "",
-                        customerId: "",
-                        materialId: "",
-                        location: "",
-                        bum: "",
-                        orderUnit: "",
-                        price: "",
-                        salesGroup: "",
-                        taxId: "",
-                        tandc: "",
-                      });
-                    }}
+                    onClick={handleCloseModal}
                     aria-label="Close"
                   ></button>
                 </div>
@@ -694,16 +783,46 @@ function CustomerPriceListForm() {
                         <div className="col-md-4 mb-2">
                           <div className="row">
                             <div className="col-4">
-                              <label className="form-label">Unit:</label>
+                              <label className="form-label">Location</label>
                             </div>
                             <div className="col-8">
-                              <input
-                                type="text"
+                              <select
                                 name="unit"
-                                className="form-control"
-                                placeholder="Enter unit"
+                                className="form-select form-select-sm"
                                 value={formData.unit}
                                 onChange={handleChange}
+                                required
+                              >
+                                <option value="">Select</option>
+                                {locations.map((loc) => (
+                                  <option key={loc.name} value={loc.name}>
+                                    {loc.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+
+
+
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-5">
+                              <label className="form-label">BUM (Base Unit):</label>
+                            </div>
+                            <div className="col-7">
+                              <input
+                                type="number"
+                                name="bum"
+                                className="form-control"
+                                placeholder="Enter BUM"
+                                value={formData.bum}
+                                onChange={(e) => {
+                                  e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+                                  handleChange(e)
+                                }}
                                 required
                               />
                             </div>
@@ -713,15 +832,39 @@ function CustomerPriceListForm() {
                         <div className="col-md-4 mb-2">
                           <div className="row">
                             <div className="col-4">
-                              <label className="form-label">BUM (Base Unit):</label>
+                              <label className="form-label">Order Unit:</label>
                             </div>
                             <div className="col-8">
                               <input
                                 type="number"
-                                name="bum"
+                                name="orderUnit"
                                 className="form-control"
-                                placeholder="Enter BUM"
-                                value={formData.bum}
+                                placeholder="Enter Order Unit"
+                                value={formData.orderUnit}
+                                onChange={(e) => {
+                                  e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+                                  handleChange(e)
+                                }}
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Added Price Field */}
+                        <div className="col-md-4 mb-2">
+                          <div className="row">
+                            <div className="col-4">
+                              <label className="form-label">Price:</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                type="number"
+                                step="0.01"
+                                name="price"
+                                className="form-control"
+                                placeholder="Enter price"
+                                value={formData.price}
                                 onChange={handleChange}
                                 required
                               />
@@ -741,25 +884,6 @@ function CustomerPriceListForm() {
                                 className="form-control"
                                 placeholder="Enter Sales Group"
                                 value={formData.salesGroup}
-                                onChange={handleChange}
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-4 mb-2">
-                          <div className="row">
-                            <div className="col-4">
-                              <label className="form-label">Order Unit:</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="orderUnit"
-                                className="form-control"
-                                placeholder="Enter Order Unit"
-                                value={formData.orderUnit}
                                 onChange={handleChange}
                                 required
                               />
@@ -801,8 +925,7 @@ function CustomerPriceListForm() {
                                 <option value="">Select</option>
                                 {taxes.map((tax) => (
                                   <option key={tax._id} value={tax._id}>
-                                    {tax.taxName} (CGST: {tax.cgst}%, SGST:{" "}
-                                    {tax.sgst}%, IGST: {tax.igst}%)
+                                    {tax.taxName} (CGST: {tax.cgst}%, SGST: {tax.sgst}%, IGST: {tax.igst}%)
                                   </option>
                                 ))}
                               </select>
@@ -815,8 +938,8 @@ function CustomerPriceListForm() {
                     <div className="modal-footer d-flex align-items-center justify-content-between gap-1">
                       <button
                         type="button"
-                        className="btn btn-outline-white"
-                        onClick={() => setShowModal(false)}
+                        className="btn btn-outline-secondary"
+                        onClick={handleCloseModal}
                       >
                         Cancel
                       </button>
@@ -832,6 +955,7 @@ function CustomerPriceListForm() {
         </>
       )}
 
+      {/* Material Search Modal */}
       {showSearchModal && (
         <div
           className="modal show d-block"
@@ -851,7 +975,6 @@ function CustomerPriceListForm() {
                 ></button>
               </div>
               <div className="modal-body">
-                {/* Search Controls */}
                 <div className="row mb-3">
                   <div className="col-md-3">
                     <label className="form-label">Search Type</label>
@@ -879,7 +1002,7 @@ function CustomerPriceListForm() {
                             : "Search by Description..."
                         }
                         value={searchQuery}
-                        onChange={handleSearchInputChange}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
                   </div>
@@ -901,10 +1024,9 @@ function CustomerPriceListForm() {
                   </div>
                 </div>
 
-                {/* Search Results */}
                 <div style={{ maxHeight: "400px", overflowY: "auto" }}>
                   {searchResults.length > 0 ? (
-                    <table className="table table-hover">
+                    <table className="table table-sm table-bordered">
                       <thead className="table-light sticky-top">
                         <tr>
                           <th>Material ID</th>
@@ -918,29 +1040,15 @@ function CustomerPriceListForm() {
                       <tbody>
                         {searchResults.map((material, idx) => (
                           <tr key={idx}>
-                            <td>
-                              <span className="badge ">
-                                {material.materialId}
-                              </span>
-                            </td>
-                            <td>{material.description}</td>
-                            <td>
-                              <span className="badge bg-secondary">
-                                {material.baseUnit}
-                              </span>
-                            </td>
-                            <td>{material.location}</td>
-                            <td>
-                              <span className="badge bg-info">
-                                {material.materialgroup}
-                              </span>
-                            </td>
+                            <td className="text-wrap">{material.materialId}</td>
+                            <td className="text-wrap">{material.description}</td>
+                            <td className="text-wrap">{material.baseUnit}</td>
+                            <td className="text-wrap">{material.location}</td>
+                            <td className="text-wrap">{material.materialgroup}</td>
                             <td>
                               <button
                                 className="btn btn-success btn-sm"
-                                onClick={() =>
-                                  selectMaterialFromSearch(material)
-                                }
+                                onClick={() => selectMaterialFromSearch(material)}
                               >
                                 <i className="fas fa-check me-1"></i>Select
                               </button>
@@ -976,6 +1084,8 @@ function CustomerPriceListForm() {
           </div>
         </div>
       )}
+
+      {/* Customer Search Modal */}
       {showCustomerSearchModal && (
         <div
           className="modal show d-block"
@@ -995,7 +1105,6 @@ function CustomerPriceListForm() {
                 ></button>
               </div>
               <div className="modal-body">
-                {/* Search Controls */}
                 <div className="row mb-3">
                   <div className="col-md-3">
                     <label className="form-label">Search Type</label>
@@ -1048,14 +1157,14 @@ function CustomerPriceListForm() {
                   </div>
                 </div>
 
-                {/* Search Results */}
                 <div style={{ maxHeight: "400px", overflowY: "auto" }}>
                   {customerSearchResults.length > 0 ? (
-                    <table className="table table-hover">
+                    <table className="table table-sm table-bordered">
                       <thead className="table-light sticky-top">
                         <tr>
                           <th>Customer ID</th>
                           <th>Name</th>
+                          <th>City</th>
                           <th>Email</th>
                           <th>Phone</th>
                           <th>Action</th>
@@ -1064,20 +1173,15 @@ function CustomerPriceListForm() {
                       <tbody>
                         {customerSearchResults.map((customer, idx) => (
                           <tr key={idx}>
-                            <td>
-                              <span className="badge">
-                                {customer.customerId}
-                              </span>
-                            </td>
-                            <td>{customer.name1}</td>
-                            <td>{customer.email}</td>
-                            <td>{customer.phone}</td>
+                            <td className="text-wrap">{customer.cnNo}</td>
+                            <td className="text-wrap">{customer.name1}</td>
+                            <td className="text-wrap">{customer.city}</td>
+                            <td className="text-wrap">{customer.email}</td>
+                            <td className="text-wrap">{customer.contactNo}</td>
                             <td>
                               <button
                                 className="btn btn-success btn-sm"
-                                onClick={() =>
-                                  selectCustomerFromSearch(customer)
-                                }
+                                onClick={() => selectCustomerFromSearch(customer)}
                               >
                                 <i className="fas fa-check me-1"></i>Select
                               </button>
@@ -1113,6 +1217,13 @@ function CustomerPriceListForm() {
           </div>
         </div>
       )}
+
+      <DataImportModal
+        show={showDataImportModal}
+        onClose={() => setShowDataImportModal(false)}
+        onImportSuccess={handleImportSuccess}
+        masterDataType="customerPriceList"
+      />
     </div>
   );
 }

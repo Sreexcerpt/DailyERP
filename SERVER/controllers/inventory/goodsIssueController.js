@@ -1,8 +1,8 @@
 
-const GoodsIssue = require('../models/inventry/GoodsIssue');
-const GoodsIssueCategory = require('../models/categories/GoodsIssueCategory'); // ensure this model exists
+const GoodsIssue = require('../../models/inventry/GoodsIssue');
+const GoodsIssueCategory = require('../../models/categories/GoodsIssueCategory'); // ensure this model exists
 const mongoose = require('mongoose');
-const StockItem = require('../models/inventry/StockItemModel'); // Assuming you have a StockItem model
+const StockItem = require('../../models/inventry/StockItemModel'); // Assuming you have a StockItem model
 // POST /api/goodsissue
 const createGoodsIssue = async (req, res) => {
   try {

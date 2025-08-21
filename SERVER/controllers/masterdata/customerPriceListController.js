@@ -1,4 +1,4 @@
-const CustomerPriceList = require('../models/masterdata/CustomerPriceList');
+const CustomerPriceList = require('../../models/masterdata/CustomerPriceList');
 
 // exports.createCustomerPrice = async (req, res) => {
 //   try {

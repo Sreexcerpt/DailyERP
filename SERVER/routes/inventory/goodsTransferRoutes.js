@@ -4,7 +4,7 @@ const {
   createGoodsTransfer,
   getAllGoodsTransfers,
   getGoodsTransferByDocNumber
-} = require('../controllers/inventory/goodsTransferController');
+} = require('../../controllers/inventory/goodsTransferController');
 
 router.post('/', createGoodsTransfer);
 router.get('/', getAllGoodsTransfers);

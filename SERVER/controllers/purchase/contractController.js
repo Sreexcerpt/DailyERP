@@ -1,5 +1,5 @@
-const Contract = require('../models/purchase/Contract')
-const ContractCategory = require('../models/categories/PurchaseContractCategoryModel');
+const Contract = require('../../models/purchase/Contract')
+const ContractCategory = require('../../models/categories/PurchaseContractCategoryModel');
 
 // Generate Contract Number
 async function generateCTNRNumber(categoryId) {
