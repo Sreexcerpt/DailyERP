@@ -71,7 +71,7 @@ import SalesCategory from './pages/category/SalesCategory';
 import SalesOrderCategoryForm from './pages/category/SalesOrderCategoryForm';
 import TransferCategory from './pages/category/TransferCategory';
 import VendorCategoryForm from './pages/category/VendorCategory';
-
+import GoodsTransferList from './pages/Inventory/GoodsTransferList';
 
 
 
@@ -162,6 +162,7 @@ function App() {
               <PurchaseOrderDisplay />
             </ProtectedLayout>
           } />
+
           <Route path='/SaleContractCategory' element={
             <ProtectedLayout>
               <SaleContractCategoryForm />
@@ -254,8 +255,12 @@ function App() {
               <GoodsTransfer />
             </ProtectedLayout>
           } />
-
-          <Route path='/MatrialIssueList' element={
+          <Route path='/MatrialTransferList' element={
+            <ProtectedLayout>
+              <GoodsTransferList />
+            </ProtectedLayout>
+          } />
+          <Route path='/MaterialIssueList' element={
             <ProtectedLayout>
               <GoodsIssueList />
             </ProtectedLayout>

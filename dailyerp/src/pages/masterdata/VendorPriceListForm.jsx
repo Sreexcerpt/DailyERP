@@ -110,7 +110,7 @@ function VendorPriceListForm() {
     XLSX.writeFile(wb, filename);
 
     // Show success message
-    alert(`Excel file exported successfully as: ${filename}`);
+    // alert(`Excel file exported successfully as: ${filename}`);
   };
 
   const fetchCategories = async () => {
@@ -570,16 +570,17 @@ function VendorPriceListForm() {
   }, [materialSearchQuery, materialSearchType, materials]);
 
   const handleImportSuccess = (result) => {
-    alert(`Import completed: ${result.results.imported} records imported`);
+    // alert(`Import completed: ${result.results.imported} records imported`);
     setShowDataImportModal(false);
+    fetchPriceList(); // Refresh data after import
   };
 
   return (
     <>
       <div className="content">
         {/* Header Section */}
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+          <div className="my-auto">
             <h2 className="mb-1">Vendor Price List</h2>
             <nav>
               <ol className="breadcrumb mb-0">
@@ -696,66 +697,67 @@ function VendorPriceListForm() {
                 </tbody>
               </table>
             </div>
-            <div
-              className="dataTables_paginate paging_simple_numbers"
-              id="DataTables_Table_0_paginate"
-            >
-              <ul className="pagination">
-                <li
-                  className={`paginate_button page-item previous ${currentPage === 1 ? "disabled" : ""
-                    }`}
-                >
-                  <a
-                    href="#"
-                    className="page-link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageClick(currentPage - 1);
-                    }}
-                  >
-                    <i className="ti ti-arrow-left"></i>
-                  </a>
-                </li>
 
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <li
-                    key={i}
-                    className={`paginate_button page-item ${currentPage === i + 1 ? "active" : ""
-                      }`}
-                  >
-                    <a
-                      href="#"
-                      className="page-link"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageClick(i + 1);
-                      }}
-                    >
-                      {i + 1}
-                    </a>
-                  </li>
-                ))}
-
-                <li
-                  className={`paginate_button page-item next ${currentPage === totalPages ? "disabled" : ""
-                    }`}
-                >
-                  <a
-                    href="#"
-                    className="page-link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageClick(currentPage + 1);
-                    }}
-                  >
-                    <i className="ti ti-arrow-right"></i>
-                  </a>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
+        {totalPages >1 && (
+        <nav aria-label="Page navigation">
+          <ul className="pagination mb-0 justify-content-end ms-auto">
+            <li
+              className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+            >
+              <a
+                className="page-link"
+                href="javascript:void(0);"
+                aria-label="Previous"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageClick(currentPage - 1);
+                }}
+              >
+                <span aria-hidden="true">
+                  <i className="fas fa-angle-left"></i>
+                </span>
+              </a>
+            </li>
 
+            {Array.from({ length: totalPages }, (_, i) => (
+              <li
+                key={i}
+                className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+              >
+                <a
+                  className="page-link"
+                  href="javascript:void(0);"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageClick(i + 1);
+                  }}
+                >
+                  {i + 1}
+                </a>
+              </li>
+            ))}
+
+            <li
+              className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+            >
+              <a
+                className="page-link"
+                href="javascript:void(0);"
+                aria-label="Next"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePageClick(currentPage + 1);
+                }}
+              >
+                <span aria-hidden="true">
+                  <i className="fas fa-angle-right"></i>
+                </span>
+              </a>
+            </li>
+          </ul>
+        </nav>)}
         {showModal && (
           <>
             <div className="modal-backdrop fade show"></div>

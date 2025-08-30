@@ -22,7 +22,6 @@ function MRP() {
     const [indentIdType, setIndentIdType] = useState('internal');
     const [externalIndentId, setExternalIndentId] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
-    console.log("selectedCategory",selectedCategory)
     const [location, setLocation] = useState('');
     const [buyerGroup, setBuyerGroup] = useState('');
     const [taxes, setTaxes] = useState([]);
@@ -35,21 +34,26 @@ function MRP() {
     const [approvedby, setApprovedby] = useState('');
     const [preparedby, setPreparedby] = useState('');
     const [locations, setLocations] = useState([]);
+    
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
+    
+    // Search state
+    const [searchTerm, setSearchTerm] = useState('');
+    
     const [generalConditions, setGeneralConditions] = useState([]);
     const [processes, setProcesses] = useState([]);
     const [validityDate, setValidityDate] = useState('');
     const [payTerms, setPayTerms] = useState('');
     const [poNumber, setPoNumber] = useState('');
     const [date, setDate] = useState('');
+    const companyId = localStorage.getItem("selectedCompanyId");
+    const financialYear = localStorage.getItem("financialYear");
+
     const fetchMaterials = async () => {
         try {
-            const companyId = localStorage.getItem("selectedCompanyId");
-            const financialYear = localStorage.getItem("financialYear");
-
             const res = await axios.get("http://localhost:8080/api/material", {
                 params: { companyId, financialYear },
             });
@@ -59,6 +63,7 @@ function MRP() {
             );
             setMaterials(sortedMaterials);
             setTotalItems(sortedMaterials.length);
+            setCurrentPage(1); // Reset to first page when data is fetched
         } catch (error) {
             console.error("Failed to fetch materials:", error);
         }
@@ -66,30 +71,54 @@ function MRP() {
 
     const fetchInventory = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/api/stock");
+            const response = await axios.get("http://localhost:8080/api/stock/data", {
+                params: { companyId, financialYear }
+            });
             setInventory(response.data);
             console.log("Stock data fetched:", response.data);
         } catch (error) {
             console.error("Failed to fetch stock:", error);
         }
     };
-const toggleSelection = (id, currentSelection, setSelection) => {
-    if (currentSelection.includes(id)) {
-        setSelection(currentSelection.filter(item => item !== id));
-    } else {
-        setSelection([...currentSelection, id]);
-    }
-};
+
+    const toggleSelection = (id, currentSelection, setSelection) => {
+        if (currentSelection.includes(id)) {
+            setSelection(currentSelection.filter(item => item !== id));
+        } else {
+            setSelection([...currentSelection, id]);
+        }
+    };
+
+    // Search handler
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); // Reset to first page when searching
+    };
+
+    // Clear search
+    const clearSearch = () => {
+        setSearchTerm('');
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         fetchMaterials();
         fetchInventory();
-        axios.get("http://localhost:8080/api/vendors")
+        axios.get("http://localhost:8080/api/vendors", {
+            params: { companyId, financialYear }
+        })
             .then((res) => setVendors(res.data));
-        axios.get("http://localhost:8080/api/tax")
+        axios.get("http://localhost:8080/api/tax", {
+            params: { companyId, financialYear }
+        })
             .then((res) => setTaxes(res.data));
-        axios.get("http://localhost:8080/api/locations")
+        axios.get("http://localhost:8080/api/locations", {
+            params: { companyId, financialYear }
+        })
             .then((res) => setLocations(res.data));
-        axios.get('http://localhost:8080/api/general-conditions')
+        axios.get('http://localhost:8080/api/general-conditions', {
+            params: { companyId, financialYear }
+        })
             .then(res => {
                 const filteredConditions = res.data
                     .filter(gc => !gc.isDeleted) // remove deleted if needed
@@ -101,7 +130,9 @@ const toggleSelection = (id, currentSelection, setSelection) => {
                 setGeneralConditions(filteredConditions);
             });
 
-        axios.get('http://localhost:8080/api/processes')
+        axios.get('http://localhost:8080/api/processes', {
+            params: { companyId, financialYear }
+        })
             .then(res => {
                 const filteredProcesses = res.data
                     .filter(p => !p.isDeleted)
@@ -127,7 +158,6 @@ const toggleSelection = (id, currentSelection, setSelection) => {
         const reorderPoint = Math.abs(safetyStock - inventoryStock);
         const reorderQuantity = Math.abs(safetyStock - inventoryStock);
 
-
         return {
             ...material,
             inventoryStock,
@@ -136,11 +166,27 @@ const toggleSelection = (id, currentSelection, setSelection) => {
         };
     });
 
-    // Pagination logic
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    // Filter materials based on search term
+    const filteredMaterials = enrichedMaterials.filter(material => {
+        if (!searchTerm) return true;
+        
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            material.materialId?.toLowerCase().includes(searchLower) ||
+            material.description?.toLowerCase().includes(searchLower) ||
+            material.minstock?.toString().includes(searchLower) ||
+            material.maxstock?.toString().includes(searchLower) ||
+            material.safetyStock?.toString().includes(searchLower) ||
+            material.inventoryStock?.toString().includes(searchLower) ||
+            material.reorderQuantity?.toString().includes(searchLower)
+        );
+    });
+
+    // Pagination logic (based on filtered data)
+    const totalPages = Math.ceil(filteredMaterials.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentItems = enrichedMaterials.slice(startIndex, endIndex);
+    const currentItems = filteredMaterials.slice(startIndex, endIndex);
 
     // Pagination handlers
     const handlePageChange = (page) => {
@@ -183,11 +229,6 @@ const toggleSelection = (id, currentSelection, setSelection) => {
     };
 
     const handleModalIndentSubmit = async () => {
-        // if ( !selectedCategory || !location || !buyerGroup) {
-        //     alert("Please fill in all required fields");
-        //     return;
-        // }
-
         // Additional validation for PO
         if (actionType === "PO") {
             if (!vendor) {
@@ -201,9 +242,6 @@ const toggleSelection = (id, currentSelection, setSelection) => {
         }
 
         console.log("modalMaterial", modalMaterial);
-
-        const companyId = localStorage.getItem("selectedCompanyId");
-        const financialYear = localStorage.getItem("financialYear");
 
         // Ensure unitPrice has a default value
         const unitPrice = parseFloat(modalMaterial.unitPrice) || 0;
@@ -227,6 +265,8 @@ const toggleSelection = (id, currentSelection, setSelection) => {
                 categoryName: categoryObj.name || categoryObj.categoryName,
                 location,
                 buyerGroup,
+                companyId,
+                financialYear,
                 deliveryDate,
                 documentDate: new Date().toISOString().split('T')[0],
                 items: [item],
@@ -310,6 +350,8 @@ const toggleSelection = (id, currentSelection, setSelection) => {
                 processes: selectedProcesses || [], // Add if you have this data
                 generalConditions: selectedConditions || [], // Add if you have this data
                 poGenerationType: indentIdType, // Backend expects 'poGenerationType', not 'indentIdType'
+                companyId,
+                financialYear
             };
 
             // Add external PO number if needed
@@ -371,8 +413,12 @@ const toggleSelection = (id, currentSelection, setSelection) => {
     };
 
     useEffect(() => {
-        axios.get("http://localhost:8080/api/purchasecategory").then(res => setIndentCategories(res.data));
-        axios.get("http://localhost:8080/api/po-categories").then(res => setPoCategories(res.data));
+        axios.get("http://localhost:8080/api/purchasecategory", {
+            params: { companyId, financialYear }
+        }).then(res => setIndentCategories(res.data));
+        axios.get("http://localhost:8080/api/po-categories", {
+            params: { companyId, financialYear }
+        }).then(res => setPoCategories(res.data));
     }, []);
 
     const VendorSearchModal = () => (
@@ -600,8 +646,8 @@ const toggleSelection = (id, currentSelection, setSelection) => {
     return (
         <div className="content">
             <style>{checkboxStyles}</style>
-            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-                <div className="my-auto mb-2">
+            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+                <div className="my-auto">
                     <h2 className="mb-1">Material Requirements Planning</h2>
                     <nav>
                         <ol className="breadcrumb mb-0">
@@ -615,13 +661,37 @@ const toggleSelection = (id, currentSelection, setSelection) => {
                         </ol>
                     </nav>
                 </div>
-
             </div>
 
-
             <div className="card">
+                <div className="card-header">
+                    <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3">
+                        {/* Search Box */}
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="input-group" style={{ width: '300px' }}>
+                                <span className="input-group-text">
+                                    <i className="ti ti-search"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Search materials..."
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                />
+                               
+                                
+                            </div>
+                           
+                        </div>
+                        
+                        {/* You can add action buttons here if needed */}
+                        <div></div>
+                    </div>
+                </div>
+                
                 <div className="card-body">
-                    <div className="table-responsive">
+                   <div className="table-responsive">
                         <table className="table table-sm table-bordered text-wrap">
                             <thead>
                                 <tr>
@@ -712,73 +782,77 @@ const toggleSelection = (id, currentSelection, setSelection) => {
                                 {currentItems.length === 0 && (
                                     <tr>
                                         <td colSpan="11" style={{ textAlign: "center" }}>
-                                            No materials found.
+                                            {searchTerm ? 'No materials found matching your search criteria' : 'No materials found.'}
                                         </td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
-            {totalPages > 1 && (
 
-                <div className="mt-2">
+            {/* Enhanced Pagination */}
+            {totalPages > 1 && (
+                <div className="d-md-flex d-block align-items-center justify-content-between mt-3">
+                    <div className="text-muted">
+                        
+                    </div>
                     <nav aria-label="Page navigation">
                         <ul className="pagination mb-0">
-                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                <button
+                            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                <a
                                     className="page-link"
-                                    onClick={() => handlePageChange(1)}
-                                    disabled={currentPage === 1}
+                                    href="javascript:void(0);"
+                                    aria-label="Previous"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (currentPage > 1) {
+                                            handlePageChange(currentPage - 1);
+                                        }
+                                    }}
                                 >
-                                    <i className="fas fa-angle-double-left"></i>
-                                </button>
-                            </li>
-                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                <button
-                                    className="page-link"
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage === 1}
-                                >
-                                    <i className="fas fa-angle-left"></i>
-                                </button>
+                                    <span aria-hidden="true">
+                                        <i className="fas fa-angle-left"></i>
+                                    </span>
+                                </a>
                             </li>
 
                             {getPageNumbers().map(number => (
-                                <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
-                                    <button
+                                <li key={number} className={`page-item ${currentPage === number ? "active" : ""}`}>
+                                    <a
                                         className="page-link"
-                                        onClick={() => handlePageChange(number)}
+                                        href="javascript:void(0);"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handlePageChange(number);
+                                        }}
                                     >
                                         {number}
-                                    </button>
+                                    </a>
                                 </li>
                             ))}
 
-                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                <button
+                            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                <a
                                     className="page-link"
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage === totalPages}
+                                    href="javascript:void(0);"
+                                    aria-label="Next"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (currentPage < totalPages) {
+                                            handlePageChange(currentPage + 1);
+                                        }
+                                    }}
                                 >
-                                    <i className="fas fa-angle-right"></i>
-                                </button>
-                            </li>
-                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                <button
-                                    className="page-link"
-                                    onClick={() => handlePageChange(totalPages)}
-                                    disabled={currentPage === totalPages}
-                                >
-                                    <i className="fas fa-angle-double-right"></i>
-                                </button>
+                                    <span aria-hidden="true">
+                                        <i className="fas fa-angle-right"></i>
+                                    </span>
+                                </a>
                             </li>
                         </ul>
                     </nav>
                 </div>
-
             )}
 
             {showIndentModal && modalMaterial && (
@@ -828,23 +902,6 @@ const toggleSelection = (id, currentSelection, setSelection) => {
                                                     </div>
                                                 </div>
                                             )}
-
-                                            {/* Location */}
-                                            {/* <div className="col-xl-3 row form-group">
-                                                <div className="col-xl-6">
-                                                    <label>Location *</label>
-                                                </div>
-                                                <div className="col-xl-6">
-                                                    <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        value={location}
-                                                        onChange={(e) => setLocation(e.target.value)}
-                                                        placeholder="Enter location"
-                                                        required
-                                                    />
-                                                </div>
-                                            </div> */}
 
                                             {/* Buyer Group */}
                                             <div className="col-xl-3 row form-group">

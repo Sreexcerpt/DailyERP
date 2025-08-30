@@ -41,11 +41,11 @@ function SalesQuotationForm() {
       })
       .catch(console.error);
     axios
-      .get("http://localhost:8080/api/sale-quotation-categories")
+      .get("http://localhost:8080/api/sale-quotation-categories", { params: { companyId, financialYear }, })
       .then((res) => setQuotationCategories(res.data))
       .catch(console.error);
     // Fetch and filter customers
-    axios.get("http://localhost:8080/api/locations").then((res) => {
+    axios.get("http://localhost:8080/api/locations", { params: { companyId, financialYear }, }).then((res) => {
       console.log("Locations API response:", res.data); // Add this to debug
       // Handle different response structures
       if (Array.isArray(res.data)) {
@@ -194,111 +194,94 @@ function SalesQuotationForm() {
   // Add this new QuotationNumberModal component:
   const QuotationNumberModal = () => {
     return (
-      <ModalWrapper onClose={() => setShowQuotationModal(false)}>
-        <div className="text-center mb-4">
-          <h5>Choose Quotation Number Generation</h5>
-          <p className="text-muted">Select how you want to generate the quotation number</p>
-        </div>
-
-        <div className="row justify-content-center">
-          <div className="col-md-8">
-            <div className="row">
-              <div className="col-md-6">
-                <div className="card h-100" style={{ cursor: 'pointer' }}>
-                  <div
-                    className={`card-body text-center p-4 ${quotationNumberType === 'internal' ? 'bg-primary text-white' : ''}`}
-                    onClick={() => setQuotationNumberType('internal')}
-                  >
-                    <i className="fas fa-cog fa-3x mb-3"></i>
-                    <h6>Internal Generation</h6>
-                    <p className="small">
-                      System will automatically generate quotation number based on category and range
-                    </p>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="quotationType"
-                        value="internal"
-                        checked={quotationNumberType === 'internal'}
-                        onChange={(e) => setQuotationNumberType(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
+      <>
+        <div className="modal-backdrop fade show"></div>
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-md">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">
+                  <i className="fas fa-hashtag me-2"></i>Quotation Number Generation
+                </h4>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowQuotationModal(false)}
+                  aria-label="Close"
+                ></button>
               </div>
-
-              <div className="col-md-6">
-                <div className="card h-100">
-                  <div
-                    className={`card-body text-center p-4 ${quotationNumberType === 'external' ? 'bg-primary text-white' : ''}`}
-                    onClick={() => setQuotationNumberType('external')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <i className="fas fa-keyboard fa-3x mb-3"></i>
-                    <h6>External Generation</h6>
-                    <p className="small">
-                      Enter your own custom quotation number
-                    </p>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="quotationType"
-                        value="external"
-                        checked={quotationNumberType === 'external'}
-                        onChange={(e) => setQuotationNumberType(e.target.value)}
-                      />
-                    </div>
+              <div className="modal-body">
+                <p className="mb-4">
+                  Choose how you want to create the Quotation Number:
+                </p>
+                <div className="row">
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-primary btn-md"
+                      onClick={() => {
+                        setQuotationNumberType("internal");
+                        handleFinalSubmit();
+                      }}
+                    >
+                      <i className="ti ti-user me-2"></i>
+                      Internal (Auto-generate)
+                    </button>
+                  </div>
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-secondary btn-md"
+                      onClick={() => setQuotationNumberType("external")}
+                    >
+                      <i className="ti ti-edit me-2"></i>
+                      External (Manual Entry)
+                    </button>
                   </div>
                 </div>
+                {quotationNumberType === "external" && (
+                  <div className="mt-4">
+                    <label className="form-label">Enter Quotation Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter custom quotation number (max 50 characters)"
+                      value={externalQuotationNumber}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 50) {
+                          setExternalQuotationNumber(e.target.value);
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && externalQuotationNumber.trim()) {
+                          handleFinalSubmit();
+                        }
+                      }}
+                      maxLength={50}
+                      autoFocus
+                    />
+                    <div className="form-text">{externalQuotationNumber.length}/50 characters</div>
+                    <div className="mt-3">
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleFinalSubmit}
+                        disabled={!externalQuotationNumber.trim()}
+                      >
+                        <i className="fas fa-save me-1"></i>Save Quotation
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
               </div>
             </div>
-
-            {quotationNumberType === 'external' && (
-              <div className="mt-4">
-                <label className="form-label">Enter Quotation Number</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter custom quotation number (max 50 characters)"
-                  value={externalQuotationNumber}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 50) {
-                      setExternalQuotationNumber(e.target.value);
-                    }
-                  }}
-                  onFocus={(e) => e.stopPropagation()}
-                  onClick={(e) => e.stopPropagation()}
-                  maxLength="50"
-                  autoFocus
-                />
-                <div className="form-text">
-                  {externalQuotationNumber.length}/50 characters
-                </div>
-              </div>
-            )}
           </div>
         </div>
-
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setShowQuotationModal(false)}
-          >
-            <i className="fas fa-times me-1"></i>Cancel
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleFinalSubmit}
-            disabled={quotationNumberType === 'external' && !externalQuotationNumber.trim()}
-          >
-            <i className="fas fa-save me-1"></i>Save Quotation
-          </button>
-        </div>
-      </ModalWrapper>
+      </>
     );
   };
 
@@ -759,420 +742,420 @@ function SalesQuotationForm() {
 
   return (
 
-    <>
-      <div className="content">
 
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
-            <h2 className="mb-1">Sales Quotation</h2>
-            <nav>
-              <ol className="breadcrumb mb-0">
-                <li className="breadcrumb-item">
-                  <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
-                </li>
-                <li className="breadcrumb-item">
-                  Sales
-                </li>
-                <li className="breadcrumb-item active" aria-current="page">Sales Quotation</li>
-              </ol>
-            </nav>
-          </div>
+    <div className="content">
 
-        </div>
-        <div className="accordion todo-accordion" id="accordionExample">
-          <div className="accordion-item mb-3">
-            <div className="row align-items-center mb-3 row-gap-3">
-              <div className="col-lg-4 col-sm-6">
-                <div className="accordion-header" id="headingTwo">
-                  <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-controls="collapseTwo" aria-expanded="false">
-                    <div className="d-flex align-items-center w-100">
-                      <div className="me-2">
-                        <a href="javascript:void(0);">
-                          <span><i className="fas fa-chevron-down"></i></span>
-                        </a>
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <span><i className="fas fa-clipboard-list me-2"></i></span>
-                        <h5 className="fw-semibold">Quotation Header</h5>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-            <div id="collapseTwo" className="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" >
-              <div className="accordion-body">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="row gap-2">
-                      <div className="col-xl-3 row">
-                        <div className="col-xl-6">
-                          <label className="form-label">
-                            Sales Request:
-                          </label></div>
-                        <div className="col-xl-6">
-                          <div className="input-group">
-                            <input
-                              className="form-control form-control-sm"
-                              placeholder="Type or search Indent"
-                              value={selectedRequest?.label || ""}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setSelectedRequest({
-                                  label: val,
-                                  value: null,
-                                });
-                              }}
-                            />
-                            <button
-                              className="btn btn-outline-primary btn-sm"
-                              type="button"
-                              onClick={() => setShowRequestModal(true)}
-                            >
-                              <i className="ti ti-search"></i>
-                            </button>
-                          </div></div>
-                      </div>
-                      <div className="col-xl-3 row ">
-                        <div className="col-xl-6">
-                          <label className="form-label">Customer:</label>
-                        </div> <div className="col-xl-6">
-                          <div className="input-group">
-                            <input
-                              className="form-control form-control-sm"
-                              placeholder="Type or search Customer"
-                              value={selectedCustomer?.label || ""}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setSelectedCustomer({
-                                  label: val,
-                                  value: null,
-                                });
-                              }}
-                            />
-                            <button
-                              className="btn btn-outline-primary btn-sm"
-                              type="button"
-                              onClick={() => setShowCustomerModal(true)}
-                            >
-                              <i className="ti ti-search"></i>
-                            </button>
-                          </div></div>
-                      </div>
-                      <div className="col-lg-3 row">
-                        <div className="col-xl-3">
-                          <label className="form-label">Location</label></div>
-                        <div className="col-xl-9">
-                          <select
-                            className="form-select"
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                          >
-                            <option value="">Select Location</option>
-                            {Array.isArray(locations) && locations.map((loc, idx) => (
-                              <option key={idx} value={loc.name || loc._id || loc}>
-                                {loc.name || loc.locationName || loc}
-                              </option>
-                            ))}
-                          </select></div>
-                      </div>
-                      <div className="col-xl-3 row">
-                        <div className="col-xl-7">
-                          <label className="form-label">
-                            Quotation Category:
-                          </label>
-                        </div>  <div className="col-xl-5">
-                          <select
-                            className="form-select"
-                            value={selectedCategory?.value || ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              const found = quotationCategories.find(
-                                (cat) => cat._id === value
-                              );
-                              setSelectedCategory(
-                                found
-                                  ? {
-                                    label: found.categoryName,
-                                    value: found._id,
-                                  }
-                                  : null
-                              );
-                            }}
-                          >
-                            <option value="">Select</option>
-                            {quotationCategories.map((cat) => (
-                              <option key={cat._id} value={cat._id}>
-                                {cat.categoryName} ({cat.prefix})
-                              </option>
-                            ))}
-                          </select>
-                        </div></div>
-                      <div className="col-xl-3 row">
-                        <div className="col-xl-6">
-                          <label className="form-label">
-                            Validity Date
-                          </label></div>
-                        <div className="col-xl-6">
-                          <input
-                            type="date"
-                            className="form-control form-control-sm"
-                            value={validityDate}
-                            onChange={(e) =>
-                              setValidityDate(e.target.value)
-                            }
-                          /></div>
-                      </div>
-                      <div className="col-xl-3 row">
-                        <div className="col-xl-6">
-                          <label className="form-label">Sales Group:</label>
-                        </div><div className="col-xl-6">
-                          <input
-                            type="text"
-                            className="form-control form-control-sm"
-                            value={salesGroup}
-                            onChange={(e) => setSalesGroup(e.target.value)}
-                            placeholder="Enter or edit Sales Group"
-                          /></div>
-                      </div>
-                      <div className="col-xl-4 row">
-                        <div className="col-xl-2">
-                          <label className="form-label">Notes</label>
-                        </div> <div className="col-xl-10">
-                          <textarea
-                            className="form-control form-control-sm"
-                            rows="3"
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                          /></div>
-                      </div>
-
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="accordion-item mb-3">
-            <div className="row align-items-center mb-3 row-gap-3">
-              <div className="col-lg-4 col-sm-6">
-                <div className="accordion-header" id="headingThree">
-                  <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-controls="collapseThree" aria-expanded="false">
-                    <div className="d-flex align-items-center w-100">
-                      <div className="me-2">
-                        <a href="javascript:void(0);">
-                          <span><i className="fas fa-chevron-down"></i></span>
-                        </a>
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <span><i className="fas fa-list me-2"></i></span>
-                        <h5 className="fw-semibold">Item List</h5>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-            <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample" >
-              <div className="accordion-body">
-                <div className="card">
-                  <div className="card-body">
-                    <form onSubmit={handleSubmit}>
-
-                      <div className="table-responsive mb-3">
-                        <table className="table-sm table-bordered mb-0">
-                          <thead className="table-dark">
-                            <tr>
-                              <th>#</th>
-                              <th>Material ID</th>
-                              <th>Description</th>
-                              <th>Qty</th>
-                              <th>Base Unit</th>
-                              <th>Order Unit</th>
-                              <th>Location</th>
-                              <th>Customer</th>
-                              <th>Unit</th>
-                              <th>Price</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {items.map((item, idx) => (
-                              <tr key={idx}>
-                                <td>{idx + 1}</td>
-                                <td>
-                                  <div className="input-group input-group-sm">
-                                    <input
-                                      className="form-control form-control-sm"
-                                      placeholder="Type or search Material"
-                                      value={item.materialId}
-                                      onChange={(e) =>
-                                        updateItemField(
-                                          idx,
-                                          "materialId",
-                                          e.target.value
-                                        )
-                                      }
-                                    />
-                                    <button
-                                      className="btn btn-outline-info"
-                                      type="button"
-                                      title="Search Material"
-                                      onClick={() => {
-                                        setSelectedItemIndex(idx);
-                                        setShowMaterialModal(true);
-                                      }}
-                                    >
-                                      <i className="fas fa-search"></i>
-                                    </button>
-                                  </div>
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.description}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "description",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    type="number"
-                                    value={item.qty}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "qty",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.baseUnit}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "baseUnit",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.orderUnit}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "orderUnit",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.location}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "location",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.customerName}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "customerName",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.unit}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "unit",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    type="number"
-                                    className="form-control form-control-sm"
-                                    value={item.price}
-                                    onChange={(e) =>
-                                      updateItemField(
-                                        idx,
-                                        "price",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className="col-md-12">
-                        <div className="mb-3">
-                          <button
-                            type="button"
-                            className="btn btn-link"
-                            onClick={addEmptyItem}
-                          >
-                            + Add Quotation Item
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="d-flex align-items-center justify-content-between">
-                        <button type="submit" className="btn btn-primary">
-                          Submit Quotation
-                        </button>
-                      </div>
-                    </form>
-
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {showMaterialModal && <MaterialModal />}
-          {showCustomerModal && <CustomerModal />}
-          {showRequestModal && <RequestModal />}
-          {showQuotationModal && <QuotationNumberModal />}
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Sales Quotation</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Sales
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Sales Quotation</li>
+            </ol>
+          </nav>
         </div>
 
       </div>
-    </>
+      <div className="accordion todo-accordion" id="accordionExample">
+        <div className="accordion-item mb-3">
+          <div className="row align-items-center mb-3 row-gap-3">
+            <div className="col-lg-4 col-sm-6">
+              <div className="accordion-header" id="headingTwo">
+                <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-controls="collapseTwo" aria-expanded="false">
+                  <div className="d-flex align-items-center w-100">
+                    <div className="me-2">
+                      <a href="javascript:void(0);">
+                        <span><i className="fas fa-chevron-down"></i></span>
+                      </a>
+                    </div>
+                    <div className="d-flex align-items-center">
+                      <span><i className="fas fa-clipboard-list me-2"></i></span>
+                      <h5 className="fw-semibold">Quotation Header</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div id="collapseTwo" className="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" >
+            <div className="accordion-body">
+              <div className="card">
+                <div className="card-body">
+                  <div className="row gap-2">
+                    <div className="col-xl-3 row">
+                      <div className="col-xl-6">
+                        <label className="form-label">
+                          Sales Request:
+                        </label></div>
+                      <div className="col-xl-6">
+                        <div className="input-group">
+                          <input
+                            className="form-control form-control-sm"
+                            placeholder="Type or search Indent"
+                            value={selectedRequest?.label || ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setSelectedRequest({
+                                label: val,
+                                value: null,
+                              });
+                            }}
+                          />
+                          <button
+                            className="btn btn-outline-primary btn-sm"
+                            type="button"
+                            onClick={() => setShowRequestModal(true)}
+                          >
+                            <i className="ti ti-search"></i>
+                          </button>
+                        </div></div>
+                    </div>
+                    <div className="col-xl-3 row ">
+                      <div className="col-xl-6">
+                        <label className="form-label">Customer:</label>
+                      </div> <div className="col-xl-6">
+                        <div className="input-group">
+                          <input
+                            className="form-control form-control-sm"
+                            placeholder="Type or search Customer"
+                            value={selectedCustomer?.label || ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setSelectedCustomer({
+                                label: val,
+                                value: null,
+                              });
+                            }}
+                          />
+                          <button
+                            className="btn btn-outline-primary btn-sm"
+                            type="button"
+                            onClick={() => setShowCustomerModal(true)}
+                          >
+                            <i className="ti ti-search"></i>
+                          </button>
+                        </div></div>
+                    </div>
+                    <div className="col-lg-3 row">
+                      <div className="col-xl-3">
+                        <label className="form-label">Location</label></div>
+                      <div className="col-xl-9">
+                        <select
+                          className="form-select"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                        >
+                          <option value="">Select Location</option>
+                          {Array.isArray(locations) && locations.map((loc, idx) => (
+                            <option key={idx} value={loc.name || loc._id || loc}>
+                              {loc.name || loc.locationName || loc}
+                            </option>
+                          ))}
+                        </select></div>
+                    </div>
+                    <div className="col-xl-3 row">
+                      <div className="col-xl-7">
+                        <label className="form-label">
+                          Quotation Category:
+                        </label>
+                      </div>  <div className="col-xl-5">
+                        <select
+                          className="form-select"
+                          value={selectedCategory?.value || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            const found = quotationCategories.find(
+                              (cat) => cat._id === value
+                            );
+                            setSelectedCategory(
+                              found
+                                ? {
+                                  label: found.categoryName,
+                                  value: found._id,
+                                }
+                                : null
+                            );
+                          }}
+                        >
+                          <option value="">Select</option>
+                          {quotationCategories.map((cat) => (
+                            <option key={cat._id} value={cat._id}>
+                              {cat.categoryName} ({cat.prefix})
+                            </option>
+                          ))}
+                        </select>
+                      </div></div>
+                    <div className="col-xl-3 row">
+                      <div className="col-xl-6">
+                        <label className="form-label">
+                          Validity Date
+                        </label></div>
+                      <div className="col-xl-6">
+                        <input
+                          type="date"
+                          className="form-control form-control-sm"
+                          value={validityDate}
+                          onChange={(e) =>
+                            setValidityDate(e.target.value)
+                          }
+                        /></div>
+                    </div>
+                    <div className="col-xl-3 row">
+                      <div className="col-xl-6">
+                        <label className="form-label">Sales Group:</label>
+                      </div><div className="col-xl-6">
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={salesGroup}
+                          onChange={(e) => setSalesGroup(e.target.value)}
+                          placeholder="Enter or edit Sales Group"
+                        /></div>
+                    </div>
+                    <div className="col-xl-4 row">
+                      <div className="col-xl-2">
+                        <label className="form-label">Notes</label>
+                      </div> <div className="col-xl-10">
+                        <textarea
+                          className="form-control form-control-sm"
+                          rows="3"
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                        /></div>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="accordion-item mb-3">
+          <div className="row align-items-center mb-3 row-gap-3">
+            <div className="col-lg-4 col-sm-6">
+              <div className="accordion-header" id="headingThree">
+                <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-controls="collapseThree" aria-expanded="false">
+                  <div className="d-flex align-items-center w-100">
+                    <div className="me-2">
+                      <a href="javascript:void(0);">
+                        <span><i className="fas fa-chevron-down"></i></span>
+                      </a>
+                    </div>
+                    <div className="d-flex align-items-center">
+                      <span><i className="fas fa-list me-2"></i></span>
+                      <h5 className="fw-semibold">Item List</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample" >
+            <div className="accordion-body">
+              <div className="card">
+                <div className="card-body">
+                  <form onSubmit={handleSubmit}>
+
+                    <div className="table-responsive mb-3">
+                      <table className="table-sm table-bordered mb-0">
+                        <thead className="table-dark">
+                          <tr>
+                            <th>#</th>
+                            <th>Material ID</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Base Unit</th>
+                            <th>Order Unit</th>
+                            <th>Location</th>
+                            <th>Customer</th>
+                            <th>Unit</th>
+                            <th>Price</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((item, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>
+                                <div className="input-group input-group-sm">
+                                  <input
+                                    className="form-control form-control-sm"
+                                    placeholder="Type or search Material"
+                                    value={item.materialId}
+                                    onChange={(e) =>
+                                      updateItemField(
+                                        idx,
+                                        "materialId",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                  <button
+                                    className="btn btn-outline-info"
+                                    type="button"
+                                    title="Search Material"
+                                    onClick={() => {
+                                      setSelectedItemIndex(idx);
+                                      setShowMaterialModal(true);
+                                    }}
+                                  >
+                                    <i className="fas fa-search"></i>
+                                  </button>
+                                </div>
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.description}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "description",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  type="number"
+                                  value={item.qty}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "qty",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.baseUnit}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "baseUnit",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.orderUnit}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "orderUnit",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.location}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "location",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.customerName}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "customerName",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.unit}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "unit",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  className="form-control form-control-sm"
+                                  value={item.price}
+                                  onChange={(e) =>
+                                    updateItemField(
+                                      idx,
+                                      "price",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="col-md-12">
+                      <div className="mb-3">
+                        <button
+                          type="button"
+                          className="btn btn-link"
+                          onClick={addEmptyItem}
+                        >
+                          + Add Quotation Item
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="d-flex align-items-center justify-content-between">
+                      <button type="submit" className="btn btn-primary">
+                        Submit Quotation
+                      </button>
+                    </div>
+                  </form>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {showMaterialModal && <MaterialModal />}
+        {showCustomerModal && <CustomerModal />}
+        {showRequestModal && <RequestModal />}
+        {showQuotationModal && <QuotationNumberModal />}
+      </div>
+
+    </div>
+
 
   );
 }

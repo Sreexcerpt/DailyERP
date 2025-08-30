@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+
 // Import your models
 const Material = require('../models/masterdata/Material');
 const Customer = require('../models/masterdata/Customer');
@@ -11,81 +12,311 @@ const Tax = require('../models/masterdata/Tax');
 const Location = require('../models/masterdata/location');
 const GeneralCondition = require('../models/masterdata/generalcondition');
 const Process = require('../models/masterdata/Processlist'); 
-// Add other models as needed 
 
-// Master data configurations with correct field mappings
+// Master data configurations with correct field mappings and reference fields
 const masterDataConfig = {
   material: {
     model: Material,
-    requiredFields: ['materialId', 'categoryName', 'description', 'baseUnit', 'orderUnit'], // Added materialId, changed categoryId to categoryName
+    requiredFields: ['materialId', 'categoryName', 'description', 'baseUnit', 'orderUnit'],
     optionalFields: ['conversionValue', 'dimension', 'hsn', 'mpn', 'minstock', 'safetyStock', 'maxstock', 'pdt', 'materialgroup', 'location'],
-    uniqueField: 'materialId', // User-provided, not auto-generated
-    autoGenerateId: false, // Changed to false
-    idPrefix: null // Not needed since user provides materialId
+    uniqueField: 'materialId',
+    autoGenerateId: false,
+    idPrefix: null,
+    referenceFields: ['categoryName']
   },
   customer: {
     model: Customer,
-    requiredFields: ['categoryId', 'name1', 'search', 'address1', 'contactNo', 'region', 'country'],
+    requiredFields: ['categoryName', 'name1', 'search', 'address1', 'contactNo', 'region', 'country'],
     optionalFields: ['name2', 'address2', 'extraAddresses', 'city', 'pincode', 'name', 'email', 'isDeleted', 'isBlocked'],
-    uniqueField: 'cnNo', // Customer number
+    uniqueField: 'cnNo',
     autoGenerateId: true,
-    idPrefix: 'CUST'
+    idPrefix: 'CUST',
+    referenceFields: ['categoryName']
   },
   vendor: {
     model: Vendor,
-    requiredFields: ['categoryId', 'name1', 'search', 'address1', 'contactNo', 'region', 'country'],
+    requiredFields: ['categoryName', 'name1', 'search', 'address1', 'contactNo', 'region', 'country'],
     optionalFields: ['name2', 'address2', 'extraAddresses', 'city', 'pincode', 'contactname', 'email', 'isDeleted', 'isBlocked'],
-    uniqueField: 'vnNo', // Vendor number
+    uniqueField: 'vnNo',
     autoGenerateId: true,
-    idPrefix: 'VEND'
+    idPrefix: 'VEND',
+    referenceFields: ['categoryName']
   },
   vendorPriceList: {
     model: VendorPriceList,
-    requiredFields: ['categoryId', 'vendorId', 'materialId', 'unit', 'bum', 'orderUnit'],
-    optionalFields: ['buyer', 'taxId'],
-    uniqueField: null, // No auto-generated ID for price lists
+    requiredFields: ['categoryName', 'vendorCode', 'materialCode', 'unit', 'bum', 'orderUnit'],
+    optionalFields: ['buyer', 'taxCode'],
+    uniqueField: null,
     autoGenerateId: false,
-    idPrefix: null
+    idPrefix: null,
+    referenceFields: ['categoryName', 'vendorCode', 'materialCode', 'taxCode']
   },
   customerPriceList: {
     model: CustomerPriceList,
-    requiredFields: ['categoryId', 'customerId', 'materialId', 'unit', 'bum', 'orderUnit', 'salesGroup'],
-    optionalFields: ['taxId', 'tandc'],
-    uniqueField: null, // No auto-generated ID for price lists
+    requiredFields: ['categoryName', 'customerCode', 'materialCode', 'unit', 'bum', 'orderUnit', 'salesGroup'],
+    optionalFields: ['taxCode', 'tandc'],
+    uniqueField: null,
     autoGenerateId: false,
-    idPrefix: null
+    idPrefix: null,
+    referenceFields: ['categoryName', 'customerCode', 'materialCode', 'taxCode']
   },
   tax: {
     model: Tax,
     requiredFields: ['taxCode', 'taxName', 'cgst', 'sgst', 'igst'],
     optionalFields: [],
-    uniqueField: 'taxCode', // Unique field for tax
+    uniqueField: 'taxCode',
     autoGenerateId: false,
-    idPrefix: null
+    idPrefix: null,
+    referenceFields: []
   },
   location: {
     model: Location,
     requiredFields: ['name'],
     optionalFields: ['address', 'city', 'state', 'country', 'postalCode', 'contactPerson', 'contactNumber'],
-    uniqueField: 'name', // Unique field for location (name + companyId combination)
+    uniqueField: 'name',
     autoGenerateId: false,
-    idPrefix: null
+    idPrefix: null,
+    referenceFields: []
   },
   generalCondition: {
     model: GeneralCondition,
-    requiredFields: [], // No required fields in the schema
+    requiredFields: [],
     optionalFields: ['name', 'description', 'isDeleted', 'isBlocked'],
-    uniqueField: 'name', // Use name as unique identifier
+    uniqueField: 'name',
     autoGenerateId: false,
-    idPrefix: null
+    idPrefix: null,
+    referenceFields: []
   },
   process: {
     model: Process,
-    requiredFields: [], // No required fields in the schema
+    requiredFields: [],
     optionalFields: ['processId', 'processDescription', 'isDeleted', 'isBlocked'],
-    uniqueField: 'processId', // Use processId as unique identifier
+    uniqueField: 'processId',
     autoGenerateId: false,
-    idPrefix: null
+    idPrefix: null,
+    referenceFields: []
+  }
+};
+
+// Enhanced reference resolution function
+const resolveAllReferences = async (record, masterDataType) => {
+  try {
+    // Material references
+    if (masterDataType === 'material') {
+      // Resolve category name to categoryId ObjectId
+      if (record.categoryName) {
+        const MaterialCategory = require('../models/categories/MaterialCategory');
+        const category = await MaterialCategory.findOne({
+          companyId: record.companyId,
+          financialYear: record.financialYear,
+          categoryName: record.categoryName
+        });
+
+        if (category) {
+          record.categoryId = category._id;
+          delete record.categoryName;
+        } else {
+          throw new Error(`Material category '${record.categoryName}' not found. Please create the category first.`);
+        }
+      }
+    }
+
+    // Customer references
+    else if (masterDataType === 'customer') {
+      // Resolve customer category
+      if (record.categoryName) {
+        const CustomerCategory = require('../models/categories/CustomerCategory');
+        const category = await CustomerCategory.findOne({
+          companyId: record.companyId,
+          financialYear: record.financialYear,
+          categoryName: record.categoryName
+        });
+
+        if (category) {
+          record.categoryId = category._id;
+          delete record.categoryName;
+        } else {
+          throw new Error(`Customer category '${record.categoryName}' not found. Please create the category first.`);
+        }
+      }
+    }
+
+    // Vendor references
+    else if (masterDataType === 'vendor') {
+      // Resolve vendor category
+      if (record.categoryName) {
+        const VendorCategory = require('../models/categories/VendorCategory');
+        const category = await VendorCategory.findOne({
+          companyId: record.companyId,
+          categoryName: record.categoryName
+        });
+
+        if (category) {
+          record.categoryId = category._id;
+          delete record.categoryName;
+        } else {
+          throw new Error(`Vendor category '${record.categoryName}' not found. Please create the category first.`);
+        }
+      }
+    }
+
+    // Customer Price List references
+    else if (masterDataType === 'customerPriceList') {
+      // Resolve customer category
+      if (record.categoryName) {
+        const CustomerCategory = require('../models/categories/CustomerCategory');
+        const category = await CustomerCategory.findOne({
+          companyId: record.companyId,
+          financialYear: record.financialYear,
+          categoryName: record.categoryName
+        });
+
+        if (category) {
+          record.categoryId = category._id;
+          delete record.categoryName;
+        } else {
+          throw new Error(`Customer category '${record.categoryName}' not found. Please create the category first.`);
+        }
+      }
+
+      // Resolve customer reference
+      if (record.customerName || record.customerCode) {
+        const Customer = require('../models/masterdata/Customer');
+        const customerQuery = {};
+        
+        if (record.customerCode) {
+          customerQuery.cnNo = record.customerCode;
+        } else if (record.customerName) {
+          customerQuery.name1 = record.customerName;
+        }
+        
+        customerQuery.companyId = record.companyId;
+        customerQuery.financialYear = record.financialYear;
+
+        const customer = await Customer.findOne(customerQuery);
+
+        if (customer) {
+          record.customerId = customer._id;
+          delete record.customerName;
+          delete record.customerCode;
+        } else {
+          throw new Error(`Customer '${record.customerName || record.customerCode}' not found. Please create the customer first.`);
+        }
+      }
+
+      // Resolve material reference
+      if (record.materialCode) {
+        const Material = require('../models/masterdata/Material');
+        const material = await Material.findOne({
+          materialId: record.materialCode,
+          companyId: record.companyId,
+          financialYear: record.financialYear
+        });
+
+        if (material) {
+          record.materialId = material._id;
+          delete record.materialCode;
+        } else {
+          throw new Error(`Material '${record.materialCode}' not found. Please create the material first.`);
+        }
+      }
+
+      // Resolve tax reference
+      if (record.taxCode) {
+        const Tax = require('../models/masterdata/Tax');
+        const tax = await Tax.findOne({
+          taxCode: record.taxCode
+        });
+
+        if (tax) {
+          record.taxId = tax._id;
+          delete record.taxCode;
+        } else {
+          throw new Error(`Tax '${record.taxCode}' not found. Please create the tax first.`);
+        }
+      }
+    }
+
+    // Vendor Price List references
+    else if (masterDataType === 'vendorPriceList') {
+      // Resolve vendor category
+      if (record.categoryName) {
+        const VendorCategory = require('../models/categories/VendorCategory');
+        const category = await VendorCategory.findOne({
+          companyId: record.companyId,
+          financialYear: record.financialYear,
+          categoryName: record.categoryName
+        });
+
+        if (category) {
+          record.categoryId = category._id;
+          delete record.categoryName;
+        } else {
+          throw new Error(`Vendor category '${record.categoryName}' not found. Please create the category first.`);
+        }
+      }
+
+      // Resolve vendor reference
+      if (record.vendorName || record.vendorCode) {
+        const Vendor = require('../models/masterdata/Vendor');
+        const vendorQuery = {};
+        
+        if (record.vendorCode) {
+          vendorQuery.vnNo = record.vendorCode;
+        } else if (record.vendorName) {
+          vendorQuery.name1 = record.vendorName;
+        }
+        
+        vendorQuery.companyId = record.companyId;
+        vendorQuery.financialYear = record.financialYear;
+
+        const vendor = await Vendor.findOne(vendorQuery);
+
+        if (vendor) {
+          record.vendorId = vendor._id;
+          delete record.vendorName;
+          delete record.vendorCode;
+        } else {
+          throw new Error(`Vendor '${record.vendorName || record.vendorCode}' not found. Please create the vendor first.`);
+        }
+      }
+
+      // Resolve material reference
+      if (record.materialCode) {
+        const Material = require('../models/masterdata/Material');
+        const material = await Material.findOne({
+          materialId: record.materialCode,
+          companyId: record.companyId,
+          financialYear: record.financialYear
+        });
+
+        if (material) {
+          record.materialId = material._id;
+          delete record.materialCode;
+        } else {
+          throw new Error(`Material '${record.materialCode}' not found. Please create the material first.`);
+        }
+      }
+
+      // Resolve tax reference
+      if (record.taxCode) {
+        const Tax = require('../models/masterdata/Tax');
+        const tax = await Tax.findOne({
+          taxCode: record.taxCode
+        });
+
+        if (tax) {
+          record.taxId = tax._id;
+          delete record.taxCode;
+        } else {
+          throw new Error(`Tax '${record.taxCode}' not found. Please create the tax first.`);
+        }
+      }
+    }
+
+    return record;
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -202,37 +433,11 @@ const processDataTypeConversions = (record, masterDataType) => {
     // Convert numeric fields
     if (record.bum) record.bum = parseFloat(record.bum);
     if (record.orderUnit) record.orderUnit = parseFloat(record.orderUnit);
-
-    // Validate ObjectId fields
-    const objectIdFields = ['categoryId', 'vendorId', 'materialId'];
-    objectIdFields.forEach(field => {
-      if (record[field] && !isValidObjectId(record[field])) {
-        throw new Error(`${field} must be a valid ObjectId`);
-      }
-    });
-
-    // Validate optional ObjectId field
-    if (record.taxId && !isValidObjectId(record.taxId)) {
-      throw new Error('taxId must be a valid ObjectId');
-    }
   }
 
   if (masterDataType === 'customerPriceList') {
     // Convert numeric fields
     if (record.bum) record.bum = parseFloat(record.bum);
-
-    // Validate ObjectId fields
-    const objectIdFields = ['categoryId', 'customerId', 'materialId'];
-    objectIdFields.forEach(field => {
-      if (record[field] && !isValidObjectId(record[field])) {
-        throw new Error(`${field} must be a valid ObjectId`);
-      }
-    });
-
-    // Validate optional ObjectId field
-    if (record.taxId && record.taxId !== null && !isValidObjectId(record.taxId)) {
-      throw new Error('taxId must be a valid ObjectId or null');
-    }
 
     // Set taxId to null if empty string
     if (record.taxId === '' || record.taxId === 'null' || record.taxId === 'NULL') {
@@ -301,30 +506,7 @@ const processDataTypeConversions = (record, masterDataType) => {
 
   return record;
 };
-// Add this function after your existing helper functions
-const resolveMaterialReferences = async (record) => {
-  try {
-    // Resolve category name to categoryId ObjectId
-    if (record.categoryName) {
-      const MaterialCategory = require('../models/MaterialCategory'); // Adjust path as needed
-      const category = await MaterialCategory.findOne({
-        categoryName: record.categoryName // Assuming your category schema has 'name' field
-        // If your category field is different (like 'categoryName'), change it accordingly
-      });
 
-      if (category) {
-        record.categoryId = category._id;
-        delete record.categoryName; // Remove categoryName after conversion
-      } else {
-        throw new Error(`Material category '${record.categoryName}' not found. Please create the category first.`);
-      }
-    }
-
-    return record;
-  } catch (error) {
-    throw error;
-  }
-};
 // Generic import endpoint
 router.post('/:masterDataType/import', async (req, res) => {
   try {
@@ -351,6 +533,16 @@ router.post('/:masterDataType/import', async (req, res) => {
     for (let i = 0; i < data.length; i++) {
       try {
         let record = data[i];
+
+        // Add system fields for models that have them
+        if (!['tax', 'generalCondition', 'process'].includes(masterDataType)) {
+          record.companyId = companyId;
+          record.financialYear = financialYear;
+        }
+
+        // Resolve all references BEFORE validation
+        record = await resolveAllReferences(record, masterDataType);
+
         const validationErrors = validateRecord(record, config);
 
         if (validationErrors.length > 0) {
@@ -362,51 +554,7 @@ router.post('/:masterDataType/import', async (req, res) => {
         // Process data type conversions
         record = processDataTypeConversions(record, masterDataType);
 
-        // Add system fields for models that have them
-        if (!['tax', 'generalCondition', 'process'].includes(masterDataType)) {
-          record.companyId = companyId;
-          record.financialYear = financialYear;
-        }
-
-        // Handle data type conversions based on schema
-        // if (masterDataType === 'material') {
-        //   // Generate materialId if not provided
-        //   if (!record.materialId) {
-        //     record.materialId = await generateUniqueId(Model, config.idPrefix, companyId, financialYear);
-        //   }
-
-        //   // Check for duplicate materialId
-        //   const existingMaterial = await Model.findOne({
-        //     materialId: record.materialId,
-        //     companyId: companyId
-        //   });
-
-        //   if (existingMaterial) {
-        //     // Update existing record
-        //     await Model.updateOne(
-        //       { _id: existingMaterial._id },
-        //       { 
-        //         $set: {
-        //           ...record,
-        //           updatedAt: new Date()
-        //         }
-        //       }
-        //     );
-        //     results.updated++;
-        //   } else {
-        //     // Create new record
-        //     await Model.create(record);
-        //     results.imported++;
-        //   }
-        // }
-
-        // In your import endpoint, update the material handling section:
-
         if (masterDataType === 'material') {
-          // Resolve references BEFORE validation
-          record = await resolveMaterialReferences(record);
-
-          // No need to generate materialId - user provides it
           // Validate that materialId is provided
           if (!record.materialId || record.materialId.trim() === '') {
             throw new Error('materialId is required');
@@ -471,7 +619,6 @@ router.post('/:masterDataType/import', async (req, res) => {
             results.imported++;
           }
         }
-
         else if (masterDataType === 'vendor') {
           // Generate vendor number if not provided
           if (!record.vnNo) {
@@ -507,7 +654,6 @@ router.post('/:masterDataType/import', async (req, res) => {
             results.imported++;
           }
         }
-
         else if (masterDataType === 'vendorPriceList') {
           // Check for duplicate vendor price list entry
           const existingPriceList = await Model.findOne({
@@ -537,7 +683,6 @@ router.post('/:masterDataType/import', async (req, res) => {
             results.imported++;
           }
         }
-
         else if (masterDataType === 'customerPriceList') {
           // Check for duplicate customer price list entry
           const existingPriceList = await Model.findOne({
@@ -568,7 +713,6 @@ router.post('/:masterDataType/import', async (req, res) => {
             results.imported++;
           }
         }
-
         else if (masterDataType === 'tax') {
           // Check for duplicate tax by taxCode
           const existingTax = await Model.findOne({
@@ -593,7 +737,6 @@ router.post('/:masterDataType/import', async (req, res) => {
             results.imported++;
           }
         }
-
         else if (masterDataType === 'location') {
           // Check for duplicate location by name and companyId
           const existingLocation = await Model.findOne({
@@ -608,7 +751,6 @@ router.post('/:masterDataType/import', async (req, res) => {
               {
                 $set: {
                   ...record,
-                  // Don't override createdAt as it has default: Date.now
                 }
               }
             );
@@ -619,7 +761,6 @@ router.post('/:masterDataType/import', async (req, res) => {
             results.imported++;
           }
         }
-
         else if (masterDataType === 'generalCondition') {
           // Check for duplicate general condition by name
           let existingCondition;
@@ -650,7 +791,6 @@ router.post('/:masterDataType/import', async (req, res) => {
             results.imported++;
           }
         }
-
         else if (masterDataType === 'process') {
           // Check for duplicate process by processId
           let existingProcess;
@@ -744,6 +884,15 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
           let record = batch[i];
           const actualRowNumber = (batchIndex * batchSize) + i + 1;
 
+          // Add system fields for models that have them
+          if (!['tax'].includes(masterDataType)) {
+            record.companyId = companyId;
+            record.financialYear = financialYear;
+          }
+
+          // Resolve all references BEFORE validation
+          record = await resolveAllReferences(record, masterDataType);
+
           const validationErrors = validateRecord(record, config);
 
           if (validationErrors.length > 0) {
@@ -755,18 +904,7 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
           // Process data type conversions
           record = processDataTypeConversions(record, masterDataType);
 
-          // Add system fields for models that have them
-          if (!['tax1'].includes(masterDataType)) {
-            record.companyId = companyId;
-            record.financialYear = financialYear;
-          }
-
-          // In your bulk import endpoint, update the material section:
-
           if (masterDataType === 'material') {
-            // Resolve references
-            record = await resolveMaterialReferences(record);
-
             // Validate materialId
             if (!record.materialId || record.materialId.trim() === '') {
               throw new Error('materialId is required');
@@ -780,7 +918,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               }
             });
           }
-
           else if (masterDataType === 'customer') {
             if (!record.cnNo) {
               record.cnNo = await generateUniqueId(Model, config.idPrefix, companyId, financialYear);
@@ -804,7 +941,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               }
             });
           }
-
           else if (masterDataType === 'vendor') {
             if (!record.vnNo) {
               record.vnNo = await generateUniqueId(Model, config.idPrefix, companyId, financialYear);
@@ -828,7 +964,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               }
             });
           }
-
           else if (masterDataType === 'vendorPriceList') {
             bulkOps.push({
               updateOne: {
@@ -845,7 +980,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               }
             });
           }
-
           else if (masterDataType === 'customerPriceList') {
             bulkOps.push({
               updateOne: {
@@ -863,7 +997,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               }
             });
           }
-
           else if (masterDataType === 'tax') {
             bulkOps.push({
               updateOne: {
@@ -873,7 +1006,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               }
             });
           }
-
           else if (masterDataType === 'location') {
             bulkOps.push({
               updateOne: {
@@ -886,7 +1018,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               }
             });
           }
-
           else if (masterDataType === 'generalCondition') {
             if (record.name && record.name.trim() !== '') {
               bulkOps.push({
@@ -905,7 +1036,6 @@ router.post('/:masterDataType/bulk-import', async (req, res) => {
               });
             }
           }
-
           else if (masterDataType === 'process') {
             if (record.processId && record.processId.trim() !== '') {
               bulkOps.push({
@@ -974,10 +1104,11 @@ router.get('/:masterDataType/template/:format', (req, res) => {
       });
     }
 
-    // Updated templates based on your actual schema
+    // Updated templates with reference-friendly field names
     const templates = {
       material: {
-        categoryId: 'ObjectId_from_MaterialCategory',
+        materialId: 'MAT001',
+        categoryName: 'Raw Materials', // User-friendly category name instead of ObjectId
         description: 'Sample Raw Material Description',
         baseUnit: 'KG',
         orderUnit: 'KG',
@@ -993,7 +1124,7 @@ router.get('/:masterDataType/template/:format', (req, res) => {
         location: 'WH01'
       },
       customer: {
-        categoryId: 'ObjectId_from_CustomerCategory',
+        categoryName: 'Retail Customers', // User-friendly category name
         name1: 'Sample Customer Pvt Ltd',
         name2: 'Sample Customer',
         search: 'SAMPLE_CUSTOMER',
@@ -1011,7 +1142,7 @@ router.get('/:masterDataType/template/:format', (req, res) => {
         isBlocked: false
       },
       vendor: {
-        categoryId: 'ObjectId_from_VendorCategory',
+        categoryName: 'Raw Material Suppliers', // User-friendly category name
         name1: 'Sample Vendor Pvt Ltd',
         name2: 'Sample Vendor',
         search: 'SAMPLE_VENDOR',
@@ -1029,24 +1160,24 @@ router.get('/:masterDataType/template/:format', (req, res) => {
         isBlocked: false
       },
       vendorPriceList: {
-        categoryId: 'ObjectId_from_VendorCategory',
-        vendorId: 'ObjectId_from_Vendor',
-        materialId: 'ObjectId_from_Material',
+        categoryName: 'Raw Material Suppliers', // Vendor category name
+        vendorCode: 'VEND000001', // Vendor code/number
+        materialCode: 'MAT001', // Material code/ID
         unit: 'KG',
         bum: 150.50,
         buyer: 'John Doe',
-        taxId: 'ObjectId_from_Tax',
+        taxCode: 'GST1', // Tax code instead of ObjectId
         orderUnit: 100
       },
       customerPriceList: {
-        categoryId: 'ObjectId_from_CustomerCategory',
-        customerId: 'ObjectId_from_Customer',
-        materialId: 'ObjectId_from_Material',
+        categoryName: 'Retail Customers', // Customer category name
+        customerCode: 'CUST000001', // Customer code/number
+        materialCode: 'MAT001', // Material code/ID
         unit: 'KG',
         bum: 250.75,
         orderUnit: 'BOX',
         salesGroup: 'RETAIL',
-        taxId: 'ObjectId_from_Tax',
+        taxCode: 'GST1', // Tax code instead of ObjectId
         tandc: 'Payment terms: 30 days net. Delivery: FOB warehouse.'
       },
       tax: {

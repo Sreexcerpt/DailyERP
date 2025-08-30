@@ -601,7 +601,12 @@ function QuotationsDisplay() {
   // Update your fetchCategories function to set both categories and rfqCategories
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/rfq-categories');
+      const response = await axios.get('http://localhost:8080/api/rfq-categories', {
+        params: {
+          companyId: localStorage.getItem('selectedCompanyId'),
+          financialYear: localStorage.getItem('financialYear')
+        }
+      });
       const categoryOptions = response.data.map((cat) => ({
         label: `${cat.categoryName} (${cat.prefix})`,
         value: cat._id
@@ -1064,7 +1069,7 @@ function QuotationsDisplay() {
 
               <h6 className="mb-3">Items</h6>
               <div className="table-responsive">
-                <table className="table table-striped table-hover">
+                <table className="table table-sm table-bordered">
                   <thead className="table-dark">
                     <tr>
                       <th>#</th>
@@ -1370,9 +1375,9 @@ function QuotationsDisplay() {
 
   return (
     <div className='content'>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
         <h6>All Quotations</h6>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
 
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <input
@@ -1420,11 +1425,12 @@ function QuotationsDisplay() {
 
       </div>
 
-
-      <div className="table-responsive">
-        <table className="table table-nowrap datatable dataTable no-footer" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" >
-          <thead>
-            <tr>
+<div className="card">
+  <div className="card-body">
+    <div className="table-responsive">
+      <table className="table table-sm table-bordered" id="DataTables_Table_0" aria-describedby="DataTables_Table_0_info" >
+        <thead>
+          <tr>
               <th>#</th>
               <th>Quotation ID</th>
               <th>Quotation Reference</th>
@@ -1483,13 +1489,14 @@ function QuotationsDisplay() {
 
         </table>
       </div>
-
-      <div className="d-flex justify-content-center mt-2">
+</div>
+</div>
+      <div className="d-flex justify-content-end mt-2">
         <nav>
           <ul className="pagination pagination-sm mb-0">
             <li className={`page-item${currentPage === 1 ? ' disabled' : ''}`}>
               <button className="page-link" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-                <i className="bi bi-chevron-double-left"></i>
+                <i className="fas fa-angle-left"></i>
               </button>
             </li>
             {/* Page Numbers */}
@@ -1564,7 +1571,7 @@ function QuotationsDisplay() {
             })()}
             <li className={`page-item${currentPage === totalPages ? ' disabled' : ''}`}>
               <button className="page-link" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                <i className="bi bi-chevron-double-right"></i>
+                <i className="fas fa-angle-right"></i>
               </button>
             </li>
           </ul>

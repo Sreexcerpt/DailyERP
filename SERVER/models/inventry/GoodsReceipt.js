@@ -12,6 +12,8 @@ const GoodsReceiptSchema = new mongoose.Schema({
   receiptDate: { type: String },
   purchaseOrderId: { type: mongoose.Schema.Types.ObjectId, ref: 'PurchaseOrder' },
   isdelete: { type: Boolean, default: false },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  financialYear: { type: String },
   items: [
     {
       materialId: String,

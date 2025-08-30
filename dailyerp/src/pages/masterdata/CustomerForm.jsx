@@ -424,8 +424,8 @@ function CustomerForm() {
   return (
     <div className="content">
       {/* Header Section */}
-      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-        <div className="my-auto mb-2">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
           <h2 className="mb-1">Customer Master</h2>
           <nav>
             <ol className="breadcrumb mb-0">
@@ -560,473 +560,537 @@ function CustomerForm() {
               </tbody>
             </table>
           </div>
-          <div className="d-flex justify-content-between align-items-center mt-3">
-            <div className="text-muted">
-              Showing {filteredCustomers.length === 0 ? 0 : indexOfFirstItem + 1} to{" "}
-              {Math.min(indexOfLastItem, filteredCustomers.length)} of {filteredCustomers.length} entries
-              {searchTerm && ` (filtered from ${customers.length} total entries)`}
-            </div>
+        </div>
+      </div>
+      <div className="d-flex justify-content-end align-items-center mt-3">
 
-            <div className="d-flex align-items-center gap-2">
-              <button
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        {totalPages > 1 && (
+          <nav aria-label="Page navigation">
+            <ul className="pagination pagination-sm mb-0">
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
                 <button
-                  key={page}
-                  className={`btn btn-sm ${currentPage === page ? "btn-primary" : "btn-outline-primary"
-                    }`}
-                  onClick={() => setCurrentPage(page)}
+                  className="page-link"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
                 >
-                  {page}
+                  <span aria-hidden="true"><i className="fas fa-angle-left"></i></span>
                 </button>
-              ))}
+              </li>
 
-              <button
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
+              {(() => {
+                const delta = 2; // Number of pages to show on each side of current page
+                const range = [];
+                const rangeWithDots = [];
+
+                // Always show first page
+                range.push(1);
+
+                // Add pages around current page
+                for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+                  range.push(i);
+                }
+
+                // Always show last page if there are more than 1 page
+                if (totalPages > 1) {
+                  range.push(totalPages);
+                }
+
+                // Remove duplicates and sort
+                const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+                let prev;
+                for (let i of uniqueRange) {
+                  if (prev) {
+                    if (i - prev === 2) {
+                      rangeWithDots.push(prev + 1);
+                    } else if (i - prev !== 1) {
+                      rangeWithDots.push('...');
+                    }
+                  }
+                  rangeWithDots.push(i);
+                  prev = i;
+                }
+
+                return rangeWithDots.map((number, index) => {
+                  if (number === '...') {
+                    return (
+                      <li key={`ellipsis-${index}`} className="page-item disabled">
+                        <span className="page-link">...</span>
+                      </li>
+                    );
+                  }
+
+                  return (
+                    <li
+                      key={number}
+                      className={`page-item ${currentPage === number ? "active" : ""}`}
+                    >
+                      <button
+                        className="page-link"
+                        onClick={() => setCurrentPage(number)}
+                      >
+                        {number}
+                      </button>
+                    </li>
+                  );
+                });
+              })()}
+
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  <span aria-hidden="true"><i className="fas fa-angle-right"></i></span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        )}
+      </div>
+
+      {/* Customer Type Selection Modal */}
+      {showCustomerTypeModal && (
+        <>
+          <div className="modal-backdrop fade show"></div>
+          <div
+            className="modal fade show"
+            style={{ display: "block" }}
+            tabIndex="-1"
+            aria-modal="true"
+            role="dialog"
+          >
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h4 className="modal-title">Select Customer Type</h4>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseCustomerTypeModal}
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <p className="mb-4">
+                    Choose how you want to create the ID:
+                  </p>
+
+                  {customerType === "external" ? (
+                    <div>
+                      <div className="mb-3">
+                        <label className="form-label">External Customer ID</label>
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={externalCustomerId}
+                          onChange={(e) => setExternalCustomerId(e.target.value)}
+                          maxLength={50}
+                          required
+                          placeholder="Enter External Customer ID (max 50 characters)"
+                        />
+                        <small className="form-text text-muted">
+                          {externalCustomerId.length}/50 characters
+                        </small>
+                      </div>
+                      <div className="d-flex gap-2">
+                        <button
+                          className="btn btn-primary"
+                          onClick={handleExternalCustomerIdSubmit}
+                          disabled={!externalCustomerId.trim()}
+                        >
+                          Continue
+                        </button>
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => setCustomerType("")}
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="row">
+                      <div className="col-xl-6">
+                        <button
+                          className="btn btn-primary btn-md"
+                          onClick={() => handleCustomerTypeSelect("internal")}
+                        >
+                          <i className="ti ti-user me-2"></i>
+                          Internal (Auto-generate)
+                        </button>
+                      </div>
+                      <div className="col-xl-6">
+                        <button
+                          className="btn btn-secondary btn-md"
+                          onClick={() => handleCustomerTypeSelect("external")}
+                        >
+                          <i className="ti ti-edit me-2"></i>
+                          External (Manual Entry)
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
+        </>
+      )}
 
-          {/* Customer Type Selection Modal */}
-          {showCustomerTypeModal && (
-            <>
-              <div className="modal-backdrop fade show"></div>
-              <div
-                className="modal fade show"
-                style={{ display: "block" }}
-                tabIndex="-1"
-                aria-modal="true"
-                role="dialog"
-              >
-                <div className="modal-dialog modal-md">
-                  <div className="modal-content">
-                    <div className="modal-header">
-                      <h4 className="modal-title">Select Customer Type</h4>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        onClick={handleCloseCustomerTypeModal}
-                        aria-label="Close"
-                      ></button>
-                    </div>
-                    <div className="modal-body">
-                      <p className="mb-4">
-                        Choose how you want to create the ID:
-                      </p>
-                      <div className="row">
-                        <div className="col-xl-6">
-                          <button
-                            className="btn btn-outline-primary btn-md"
-                            onClick={() => handleCustomerTypeSelect("internal")}
-                          >
-                            <i className="ti ti-user me-2"></i>
-                            Internal (Auto-generate)
-                          </button>
+      {/* Main Customer Form Modal */}
+      {showMainModal && (
+        <>
+          <div className="modal-backdrop fade show"></div>
+          <div
+            className="modal fade show"
+            style={{ display: "block" }}
+            tabIndex="-1"
+            aria-labelledby="myLargeModalLabel"
+            aria-modal="true"
+            role="dialog"
+          >
+            <div className="modal-dialog modal-xl modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h4 className="modal-title" id="myLargeModalLabel">
+                    {editingId ? "Edit Customer" : "Add New Customer"}
+                    {customerType && (
+                      <span className="badge bg-info ms-2">
+                        {customerType === "internal" ? "Internal" : "External"}
+                      </span>
+                    )}
+                  </h4>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseMainModal}
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleSubmit}>
+                    {customerType === "external" && (
+                      <div className="alert alert-info mb-3">
+                        <strong>External Customer ID:</strong> {externalCustomerId}
+                      </div>
+                    )}
+
+                    <div className="row">
+                      {/* Category */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">
+                            Category <span className="text-danger">*</span>
+                          </label>
                         </div>
-                        <div className="col-xl-6">
-                          <button
-                            className="btn btn-outline-secondary btn-md"
-                            onClick={() => handleCustomerTypeSelect("external")}
+                        <div className="col-8">
+                          <select
+                            name="categoryId"
+                            value={formData.categoryId}
+                            onChange={handleChange}
+                            className="form-select"
                           >
-                            <i className="ti ti-edit me-2"></i>
-                            External (Manual Entry)
+                            <option value="">Select Category</option>
+                            {categories.map((cat) => (
+                              <option key={cat._id} value={cat._id}>
+                                {cat.categoryName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Name1 */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">
+                            Name1 <span className="text-danger">*</span>
+                          </label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="name1"
+                            placeholder="Enter Name 1"
+                            value={formData.name1}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Name2 */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">Name2</label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="name2"
+                            placeholder="Enter Name 2 (Optional)"
+                            value={formData.name2}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Search Term */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">
+                            SearchTerm <span className="text-danger">*</span>
+                          </label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="search"
+                            placeholder="Enter Search Term"
+                            value={formData.search}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Address1 */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">
+                            Address1 <span className="text-danger">*</span>
+                          </label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="address1"
+                            placeholder="Enter Address 1"
+                            value={formData.address1}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Address2 */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">Address2</label>
+                        </div>
+                        <div className="col-6">
+                          <input
+                            type="text"
+                            name="address2"
+                            placeholder="Enter Address 2"
+                            value={formData.address2}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                        <div className="col-2">
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={addExtraAddress}
+                          >
+                            +
                           </button>
                         </div>
                       </div>
-                      {customerType === "external" && (
-                        <div className="mt-4">
-                          <label className="form-label">External Customer ID</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter External Customer ID (max 50 characters)"
-                            value={externalCustomerId}
-                            onChange={(e) => setExternalCustomerId(e.target.value)}
-                            maxLength={50}
-                          />
-                          <div className="form-text">{externalCustomerId.length}/50 characters</div>
-                          <div className="mt-3">
-                            <button className="btn btn-primary me-2" onClick={handleExternalCustomerIdSubmit}>
-                              Continue
-                            </button>
-                            <button className="btn btn-secondary" onClick={() => setCustomerType("")}>
-                              Back
-                            </button>
+
+                      {/* Dynamic Extra Addresses */}
+                      {formData?.extraAddresses?.map((address, index) => (
+                        <div className="row col-md-4 mb-2" key={index}>
+                          <div className="col-4">
+                            <label className="form-label">{`Address ${index + 3}`}</label>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Main Customer Form Modal */}
-          {showMainModal && (
-            <>
-              <div className="modal-backdrop fade show"></div>
-              <div
-                className="modal fade show"
-                style={{ display: "block" }}
-                tabIndex="-1"
-                aria-labelledby="myLargeModalLabel"
-                aria-modal="true"
-                role="dialog"
-              >
-                <div className="modal-dialog modal-xl modal-dialog-centered">
-                  <div className="modal-content">
-                    <div className="modal-header">
-                      <h4 className="modal-title" id="myLargeModalLabel">
-                        {editingId ? "Edit Customer" : "Add New Customer"}
-                        {customerType && (
-                          <span className="badge bg-info ms-2">
-                            {customerType === "internal" ? "Internal" : "External"}
-                          </span>
-                        )}
-                      </h4>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        onClick={handleCloseMainModal}
-                        aria-label="Close"
-                      ></button>
-                    </div>
-                    <div className="modal-body">
-                      <form onSubmit={handleSubmit}>
-                        {customerType === "external" && (
-                          <div className="alert alert-info mb-3">
-                            <strong>External Customer ID:</strong> {externalCustomerId}
+                          <div className="col-6">
+                            <input
+                              type="text"
+                              placeholder={`Enter Address ${index + 3}`}
+                              value={address}
+                              onChange={(e) =>
+                                handleExtraAddressChange(index, e.target.value)
+                              }
+                              className="form-control"
+                            />
                           </div>
-                        )}
-
-                        <div className="row">
-                          {/* Category */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">
-                                Category <span className="text-danger">*</span>
-                              </label>
-                            </div>
-                            <div className="col-8">
-                              <select
-                                name="categoryId"
-                                value={formData.categoryId}
-                                onChange={handleChange}
-                                className="form-select"
-                              >
-                                <option value="">Select Category</option>
-                                {categories.map((cat) => (
-                                  <option key={cat._id} value={cat._id}>
-                                    {cat.categoryName}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-
-                          {/* Name1 */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">
-                                Name1 <span className="text-danger">*</span>
-                              </label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="name1"
-                                placeholder="Enter Name 1"
-                                value={formData.name1}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Name2 */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">Name2</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="name2"
-                                placeholder="Enter Name 2 (Optional)"
-                                value={formData.name2}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Search Term */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">
-                                SearchTerm <span className="text-danger">*</span>
-                              </label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="search"
-                                placeholder="Enter Search Term"
-                                value={formData.search}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Address1 */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">
-                                Address1 <span className="text-danger">*</span>
-                              </label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="address1"
-                                placeholder="Enter Address 1"
-                                value={formData.address1}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Address2 */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">Address2</label>
-                            </div>
-                            <div className="col-6">
-                              <input
-                                type="text"
-                                name="address2"
-                                placeholder="Enter Address 2"
-                                value={formData.address2}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                            <div className="col-2">
-                              <button
-                                type="button"
-                                className="btn btn-outline-primary btn-sm"
-                                onClick={addExtraAddress}
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Dynamic Extra Addresses */}
-                          {formData?.extraAddresses?.map((address, index) => (
-                            <div className="row col-md-4 mb-2" key={index}>
-                              <div className="col-4">
-                                <label className="form-label">{`Address ${index + 3}`}</label>
-                              </div>
-                              <div className="col-6">
-                                <input
-                                  type="text"
-                                  placeholder={`Enter Address ${index + 3}`}
-                                  value={address}
-                                  onChange={(e) =>
-                                    handleExtraAddressChange(index, e.target.value)
-                                  }
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-2">
-                                <button
-                                  type="button"
-                                  className="btn btn-outline-danger btn-sm"
-                                  onClick={() => removeExtraAddress(index)}
-                                >
-                                  <i className="ti ti-x"></i>
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-
-                          {/* City */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">City</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="city"
-                                placeholder="Enter City"
-                                value={formData.city}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Pincode */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">Pincode</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="pincode"
-                                placeholder="Enter 6-digit Pincode"
-                                value={formData.pincode}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Region */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">
-                                Region <span className="text-danger">*</span>
-                              </label>
-                            </div>
-                            <div className="col-8">
-                              <select
-                                name="region"
-                                value={formData.region}
-                                onChange={handleChange}
-                                className="form-select"
-                              >
-                                <option value="">Select Region</option>
-                                {regions.map((region) => (
-                                  <option key={region} value={region}>
-                                    {region}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-
-                          {/* Country */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">
-                                Country <span className="text-danger">*</span>
-                              </label>
-                            </div>
-                            <div className="col-8">
-                              <select
-                                name="country"
-                                value={formData.country}
-                                onChange={handleChange}
-                                className="form-select"
-                              >
-                                <option value="">Select Country</option>
-                                {countries.map((c) => (
-                                  <option key={c} value={c}>
-                                    {c}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-
-                          {/* Contact No */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">
-                                Contact No <span className="text-danger">*</span>
-                              </label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="contactNo"
-                                placeholder="Enter 10-digit Contact No"
-                                value={formData.contactNo}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Email */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">Email</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="email"
-                                name="email"
-                                placeholder="Enter Email (Optional)"
-                                value={formData.email}
-                                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                                title="Please enter a valid email address (e.g., user@example.com)"
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Contact Person */}
-                          <div className="row col-md-4 mb-2">
-                            <div className="col-4">
-                              <label className="form-label">Contact Person</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                type="text"
-                                name="name"
-                                placeholder="Enter name (Optional)"
-                                value={formData.name}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-3">
-                          <button type="submit" className="btn btn-success">
-                            {editingId ? "Update Customer" : "Save Customer"}
-                          </button>
-
-                          {editingId && (
+                          <div className="col-2">
                             <button
                               type="button"
-                              onClick={resetForm}
-                              className="btn btn-danger ms-2"
+                              className="btn btn-outline-danger btn-sm"
+                              onClick={() => removeExtraAddress(index)}
                             >
-                              Cancel
+                              <i className="ti ti-x"></i>
                             </button>
-                          )}
+                          </div>
                         </div>
-                      </form>
+                      ))}
+
+                      {/* City */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">City</label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="city"
+                            placeholder="Enter City"
+                            value={formData.city}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Pincode */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">Pincode</label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="pincode"
+                            placeholder="Enter 6-digit Pincode"
+                            value={formData.pincode}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Region */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">
+                            Region <span className="text-danger">*</span>
+                          </label>
+                        </div>
+                        <div className="col-8">
+                          <select
+                            name="region"
+                            value={formData.region}
+                            onChange={handleChange}
+                            className="form-select"
+                          >
+                            <option value="">Select Region</option>
+                            {regions.map((region) => (
+                              <option key={region} value={region}>
+                                {region}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Country */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">
+                            Country <span className="text-danger">*</span>
+                          </label>
+                        </div>
+                        <div className="col-8">
+                          <select
+                            name="country"
+                            value={formData.country}
+                            onChange={handleChange}
+                            className="form-select"
+                          >
+                            <option value="">Select Country</option>
+                            {countries.map((c) => (
+                              <option key={c} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Contact No */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">
+                            Contact No <span className="text-danger">*</span>
+                          </label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="contactNo"
+                            placeholder="Enter 10-digit Contact No"
+                            value={formData.contactNo}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Email */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">Email</label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="email"
+                            name="email"
+                            placeholder="Enter Email (Optional)"
+                            value={formData.email}
+                            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                            title="Please enter a valid email address (e.g., user@example.com)"
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Contact Person */}
+                      <div className="row col-md-4 mb-2">
+                        <div className="col-4">
+                          <label className="form-label">Contact Person</label>
+                        </div>
+                        <div className="col-8">
+                          <input
+                            type="text"
+                            name="name"
+                            placeholder="Enter name (Optional)"
+                            value={formData.name}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+
+                    <div className="mt-3">
+                      <button type="submit" className="btn btn-success">
+                        {editingId ? "Update Customer" : "Save Customer"}
+                      </button>
+
+                      {editingId && (
+                        <button
+                          type="button"
+                          onClick={resetForm}
+                          className="btn btn-danger ms-2"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
                 </div>
               </div>
-            </>
-          )}
-        </div>
-      </div>
-
+            </div>
+          </div>
+        </>
+      )}
       <DataImportModal
         show={showDataImportModal}
         onClose={() => setShowDataImportModal(false)}

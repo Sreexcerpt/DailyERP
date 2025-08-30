@@ -8,7 +8,7 @@ const createBillingCategory = async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const category = new BillingCategory({ categoryName, prefix, rangeStart, rangeEnd });
+    const category = new BillingCategory(req.body);
     await category.save();
     res.status(201).json({ message: 'Billing Category created successfully', category });
   } catch (error) {

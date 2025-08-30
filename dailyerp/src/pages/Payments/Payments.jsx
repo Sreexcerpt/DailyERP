@@ -117,98 +117,114 @@ function Payment() {
     return (currentBalance.toFixed(2) - paymentAmount.toFixed(2));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage({ type: "", text: "" });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage({ type: "", text: "" });
 
+  try {
+    if (!paymentData.selectedRecord) {
+      throw new Error("Please select a record to update");
+    }
+
+    const paymentAmount = parseFloat(paymentData.paymentAmount);
+    const currentBalance = paymentData.selectedRecord.balance || 0;
+    const newBalance = currentBalance - paymentAmount;
+
+    // Prepare update payload
+    const updatePayload = {
+      balance: newBalance,
+      lastPaymentAmount: paymentAmount,
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
+      lastPaymentDocNumber: paymentData.docnumber || "",
+      lastPaymentMethod: paymentData.paymentMethod,
+      paymentDescription: paymentData.description || `Payment via ${paymentData.paymentMethod}`
+    };
+
+    const endpoint = paymentData.type === "vendor"
+      ? `http://localhost:8080/api/invoiceform/${paymentData.recordId}`
+      : `http://localhost:8080/api/billingform/${paymentData.recordId}`;
+
+    await axios.put(endpoint, updatePayload);
+
+    // Get entity name more safely
+    const entityName = paymentData.type === "vendor"
+      ? (paymentData.selectedRecord.vendor || 'Unknown Vendor')
+      : (paymentData.selectedRecord.salesOrderId?.customer || paymentData.selectedRecord.customer || 'Unknown Customer');
+
+    // Create payment history record
+    const paymentHistoryPayload = {
+      recordType: paymentData.type,
+      recordId: paymentData.recordId,
+      docnumber: paymentData.docnumber,
+      entityName: entityName,
+      paymentAmount: paymentAmount,
+      companyId: selectedCompanyId,
+      financialYear: financialYear,
+      previousBalance: currentBalance,
+      newBalance: newBalance,
+      paymentMethod: paymentData.paymentMethod,
+      description: paymentData.description,
+      paymentDate: new Date().toISOString()
+    };
+
+    console.log('Payment History Payload:', paymentHistoryPayload); // Add logging
+
+    // Save payment history with better error handling
     try {
-      if (!paymentData.selectedRecord) {
-        throw new Error("Please select a record to update");
-      }
+      const historyResponse = await axios.post("http://localhost:8080/api/payment", paymentHistoryPayload);
+      console.log('Payment history saved successfully:', historyResponse.data);
+    } catch (historyError) {
+      console.error("Payment history save failed:", historyError);
+      console.error("Error details:", historyError.response?.data);
+      
+      // Show warning to user but don't fail the entire operation
+      setMessage({
+        type: "warning",
+        text: `Payment updated successfully, but payment history could not be saved. Error: ${historyError.response?.data?.message || historyError.message}`
+      });
+    }
 
-      const paymentAmount = parseFloat(paymentData.paymentAmount);
-      const currentBalance = paymentData.selectedRecord.balance || 0;
-      const newBalance = currentBalance - paymentAmount;
-
-      // Prepare update payload
-      const updatePayload = {
-        balance: newBalance,
-        lastPaymentAmount: paymentAmount,
-        companyId: selectedCompanyId,
-        financialYear: financialYear,
-        lastPaymentDocNumber: paymentData.docnumber || "",
-        lastPaymentMethod: paymentData.paymentMethod,
-        paymentDescription: paymentData.description || `Payment via ${paymentData.paymentMethod}`
-      };
-
-      const endpoint = paymentData.type === "vendor"
-        ? `http://localhost:8080/api/invoiceform/${paymentData.recordId}`
-        : `http://localhost:8080/api/billingform/${paymentData.recordId}`;
-
-      await axios.put(endpoint, updatePayload);
-
-      // Create payment history record (optional)
-      const paymentHistoryPayload = {
-        recordType: paymentData.type,
-        recordId: paymentData.recordId,
-        docnumber: paymentData.docnumber,
-        entityName: paymentData.type === "vendor"
-          ? paymentData.selectedRecord.vendor
-          : paymentData.selectedRecord.salesOrderId?.customer,
-        paymentAmount: paymentAmount,
-        companyId: selectedCompanyId,
-        financialYear: financialYear,
-        previousBalance: currentBalance,
-        newBalance: newBalance,
-        paymentMethod: paymentData.paymentMethod,
-        description: paymentData.description,
-        paymentDate: new Date().toISOString()
-      };
-
-      // Save payment history (create this endpoint)
-      try {
-        await axios.post("http://localhost:8080/api/payment", paymentHistoryPayload);
-      } catch (historyError) {
-        console.warn("Payment history not saved:", historyError);
-      }
-
+    // Only show success message if no history error occurred
+    if (!message.text) {
       setMessage({
         type: "success",
-        text: `Payment of ₹${paymentAmount} recorded successfully. New balance: ₹${newBalance.toFixed(2)}`
+        text: `Payment of ₹${paymentAmount} recorded successfully for ${entityName}. New balance: ₹${newBalance.toFixed(2)}`
       });
-
-      // Refresh invoices and reset form
-      await fetchInvoices();
-      setPaymentData({
-        type: "vendor",
-        recordId: "",
-        selectedRecord: null,
-        paymentAmount: "",
-        paymentMethod: "cash",
-        description: "",
-        docnumber: ""
-      });
-      setSearchTerm("");
-
-    } catch (error) {
-      console.error("Error recording payment", error);
-      setMessage({
-        type: "error",
-        text: error.message || "Failed to record payment. Please try again."
-      });
-    } finally {
-      setLoading(false);
     }
-  };
+
+    // Refresh invoices and reset form
+    await fetchInvoices();
+    setPaymentData({
+      type: "vendor",
+      recordId: "",
+      selectedRecord: null,
+      paymentAmount: "",
+      paymentMethod: "cash",
+      description: "",
+      docnumber: ""
+    });
+    setSearchTerm("");
+
+  } catch (error) {
+    console.error("Error recording payment", error);
+    setMessage({
+      type: "error",
+      text: error.response?.data?.message || error.message || "Failed to record payment. Please try again."
+    });
+  } finally {
+    setLoading(false);
+  }
+};  
 
   const filteredRecords = getCurrentRecords();
   const newBalance = calculateNewBalance();
 
   return (
     <div className="content">
-      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-        <div className="my-auto mb-2">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
           <h2 className="mb-1">Record Payment</h2>
           <nav>
             <ol className="breadcrumb mb-0">

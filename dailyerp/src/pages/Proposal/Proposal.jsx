@@ -682,8 +682,8 @@ function Proposals() {
     return (
         <div className="content">
             
- <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-        <div className="my-auto mb-2">
+ <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
           <h2 className="mb-1">Proposals</h2>
           <nav>
             <ol className="breadcrumb mb-0">
@@ -719,7 +719,7 @@ function Proposals() {
                 </div>
         </div>
       </div>
-            <h1 className="mb-4"></h1>
+            
 
             {/* Filters */}
             <div className="card mb-3">

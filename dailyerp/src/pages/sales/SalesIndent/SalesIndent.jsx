@@ -106,7 +106,7 @@ const Salesrequest = () => {
 
   // Fetch purchase categories
   useEffect(() => {
-    axios.get('http://localhost:8080/api/salecategory')
+    axios.get('http://localhost:8080/api/salecategory', { params: { companyId, financialYear } })
       .then(res => setCategories(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -449,11 +449,11 @@ const Salesrequest = () => {
 
   };
   return (
-    <div className="">
+    
       <div className="content">
         {/* Header Section */}
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+          <div className="my-auto ">
             <h2 className="mb-1">Sales Enquiry</h2>
             <nav>
               <ol className="breadcrumb mb-0">
@@ -925,20 +925,19 @@ const Salesrequest = () => {
                       <div className="text-center">
                         <div className="d-flex justify-content-center gap-3">
                           <button
-                            className="btn btn-primary btn-lg"
+                            className="btn btn-primary btn-sm"
                             onClick={() => handleIndentIdTypeSelection('internal')}
                           >
-                            <i className="isax isax-setting-2 me-2"></i>
+                            <i className="ti ti-settings me-2"></i>
                             Internal
-                            <small className="d-block mt-1">Auto-generated ID</small>
+                            (Auto-generated ID)
                           </button>
                           <button
-                            className="btn btn-secondary btn-lg"
+                            className="btn btn-secondary btn-sm"
                             onClick={() => handleIndentIdTypeSelection('external')}
                           >
-                            <i className="isax isax-edit me-2"></i>
-                            External
-                            <small className="d-block mt-1">Custom ID</small>
+                            <i className="ti ti-edit me-2"></i>
+                            External(Custom ID)
                           </button>
                         </div>
                       </div>
@@ -950,7 +949,7 @@ const Salesrequest = () => {
           </>
         )}
       </div>
-    </div>
+   
   );
 };
 

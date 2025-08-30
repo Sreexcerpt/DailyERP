@@ -25,7 +25,7 @@ async function generateQuotationNumber(categoryId) {
           const numberPart = quotation.quotationNumber;
           return parseInt(numberPart, 10);
         })
-        .filter(num => !isNaN(num)); // Filter out invalid numbers
+        .filter(num => !isNaN(num) && num >= category.rangeFrom && num <= category.rangeTo); // Filter valid numbers within range
       
       if (usedNumbers.length > 0) {
         const maxUsedNumber = Math.max(...usedNumbers);
@@ -40,7 +40,7 @@ async function generateQuotationNumber(categoryId) {
       throw new Error(`Quotation number exceeded category range. Next: ${nextNumber}, Max: ${category.rangeTo}`);
     }
 
-    const generatedQuotationNumber = nextNumber.toString().padStart(6, '0');
+    const generatedQuotationNumber = nextNumber.toString();
     console.log('Generated Quotation Number:', generatedQuotationNumber);
 
     // Optional: Add a check to ensure this number doesn't already exist

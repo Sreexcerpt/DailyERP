@@ -140,7 +140,7 @@ const LeaveRequests = () => {
           <div className="col-md-12">
             <div className="page-header">
               <div className="row">
-                <div className="col-md-4">
+                <div className="col-md-12">
                   <h3>Leave Request Management</h3>
                 </div>
               </div>
@@ -153,7 +153,7 @@ const LeaveRequests = () => {
           <div className="card-body">
             <div className="row gx-3">
               {/* Status Filter */}
-              <div className="col-md-3">
+              <div className="col-md-2">
                 <label className="form-label">Status</label>
                 <select
                   className="form-select"
@@ -169,7 +169,7 @@ const LeaveRequests = () => {
               </div>
 
               {/* Search Filter */}
-              <div className="col-md-3">
+              <div className="col-md-2">
                 <label className="form-label">Search</label>
                 <input
                   type="text"
@@ -181,7 +181,7 @@ const LeaveRequests = () => {
               </div>
 
               {/* Date Range Filter */}
-              <div className="col-md-6">
+              <div className="col-md-3">
                 <label className="form-label">Request Date Range</label>
                 <div className="d-flex gap-2">
                   <DatePicker
@@ -207,9 +207,26 @@ const LeaveRequests = () => {
                   />
                 </div>
               </div>
+
+               <div className="col-5 d-flex justify-content-end mt-3">
+                <button
+                  className="btn btn-primary me-2"
+                  onClick={applyFilters}
+                  style={{ width: "120px",height:"38px" }}
+                >
+                  Apply Filters
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={resetFilters}
+                  style={{ width: "120px", height:"38px" }}
+                >
+                  Reset Filters
+                </button>
+              </div>
             </div>
             
-            <div className="row mt-3">
+            {/* <div className="row mt-3">
               <div className="col-12 d-flex justify-content-end">
                 <button
                   className="btn btn-primary me-2"
@@ -226,7 +243,7 @@ const LeaveRequests = () => {
                   Reset Filters
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 

@@ -1248,7 +1248,7 @@ const ContactsList = () => {
         <>
             <div className="content pb-0">
                 {/* Page Header */}
-                <div className="d-flex align-items-center justify-content-between gap-2 mb-4 flex-wrap">
+                <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap">
                     <div>
                         <h4 className="mb-1">
                             Contacts

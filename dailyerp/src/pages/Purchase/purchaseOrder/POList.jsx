@@ -1402,71 +1402,71 @@ function PurchaseOrderDisplay() {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
- 
 
-   const handlePrint = async (po) => {
-   try {
-     // Fetch vendor details
-     const companyId = localStorage.getItem("selectedCompanyId");
-     const financialYear = localStorage.getItem("financialYear");
- // Add this function before the main handlePrint function
- 
- // And in the HTML:
-    const [vendorResponse, companyResponse] = await Promise.all([
-       axios.get(`http://localhost:8080/api/vendors/${po.vendor}`, {
-         params: { companyId, financialYear },
-       }),
-       axios.get(`http://localhost:8080/api/companies/${companyId}`),
-     ]);
- 
-     const vendor = vendorResponse.data;
-     const company = companyResponse.data;
- // Client side - add logging to your function
- const getImageAsBase64 = async (imagePath) => {
-   try {
-     console.log('=== getImageAsBase64 called ===');
-     console.log('Input imagePath:', imagePath);
-     
-     const filename = imagePath.includes('/') 
-       ? imagePath.split('/').pop()
-       : imagePath;
-     
-     console.log('Extracted filename:', filename);
-     
-     const url = `http://localhost:8080/api/image/${filename}`;
-     console.log('Request URL:', url);
- 
-     const response = await axios.get(url, {
-       responseType: 'arraybuffer'
-     });
- 
-     console.log('Response status:', response.status);
-     console.log('Response data length:', response.data.byteLength);
- 
-     const base64 = btoa(
-       new Uint8Array(response.data)
-         .reduce((data, byte) => data + String.fromCharCode(byte), '')
-     );
- 
-     return `data:image/jpeg;base64,${base64}`;
-   } catch (error) {
-     console.error('Error fetching image:', error.message);
-     console.error('Error status:', error.response?.status);
-     console.error('Error URL:', error.config?.url);
-     return null;
-   }
- };
- 
- // Then in your handlePrint function, after getting company data:
- let logoBase64 = null;
- if (company.logo) {
-   logoBase64 = await getImageAsBase64(company.logo);
- }
- 
-     // Generate item rows
-     const itemRows = po.items
-       .map(
-         (item, idx) => `
+
+  const handlePrint = async (po) => {
+    try {
+      // Fetch vendor details
+      const companyId = localStorage.getItem("selectedCompanyId");
+      const financialYear = localStorage.getItem("financialYear");
+      // Add this function before the main handlePrint function
+
+      // And in the HTML:
+      const [vendorResponse, companyResponse] = await Promise.all([
+        axios.get(`http://localhost:8080/api/vendors/${po.vendor}`, {
+          params: { companyId, financialYear },
+        }),
+        axios.get(`http://localhost:8080/api/companies/${companyId}`),
+      ]);
+
+      const vendor = vendorResponse.data;
+      const company = companyResponse.data;
+      // Client side - add logging to your function
+      const getImageAsBase64 = async (imagePath) => {
+        try {
+          console.log('=== getImageAsBase64 called ===');
+          console.log('Input imagePath:', imagePath);
+
+          const filename = imagePath.includes('/')
+            ? imagePath.split('/').pop()
+            : imagePath;
+
+          console.log('Extracted filename:', filename);
+
+          const url = `http://localhost:8080/api/image/${filename}`;
+          console.log('Request URL:', url);
+
+          const response = await axios.get(url, {
+            responseType: 'arraybuffer'
+          });
+
+          console.log('Response status:', response.status);
+          console.log('Response data length:', response.data.byteLength);
+
+          const base64 = btoa(
+            new Uint8Array(response.data)
+              .reduce((data, byte) => data + String.fromCharCode(byte), '')
+          );
+
+          return `data:image/jpeg;base64,${base64}`;
+        } catch (error) {
+          console.error('Error fetching image:', error.message);
+          console.error('Error status:', error.response?.status);
+          console.error('Error URL:', error.config?.url);
+          return null;
+        }
+      };
+
+      // Then in your handlePrint function, after getting company data:
+      let logoBase64 = null;
+      if (company.logo) {
+        logoBase64 = await getImageAsBase64(company.logo);
+      }
+
+      // Generate item rows
+      const itemRows = po.items
+        .map(
+          (item, idx) => `
      <tr>
        <td style="text-align: center; border: 1px solid #000; padding: 4px;">${idx + 1}</td>
        <td style="border: 1px solid #000; padding: 4px;">${item.materialId || ""}</td>
@@ -1480,71 +1480,71 @@ function PurchaseOrderDisplay() {
        <td style="text-align: right; border: 1px solid #000; padding: 4px;">₹${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</td>
      </tr>
    `
-       )
-       .join("");
- 
-     // Generate notes from po.notes field - completely dynamic
- const notesRows = (() => {
-   if (po.notes) {
-     // Check if notes is a string or array
-     if (typeof po.notes === 'string') {
-       // Split string by newlines and create rows
-       const noteLines = po.notes.split('\n').filter(line => line.trim() !== '');
-       if (noteLines.length > 0) {
-         return noteLines.map((note, idx) => `
+        )
+        .join("");
+
+      // Generate notes from po.notes field - completely dynamic
+      const notesRows = (() => {
+        if (po.notes) {
+          // Check if notes is a string or array
+          if (typeof po.notes === 'string') {
+            // Split string by newlines and create rows
+            const noteLines = po.notes.split('\n').filter(line => line.trim() !== '');
+            if (noteLines.length > 0) {
+              return noteLines.map((note, idx) => `
            <tr>
              <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">${idx + 1}.</td>
              <td style="border: 1px solid #000; padding: 4px;">${note.trim()}</td>
            </tr>
          `).join("");
-       }
-     } else if (Array.isArray(po.notes) && po.notes.length > 0) {
-       // Handle array of notes
-       return po.notes.map((note, idx) => `
+            }
+          } else if (Array.isArray(po.notes) && po.notes.length > 0) {
+            // Handle array of notes
+            return po.notes.map((note, idx) => `
          <tr>
            <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">${idx + 1}.</td>
            <td style="border: 1px solid #000; padding: 4px;">${note}</td>
          </tr>
        `).join("");
-     }
-   }
-   
-   // Return empty row if no notes
-   return `
+          }
+        }
+
+        // Return empty row if no notes
+        return `
      <tr>
        <td style="border: 1px solid #000; padding: 4px; vertical-align: top; width: 30px;">-</td>
        <td style="border: 1px solid #000; padding: 4px; color: #666; font-style: italic;">No notes available</td>
      </tr>
    `;
- })();
- 
-     // Generate general conditions display
-     const generalConditionsDisplay = po.generalConditions && po.generalConditions.length > 0
-       ? po.generalConditions.map((condition, idx) => `
+      })();
+
+      // Generate general conditions display
+      const generalConditionsDisplay = po.generalConditions && po.generalConditions.length > 0
+        ? po.generalConditions.map((condition, idx) => `
            <div style="margin-bottom: 8px;">
              <strong>${idx + 1}. ${condition.name}:</strong><br>
              ${condition.description}
            </div>
          `).join("")
-       : "";
- 
-     // Number to words function
-     const numberToWords = (num) => {
-       const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-       const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-       const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-       
-       if (num === 0) return 'Zero';
-       if (num < 10) return ones[num];
-       if (num < 20) return teens[num - 10];
-       if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + ones[num % 10] : '');
-       if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 ? ' ' + numberToWords(num % 100) : '');
-       if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 ? ' ' + numberToWords(num % 1000) : '');
-       if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 ? ' ' + numberToWords(num % 100000) : '');
-       return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 ? ' ' + numberToWords(num % 10000000) : '');
-     };
- 
-     const html = `
+        : "";
+
+      // Number to words function
+      const numberToWords = (num) => {
+        const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+        const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+        const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+        if (num === 0) return 'Zero';
+        if (num < 10) return ones[num];
+        if (num < 20) return teens[num - 10];
+        if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? ' ' + ones[num % 10] : '');
+        if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 ? ' ' + numberToWords(num % 100) : '');
+        if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 ? ' ' + numberToWords(num % 1000) : '');
+        if (num < 10000000) return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 ? ' ' + numberToWords(num % 100000) : '');
+        return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 ? ' ' + numberToWords(num % 10000000) : '');
+      };
+
+      const html = `
      <!DOCTYPE html>
      <html>
      <head>
@@ -1799,206 +1799,191 @@ function PurchaseOrderDisplay() {
      </body>
      </html>
    `;
- 
-     // Open print window
-     const printWindow = window.open("", "_blank", "width=800,height=600");
-     printWindow.document.write(html);
-     printWindow.document.close();
-     printWindow.focus();
- 
-     // Print after content loads
-     printWindow.onload = function () {
-       printWindow.print();
-     };
-   } catch (error) {
-     console.error("Error generating print:", error);
-     alert("Error generating print. Please try again.");
-   }
- };
+
+      // Open print window
+      const printWindow = window.open("", "_blank", "width=800,height=600");
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+
+      // Print after content loads
+      printWindow.onload = function () {
+        printWindow.print();
+      };
+    } catch (error) {
+      console.error("Error generating print:", error);
+      alert("Error generating print. Please try again.");
+    }
+  };
 
 
 
   return (
     <div className="content">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Purchase Order Display</h2>
-        <div className="mb-4">
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            {(searchQuery || dateFilter.fromDate || dateFilter.toDate) && (
-              <button
-                className="btn btn-outline-secondary"
-                onClick={clearAllFilters}
-              >
-                <i className="fas fa-times me-2"></i>Clear All Filters
-              </button>
-            )}
-          </div>
-
-          {/* Search and Filter Controls */}
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <label className="form-label">Search All Fields</label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-search"></i>
-                </span>
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Purchase Order Display</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Purchase
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Purchase Order Display</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+      <>
+        {/* Purchase Orders Table */}
+        <div className="card">
+          <div className="card-header">
+            <div className="row">
+              <div className="col-md-6"></div>
+              <div className="col-md-2">
+                <label className="form-label">Search All Fields</label>
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <i className="fas fa-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search across all fields (PO Number, Vendor, Category, etc.)..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                  />
+                </div>
+              </div>
+              <div className="col-md-2">
+                <label className="form-label">From Date</label>
                 <input
-                  type="text"
+                  type="date"
                   className="form-control"
-                  placeholder="Search across all fields (PO Number, Vendor, Category, etc.)..."
-                  value={searchQuery}
-                  onChange={handleSearchChange}
+                  value={dateFilter.fromDate}
+                  onChange={(e) =>
+                    handleDateFilterChange("fromDate", e.target.value)
+                  }
+                />
+              </div>
+              <div className="col-md-2">
+                <label className="form-label">To Date</label>
+                <input
+                  type="date"
+                  className="form-control"
+                  value={dateFilter.toDate}
+                  onChange={(e) =>
+                    handleDateFilterChange("toDate", e.target.value)
+                  }
                 />
               </div>
             </div>
-            <div className="col-md-3">
-              <label className="form-label">From Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={dateFilter.fromDate}
-                onChange={(e) =>
-                  handleDateFilterChange("fromDate", e.target.value)
-                }
-              />
-            </div>
-            <div className="col-md-3">
-              <label className="form-label">To Date</label>
-              <input
-                type="date"
-                className="form-control"
-                value={dateFilter.toDate}
-                onChange={(e) =>
-                  handleDateFilterChange("toDate", e.target.value)
-                }
-              />
-            </div>
           </div>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-4">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Results Summary */}
-          <div className="mb-3">
-            <small className="text-muted">
-              Showing {indexOfFirstItem + 1} to{" "}
-              {Math.min(indexOfLastItem, filteredPos.length)} of{" "}
-              {filteredPos.length} purchase orders
-              {filteredPos.length !== pos.length && (
-                <span className="badge bg-info ms-2">Filtered Results</span>
-              )}
-            </small>
-          </div>
-
-          {/* Purchase Orders Table */}
-          <div className="table-responsive">
-            <table className="table table-sm table-bordered table-hover">
-              <thead className="table-light">
-                <tr>
-                  <th>PO Number</th>
-                  <th>Date</th>
-                  <th>Vendor</th>
-                  <th>Category</th>
-                  <th>Quotation Number</th>
-                  <th>Delivery Location</th>
-                  <th>Delivery Address</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.length > 0 ? (
-                  currentItems.map((po) => (
-                    <tr key={po._id}>
-                      <td>
-                        <span className="badge bg-primary">{po.poNumber}</span>
-                      </td>
-                      <td>{po.date}</td>
-                      <td>{po.vendor}</td>
-                      <td>{po.category}</td>
-                      <td>{po.quotationNumber}</td>
-                      <td>{po.deliveryLocation}</td>
-                      <td>{po.deliveryAddress}</td>
-                      <td>
-                        <button
-                          className="btn btn-primary btn-sm"
-                          onClick={() => handlePrint(po)}
-                        >
-                          <i className="fas fa-print me-1"></i>Print
-                        </button>
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="table table-sm table-bordered table-hover">
+                <thead className="table-light">
+                  <tr>
+                    <th>PO Number</th>
+                    <th>Date</th>
+                    <th>Vendor</th>
+                    <th>Category</th>
+                    <th>Quotation Number</th>
+                    <th>Delivery Location</th>
+                    <th>Delivery Address</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.length > 0 ? (
+                    currentItems.map((po) => (
+                      <tr key={po._id}>
+                        <td>
+                          <span className="badge bg-primary">{po.poNumber}</span>
+                        </td>
+                        <td>{po.date}</td>
+                        <td>{po.vendor}</td>
+                        <td>{po.category}</td>
+                        <td>{po.quotationNumber}</td>
+                        <td>{po.deliveryLocation}</td>
+                        <td>{po.deliveryAddress}</td>
+                        <td>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handlePrint(po)}
+                          >
+                            <i className="fas fa-print me-1"></i>Print
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="8" className="text-center py-4">
+                        <i className="fas fa-inbox fa-2x text-muted mb-2"></i>
+                        <p className="text-muted mb-0">
+                          No purchase orders found
+                        </p>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="8" className="text-center py-4">
-                      <i className="fas fa-inbox fa-2x text-muted mb-2"></i>
-                      <p className="text-muted mb-0">
-                        No purchase orders found
-                      </p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <nav aria-label="Purchase Orders pagination">
-              <ul className="pagination justify-content-center">
-                <li
-                  className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+        </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav aria-label="Purchase Orders pagination">
+            <ul className="pagination justify-content-end">
+              <li
+                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
                 >
-                  <button
-                    className="page-link"
-                    onClick={() => paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    <i className="fas fa-chevron-left"></i>
-                  </button>
-                </li>
+                  <i className="fas fa-chevron-left"></i>
+                </button>
+              </li>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (number) => (
-                    <li
-                      key={number}
-                      className={`page-item ${currentPage === number ? "active" : ""
-                        }`}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (number) => (
+                  <li
+                    key={number}
+                    className={`page-item ${currentPage === number ? "active" : ""
+                      }`}
+                  >
+                    <button
+                      className="page-link"
+                      onClick={() => paginate(number)}
                     >
-                      <button
-                        className="page-link"
-                        onClick={() => paginate(number)}
-                      >
-                        {number}
-                      </button>
-                    </li>
-                  )
-                )}
+                      {number}
+                    </button>
+                  </li>
+                )
+              )}
 
-                <li
-                  className={`page-item ${currentPage === totalPages ? "disabled" : ""
-                    }`}
+              <li
+                className={`page-item ${currentPage === totalPages ? "disabled" : ""
+                  }`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
                 >
-                  <button
-                    className="page-link"
-                    onClick={() => paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    <i className="fas fa-chevron-right"></i>
-                  </button>
-                </li>
-              </ul>
-            </nav>
-          )}
-        </>
-      )}
+                  <i className="fas fa-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        )}
+      </>
+
 
       {/* Search Modal */}
       {showSearchModal && (

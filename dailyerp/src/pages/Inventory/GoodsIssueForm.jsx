@@ -17,9 +17,16 @@ function GoodsIssue() {
   const [materialSearchType, setMaterialSearchType] = useState("materialId");
   const [materialSearch, setMaterialSearch] = useState("");
   const [viewAllMaterials, setViewAllMaterials] = useState(false);
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   // Add this useEffect to properly fetch materials
   useEffect(() => {
-    axios.get("http://localhost:8080/api/material")
+    axios.get("http://localhost:8080/api/material", {
+      params: {
+        companyId,
+        financialYear
+      }
+    })
       .then(res => {
         setMaterials(res.data);
         console.log("Materials loaded:", res.data);
@@ -84,7 +91,7 @@ function GoodsIssue() {
   const [searchType, setSearchType] = useState("soNumber");
   const [viewAllClicked, setViewAllClicked] = useState(false);
   const [customers, setCustomers] = useState([]);
-  const [selectedGI, setSelectedGI] = useState(null); 
+  const [selectedGI, setSelectedGI] = useState(null);
   const [customerSearchType, setCustomerSearchType] = useState("name1");
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerViewAllClicked, setCustomerViewAllClicked] = useState(false);
@@ -96,15 +103,30 @@ function GoodsIssue() {
   const [isDocumentNumberEnabled, setIsDocumentNumberEnabled] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/sales-orders')
+    axios.get('http://localhost:8080/api/sales-orders', {
+      params: {
+        companyId,
+        financialYear
+      }
+    })
       .then(res => setSalesOrders(res.data))
       .catch(err => console.error("Error fetching sales orders", err));
 
-    axios.get('http://localhost:8080/api/goodsissuecategory')
+    axios.get('http://localhost:8080/api/goodsissuecategory', {
+      params: {
+        companyId,
+        financialYear
+      }
+    })
       .then(res => setCategories(res.data))
       .catch(err => console.error("Error fetching categories", err));
 
-    axios.get('http://localhost:8080/api/customers')
+    axios.get('http://localhost:8080/api/customers', {
+      params: {
+        companyId,
+        financialYear
+      }
+    })
       .then(res => setCustomers(res.data))
       .catch(err => console.error("Error fetching customers", err));
   }, []);
@@ -112,7 +134,12 @@ function GoodsIssue() {
   // Fetch documents for search
   const fetchDocuments = () => {
     console.log('Fetching documents...'); // Debug log
-    axios.get('http://localhost:8080/api/goodsissue')
+    axios.get('http://localhost:8080/api/goodsissue', {
+      params: {
+        companyId,
+        financialYear
+      }
+    })
       .then(res => {
         console.log('Documents fetched:', res.data); // Debug log
         setDocuments(res.data);
@@ -156,7 +183,7 @@ function GoodsIssue() {
       customer: doc.customer || "",
       location: doc.location || ""
     }));
-setSelectedGI(doc);
+    setSelectedGI(doc);
     // Set selected SO data if available
     if (doc.salesOrderId) {
       const relatedSO = salesOrders.find(so => so._id === doc.salesOrderId);
@@ -425,125 +452,125 @@ setSelectedGI(doc);
 
           <div className="card-body">
             <div className="table-responsive">
-            <table className="table table-bordered">
-              <thead>
-                <tr>
-                  <th>S. No</th>
-                  <th>Mat No</th>
-                  <th>Mat Desc</th>
-                  <th>QTY</th>
-                  <th>UOM</th>
-                  <th>Del Date</th>
-                  <th>LOT No</th>
-                  <th>Value</th>
-                  <th>Available Qty</th>
-                  {isCancelMode && <th>Cancel</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {selectedSO?.items?.map((item, idx) => (
-                  <tr key={idx}>
-                    <td>{idx + 1}</td>
-                    <td>
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          value={item.materialId || ""}
-                          readOnly
-                        />
-                        {!isDisplayCategory && (
-                          <button
-                            type="button"
-                            className="btn btn-outline-secondary"
-                            onClick={() => {
-                              setSearchRowIndex(idx);
-                              setShowMaterialModal(true);
-                            }}
-                          >
-                            🔍
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.description}
-                        readOnly
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                        value={item.quantity}
-                        onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "quantity", e.target.value)}
-                        readOnly={isDisplayCategory}
-                        disabled={isDisplayCategory}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.baseUnit}
-                        readOnly
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="date"
-                        className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                        value={item.deliveryDate}
-                        onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "deliveryDate", e.target.value)}
-                        readOnly={isDisplayCategory}
-                        disabled={isDisplayCategory}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                        value={item.lotNo || ""}
-                        onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "lotNo", e.target.value)}
-                        readOnly={isDisplayCategory}
-                        disabled={isDisplayCategory}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={item.price}
-                        readOnly
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                        value={item.availableQty || ""}
-                        onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "availableQty", e.target.value)}
-                        readOnly={isDisplayCategory}
-                        disabled={isDisplayCategory}
-                      />
-                    </td>
-                    {isCancelMode && (
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>S. No</th>
+                    <th>Mat No</th>
+                    <th>Mat Desc</th>
+                    <th>QTY</th>
+                    <th>UOM</th>
+                    <th>Del Date</th>
+                    <th>LOT No</th>
+                    <th>Value</th>
+                    <th>Available Qty</th>
+                    {isCancelMode && <th>Cancel</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedSO?.items?.map((item, idx) => (
+                    <tr key={idx}>
+                      <td>{idx + 1}</td>
+                      <td>
+                        <div className="input-group">
+                          <input
+                            className="form-control"
+                            value={item.materialId || ""}
+                            readOnly
+                          />
+                          {!isDisplayCategory && (
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary"
+                              onClick={() => {
+                                setSearchRowIndex(idx);
+                                setShowMaterialModal(true);
+                              }}
+                            >
+                              🔍
+                            </button>
+                          )}
+                        </div>
+                      </td>
                       <td>
                         <input
-                          type="checkbox"
-                          checked={item.isCancelled}
-                          onChange={(e) => handleItemChange(idx, "isCancelled", e.target.checked)}
+                          type="text"
+                          className="form-control"
+                          value={item.description}
+                          readOnly
                         />
                       </td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
+                      <td>
+                        <input
+                          type="number"
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.quantity}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "quantity", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={item.baseUnit}
+                          readOnly
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="date"
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.deliveryDate}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "deliveryDate", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.lotNo || ""}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "lotNo", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={item.price}
+                          readOnly
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.availableQty || ""}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(idx, "availableQty", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      {isCancelMode && (
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={item.isCancelled}
+                            onChange={(e) => handleItemChange(idx, "isCancelled", e.target.checked)}
+                          />
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
 
 
-            </table>
+              </table>
             </div>
           </div>
         </div>

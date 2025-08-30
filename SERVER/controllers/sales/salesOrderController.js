@@ -103,6 +103,10 @@ exports.createSalesOrder = async (req, res) => {
 
 exports.getAllSalesOrders = async (req, res) => {
   const { companyId, financialYear } = req.query;
+  if (!companyId || !financialYear) {
+    return res.status(400).json({ error: 'companyId and financialYear are required' });
+  }
+  console.log('Fetching sales orders for:', companyId, financialYear);
   try {
     const orders = await SalesOrder.find({ companyId, financialYear }).sort({ createdAt: -1 });
     res.json(orders);

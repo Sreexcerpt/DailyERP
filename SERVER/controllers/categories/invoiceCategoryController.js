@@ -5,13 +5,13 @@ const InvoiceCategory = require('../../models/categories/InvoiceCategory');
 // @access  Public
 const createInvoiceCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeStart, rangeEnd } = req.body;
+    const { categoryName, rangeStart, rangeEnd } = req.body;
 
-    if (!categoryName || !prefix || rangeStart === undefined || rangeEnd === undefined) {
+    if (!categoryName || rangeStart === undefined || rangeEnd === undefined) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const category = new InvoiceCategory({ categoryName, prefix, rangeStart, rangeEnd });
+    const category = new InvoiceCategory(req.body);
     await category.save();
 
     res.status(201).json({ message: 'Invoice Category created successfully', category });
@@ -25,7 +25,9 @@ const createInvoiceCategory = async (req, res) => {
 // @route   GET /api/invoicecategory
 const getAllInvoiceCategories = async (req, res) => {
   try {
-    const categories = await InvoiceCategory.find();
+    const { companyId } = req.query;
+
+    const categories = await InvoiceCategory.find({ companyId });
     res.json(categories);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch categories' });

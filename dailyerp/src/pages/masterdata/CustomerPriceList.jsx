@@ -38,15 +38,15 @@ function CustomerPriceListForm() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = useState("");
-  const [showdropdown, setShowdropdown] = useState(false);
   const [showCustomerSearchModal, setShowCustomerSearchModal] = useState(false);
   const [customerSearchResults, setCustomerSearchResults] = useState([]);
   const [customerSearchType, setCustomerSearchType] = useState('customerId');
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
 
   const handleImportSuccess = (result) => {
-    alert(`Import completed: ${result.results.imported} records imported`);
+    // alert(`Import completed: ${result.results.imported} records imported`);
     setShowDataImportModal(false);
+    fetchAllPriceLists(); // Refresh data after import
   };
 
   // Export to Excel Function
@@ -501,7 +501,7 @@ function CustomerPriceListForm() {
     <div className="content">
       {/* Header Section */}
       <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
-        <div className="my-auto mb-2">
+        <div className="my-auto">
           <h2 className="mb-1">Customer Price List</h2>
           <nav>
             <ol className="breadcrumb mb-0">
@@ -614,56 +614,163 @@ function CustomerPriceListForm() {
             </tbody>
           </table>
 
-          <div className="dataTables_paginate paging_simple_numbers" id="DataTables_Table_0_paginate">
-            <ul className="pagination">
-              <li className={`paginate_button page-item previous ${currentPage === 1 ? "disabled" : ""}`}>
-                <a
-                  href="#"
-                  className="page-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageClick(currentPage - 1);
-                  }}
-                >
-                  <i className="ti ti-arrow-left"></i>
-                </a>
-              </li>
 
-              {Array.from({ length: totalPages }, (_, i) => (
-                <li
-                  key={i}
-                  className={`paginate_button page-item ${currentPage === i + 1 ? "active" : ""}`}
-                >
-                  <a
-                    href="#"
-                    className="page-link"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageClick(i + 1);
-                    }}
-                  >
-                    {i + 1}
-                  </a>
-                </li>
-              ))}
-
-              <li className={`paginate_button page-item next ${currentPage === totalPages ? "disabled" : ""}`}>
-                <a
-                  href="#"
-                  className="page-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePageClick(currentPage + 1);
-                  }}
-                >
-                  <i className="ti ti-arrow-right"></i>
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
+     { totalPages > 1 && (
+      <nav aria-label="Page navigation" className="">
+        <ul className="pagination mb-0 justify-content-end ms-auto">
+          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+            <a
+              className="page-link"
+              href="javascript:void(0);"
+              aria-label="Previous"
+              onClick={(e) => {
+                e.preventDefault();
+                if (currentPage > 1) {
+                  handlePageClick(currentPage - 1);
+                }
+              }}
+            >
+              <span aria-hidden="true">
+                <i className="fas fa-angle-left"></i>
+              </span>
+            </a>
+          </li>
 
+          {(() => {
+            const pages = [];
+            const maxVisiblePages = 5; // Show max 5 page numbers
+
+            if (totalPages <= maxVisiblePages) {
+              // Show all pages if total pages are less than or equal to maxVisiblePages
+              for (let i = 1; i <= totalPages; i++) {
+                pages.push(
+                  <li
+                    key={i}
+                    className={`page-item ${currentPage === i ? "active" : ""}`}
+                  >
+                    <a
+                      className="page-link"
+                      href="javascript:void(0);"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageClick(i);
+                      }}
+                    >
+                      {i}
+                    </a>
+                  </li>
+                );
+              }
+            } else {
+              // Show first page
+              pages.push(
+                <li
+                  key={1}
+                  className={`page-item ${currentPage === 1 ? "active" : ""}`}
+                >
+                  <a
+                    className="page-link"
+                    href="javascript:void(0);"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageClick(1);
+                    }}
+                  >
+                    1
+                  </a>
+                </li>
+              );
+
+              // Show ellipsis if needed
+              if (currentPage > 3) {
+                pages.push(
+                  <li key="ellipsis1" className="page-item disabled">
+                    <span className="page-link">...</span>
+                  </li>
+                );
+              }
+
+              // Show pages around current page
+              const start = Math.max(2, currentPage - 1);
+              const end = Math.min(totalPages - 1, currentPage + 1);
+
+              for (let i = start; i <= end; i++) {
+                if (i !== 1 && i !== totalPages) {
+                  pages.push(
+                    <li
+                      key={i}
+                      className={`page-item ${currentPage === i ? "active" : ""}`}
+                    >
+                      <a
+                        className="page-link"
+                        href="javascript:void(0);"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageClick(i);
+                        }}
+                      >
+                        {i}
+                      </a>
+                    </li>
+                  );
+                }
+              }
+
+              // Show ellipsis if needed
+              if (currentPage < totalPages - 2) {
+                pages.push(
+                  <li key="ellipsis2" className="page-item disabled">
+                    <span className="page-link">...</span>
+                  </li>
+                );
+              }
+
+              // Show last page
+              if (totalPages > 1) {
+                pages.push(
+                  <li
+                    key={totalPages}
+                    className={`page-item ${currentPage === totalPages ? "active" : ""}`}
+                  >
+                    <a
+                      className="page-link"
+                      href="javascript:void(0);"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageClick(totalPages);
+                      }}
+                    >
+                      {totalPages}
+                    </a>
+                  </li>
+                );
+              }
+            }
+
+            return pages;
+          })()}
+
+          <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+            <a
+              className="page-link"
+              href="javascript:void(0);"
+              aria-label="Next"
+              onClick={(e) => {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                  handlePageClick(currentPage + 1);
+                }
+              }}
+            >
+              <span aria-hidden="true">
+                <i className="fas fa-angle-right"></i>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </nav>)}
       {showModal && (
         <>
           <div className="modal-backdrop fade show"></div>

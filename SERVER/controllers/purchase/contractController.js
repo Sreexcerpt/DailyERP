@@ -3,37 +3,60 @@ const ContractCategory = require('../../models/categories/PurchaseContractCatego
 
 // Generate Contract Number
 async function generateCTNRNumber(categoryId) {
+  try {
     const category = await ContractCategory.findById(categoryId);
-    if (!category) throw new Error('Invalid Contract Category');
-
-    const internalContracts = await Contract.find({
-        contractCategoryId: categoryId,
-        contractGenType: 'internal'
-    }).sort({ contractNumber: -1 });
-
-    let nextNumber;
-
-    if (internalContracts.length > 0) {
-        const latestContract = internalContracts[0];
-        const numberPart = latestContract.contractNumber.replace(category.prefix, '');
-        const latestNumber = parseInt(numberPart, 10);
-        nextNumber = latestNumber + 1;
-    } else {
-        const allContracts = await Contract.find({
-            contractCategoryId: categoryId,
-        }).sort({ contractNumber: -1 });
-
-        if (allContracts.length > 0) {
-            const latestContract = allContracts[0];
-            const numberPart = latestContract.contractNumber.replace(category.prefix, '');
-            const latestNumber = parseInt(numberPart, 10);
-            nextNumber = latestNumber + 1;
-        } else {
-            nextNumber = category.rangeFrom;
-        }
+    if (!category) throw new Error('Contract Category not found');
+    
+    console.log('Category range:', category.rangeFrom, 'to', category.rangeTo);
+    
+    // Find ALL contracts for this category to determine the highest number
+    const existingContracts = await Contract.find({ 
+      contractCategoryId: categoryId,
+    }).select('contractNumber');
+    
+    let nextNumber = category.rangeFrom;
+    
+    if (existingContracts.length > 0) {
+      console.log('Found existing contracts:', existingContracts.length);
+      
+      // Extract all numbers and find the maximum
+      const usedNumbers = existingContracts
+        .map(contract => {
+          // Don't strip prefix - parse the full number part
+          const numberPart = contract.contractNumber.replace(category.prefix, '');
+          return parseInt(numberPart, 10);
+        })
+        .filter(num => !isNaN(num) && num >= category.rangeFrom && num <= category.rangeTo); // Filter valid numbers within range
+      
+      if (usedNumbers.length > 0) {
+        const maxUsedNumber = Math.max(...usedNumbers);
+        console.log('Highest used number:', maxUsedNumber);
+        nextNumber = maxUsedNumber + 1;
+      }
     }
-
-    return `${nextNumber.toString().padStart(6, '0')}`;
+    
+    console.log('Next number to use:', nextNumber);
+    
+    if (nextNumber > category.rangeTo) {
+      throw new Error(`Contract number exceeded category range. Next: ${nextNumber}, Max: ${category.rangeTo}`);
+    }
+    
+    const generatedContractNumber = `${nextNumber}`;
+    console.log('Generated Contract Number:', generatedContractNumber);
+    
+    // Optional: Add a check to ensure this number doesn't already exist
+    const existingContract = await Contract.findOne({ 
+      contractNumber: `${category.prefix}${generatedContractNumber}` 
+    });
+    if (existingContract) {
+      throw new Error(`Contract number ${category.prefix}${generatedContractNumber} already exists`);
+    }
+    
+    return generatedContractNumber;
+  } catch (error) {
+    console.error('Error in generateCTNRNumber:', error);
+    throw error;
+  }
 }
 
 // Create Contract
@@ -41,7 +64,7 @@ exports.createContract = async (req, res) => {
     try {
         const { contractGenType, externalContractNumber, ...otherData } = req.body;
         const contractCategoryId = req.body.categoryId;
-        console.log('Received data:', req.body);
+        // console.log('Received data:', req.body);
         let contractNumber;
 
         if (contractGenType === 'external') {
@@ -68,7 +91,7 @@ exports.createContract = async (req, res) => {
             contractGenType: contractGenType || 'internal',
             ...otherData
         });
-console.log('Contract data:', contract);
+// console.log('Contract data:', contract);
         await contract.save();
         res.status(201).json({
             message: 'Contract created successfully',

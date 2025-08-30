@@ -1963,7 +1963,7 @@ function PurchaseOrderForm() {
       },
     };
 
-    axios.get("http://localhost:8080/api/po-categories",{
+    axios.get("http://localhost:8080/api/po-categories", {
       params: {
         companyId: selectedCompanyId,
         financialYear: financialYear,
@@ -2000,7 +2000,7 @@ function PurchaseOrderForm() {
         setContracts([]); // Set empty array if API fails
       });
 
-    axios.get('http://localhost:8080/api/general-conditions')
+    axios.get('http://localhost:8080/api/general-conditions', commonParams)
       .then(res => {
         const filteredConditions = res.data
           .filter(gc => !gc.isDeleted)
@@ -2012,7 +2012,7 @@ function PurchaseOrderForm() {
         setGeneralConditions(filteredConditions);
       });
 
-    axios.get('http://localhost:8080/api/processes')
+    axios.get('http://localhost:8080/api/processes', commonParams)
       .then(res => {
         const filteredProcesses = res.data
           .filter(p => !p.isDeleted)
@@ -2027,7 +2027,7 @@ function PurchaseOrderForm() {
     axios.get("http://localhost:8080/api/locations", commonParams)
       .then((res) => setLocations(res.data));
 
-    axios.get("http://localhost:8080/api/tax")
+    axios.get("http://localhost:8080/api/tax", commonParams)
       .then((res) => setTaxes(res.data));
 
     axios.get("http://localhost:8080/api/material", commonParams)
@@ -2494,125 +2494,100 @@ function PurchaseOrderForm() {
   };
 
   const POGenerationModal = () => (
-    <div
-      className="modal show d-block"
-      tabIndex="-1"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-    >
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content">
-          <div className="modal-header bg-primary text-white">
-            <h5 className="modal-title">
-              <i className="fas fa-cog me-2"></i>PO Number Generation
-            </h5>
-            <button
-              type="button"
-              className="btn-close btn-close-white"
-              onClick={closePOModal}
-            ></button>
-          </div>
-
-          <div className="modal-body">
-            <div
-              className={`border-2 rounded-lg p-3 cursor-pointer transition-all duration-200 mb-3 ${poGenerationType === 'internal'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
-                }`}
-              onClick={() => setPOGenerationType('internal')}
-            >
-              <div className="flex items-start space-x-3">
-                <input
-                  type="radio"
-                  name="poGeneration"
-                  value="internal"
-                  checked={poGenerationType === 'internal'}
-                  onChange={(e) => setPOGenerationType(e.target.value)}
-                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-1">Internal Generation</h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    System generated number
-                  </p>
-                  <p className="text-sm text-blue-600 font-medium">
+    <>
+      <div className="modal-backdrop fade show"></div>
+      <div
+        className="modal fade show"
+        style={{ display: "block" }}
+        tabIndex="-1"
+        aria-modal="true"
+        role="dialog"
+      >
+        <div className="modal-dialog modal-md">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h4 className="modal-title">
+                <i className="fas fa-cog me-2"></i>PO Number Generation
+              </h4>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={closePOModal}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p className="mb-4">
+                Choose how you want to create the PO Number:
+              </p>
+              <div className="row">
+                <div className="col-xl-6">
+                  <button
+                    className="btn btn-primary btn-md"
+                    onClick={() => {
+                      setPOGenerationType("internal");
+                      handlePOGenerationConfirm();
+                    }}
+                  >
+                    <i className="ti ti-user me-2"></i>
+                    Internal (Auto-generate)
+                  </button>
+                </div>
+                <div className="col-xl-6">
+                  <button
+                    className="btn btn-secondary btn-md"
+                    onClick={() => setPOGenerationType("external")}
+                  >
+                    <i className="ti ti-edit me-2"></i>
+                    External (Manual Entry)
+                  </button>
+                </div>
+              </div>
+              {poGenerationType === "external" && (
+                <div className="mt-4">
+                  <label className="form-label">Enter Custom PO Number</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="External PO Number (max 50 characters)"
+                    value={externalPONumber}
+                    onChange={(e) => setExternalPONumber(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && externalPONumber.trim()) {
+                        handlePOGenerationConfirm();
+                      }
+                    }}
+                    maxLength={50}
+                    autoComplete="off"
+                    spellCheck="false"
+                    autoFocus
+                  />
+                  <div className="form-text">{externalPONumber.length}/50 characters</div>
+                  <div className="mt-3">
+                    <button
+                      className="btn btn-primary"
+                      onClick={handlePOGenerationConfirm}
+                      disabled={!externalPONumber.trim()}
+                    >
+                      <i className="fas fa-check me-1"></i>Create PO
+                    </button>
+                  </div>
+                </div>
+              )}
+              {poGenerationType === "internal" && (
+                <div className="mt-4">
+                  <div className="alert alert-info" role="alert">
+                    <strong>System Generated Number</strong>
+                    <br />
                     Format: {selectedCategory?.prefix}-XXXXXX
-                  </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-
-            <div
-              className={`border-2 rounded-lg p-3 cursor-pointer transition-all duration-200 mb-3 ${poGenerationType === 'external'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
-                }`}
-              onClick={() => setPOGenerationType('external')}
-            >
-              <div className="flex items-start space-x-3">
-                <input
-                  type="radio"
-                  name="poGeneration"
-                  value="external"
-                  checked={poGenerationType === 'external'}
-                  onChange={(e) => setPOGenerationType(e.target.value)}
-                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
-                />
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-1">External Generation</h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    Customized or manual PO number
-                  </p>
-                  <p className="text-sm text-blue-600 font-medium">
-                    Custom Format
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {poGenerationType === 'external' && (
-              <div className="border-2 border-blue-200 rounded-lg p-3 bg-blue-50">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Enter your custom PO number (up to 50 characters)
-                </label>
-                <input
-                  type="text"
-                  value={externalPONumber}
-                  onChange={(e) => setExternalPONumber(e.target.value)}
-                  placeholder="External PO Number"
-                  maxLength={50}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoFocus
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Characters: {externalPONumber.length}/50
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={closePOModal}
-            >
-              <i className="fas fa-times me-1"></i>Cancel
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handlePOGenerationConfirm}
-              disabled={!poGenerationType || (poGenerationType === 'external' && !externalPONumber.trim())}
-            >
-              <i className="fas fa-check me-1"></i>
-              {poGenerationType === 'internal' ? 'Generate PO' : 'Create PO'}
-            </button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 
   const MaterialModal = () => {
@@ -2972,9 +2947,9 @@ function PurchaseOrderForm() {
                                     </span>
                                   </td>
                                   <td>{contract.vendorName || contract.name1}</td>
-                                  <td>{ new Date(contract.validityFDate).toLocaleDateString()}</td>
-                                  <td>{ new Date(contract.validityTDate).toLocaleDateString()}</td>
-                                  <td>₹{ contract.totalPrice}</td>
+                                  <td>{new Date(contract.validityFDate).toLocaleDateString()}</td>
+                                  <td>{new Date(contract.validityTDate).toLocaleDateString()}</td>
+                                  <td>₹{contract.totalPrice}</td>
                                   <td>
                                     <button
                                       className="btn btn-success btn-sm"
@@ -3117,777 +3092,799 @@ function PurchaseOrderForm() {
   );
 
   return (
-    <>
-      <div className="content">
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
-            <h2 className="mb-1">Purchase Order</h2>
-            <nav>
-              <ol className="breadcrumb mb-0">
-                <li className="breadcrumb-item">
-                  <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
-                </li>
-                <li className="breadcrumb-item">
-                  Purchase
-                </li>
-                <li className="breadcrumb-item active" aria-current="page">Purchase Order</li>
-              </ol>
-            </nav>
-          </div>
+
+    <div className="content">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Purchase Order</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Purchase
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Purchase Order</li>
+            </ol>
+          </nav>
         </div>
-        
-        <div className="row">
-          <div className="accordion todo-accordion" id="accordionExample">
-            <div className="accordion-item mb-3">
-              <div className="row align-items-center mb-3 row-gap-3">
-                <div className="col-lg-4 col-sm-6">
-                  <div className="accordion-header" id="headingTwo">
-                    <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-controls="collapseTwo" aria-expanded="false">
-                      <div className="d-flex align-items-center w-100">
-                        <div className="me-2">
-                          <a href="javascript:void(0);">
-                            <span><i className="fas fa-chevron-down"></i></span>
-                          </a>
-                        </div>
-                        <div className="d-flex align-items-center">
-                          <span><i className="fas fa-clipboard-list me-2"></i></span>
-                          <h5 className="fw-semibold">Purchase Quotation Header</h5>
-                        </div>
+      </div>
+
+      <div className="row">
+        <div className="accordion todo-accordion" id="accordionExample">
+          <div className="accordion-item mb-3">
+            <div className="row align-items-center mb-3 row-gap-3">
+              <div className="col-lg-4 col-sm-6">
+                <div className="accordion-header" id="headingTwo">
+                  <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-controls="collapseTwo" aria-expanded="false">
+                    <div className="d-flex align-items-center w-100">
+                      <div className="me-2">
+                        <a href="javascript:void(0);">
+                          <span><i className="fas fa-chevron-down"></i></span>
+                        </a>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div id="collapseTwo" className="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" >
-                <div className="accordion-body">
-                  <div className="card">
-                    <div className="card-body">
-                      <div className="row gap-2">
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-6">
-                            <label className="form-label">Quotation_Number:
-                            </label>
-                          </div>
-                          <div className="col-xl-6">
-                            <div className="input-group">
-                              <input
-                                type="text"
-                                className="form-control form-control-sm"
-                                placeholder="Enter quotation number"
-                                value={selectedQuotationNumber}
-                                onChange={(e) => {
-                                  setSelectedQuotationNumber(e.target.value);
-                                  if (e.target.value) {
-                                    handleQuotationChange(e.target.value);
-                                  }
-                                }}
-                                required
-                              />
-                              <button
-                                className="btn btn-outline-primary btn-sm"
-                                type="button"
-                                onClick={() => setShowQuotationModal(true)}
-                                style={{ border: "0px solid" }}
-                              >
-                                <i className="ti ti-search"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-5">
-                            <label className="form-label">PO Category:</label>
-                          </div>
-                          <div className="col-xl-7">
-                            <select
-                              className="form-select"
-                              onChange={(e) => {
-                                const cat = categories.find(
-                                  (c) => c._id === e.target.value
-                                );
-                                setSelectedCategory(cat);
-                              }}
-                              required
-                            >
-                              <option value="">-- Select Category --</option>
-                              {categories.map((c) => (
-                                <option key={c._id} value={c._id}>
-                                  {c.categoryName}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                        <div className="col-lg-3 " >
-                          <label className="form-label">Select General Conditions</label>
-                          {generalConditions.map((gc) => (
-                            <div key={gc._id} className="flex items-center space-x-2 mb-1">
-                              <input
-                                type="checkbox"
-                                checked={selectedConditions.includes(gc._id)}
-                                onChange={() => toggleSelection(gc._id, selectedConditions, setSelectedConditions)}
-                              />
-                              <label>{gc.name}</label>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="col-xl-3 row">
-                          <div className="col-xl-5">
-                            <label className="form-label">Select Processes</label></div>
-                          <div className="col-xl-6">
-                            <div className="dropdown">
-                              <button
-                                className="btn btn-outline-secondary btn-sm w-100 text-start"
-                                type="button"
-                                data-bs-toggle="dropdown"
-                              >
-                                {selectedProcesses.length === 0 ? 'Select...' : `${selectedProcesses.length} selected`}
-                              </button>
-                              <div className="dropdown-menu w-200" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                {processes.map((p) => (
-                                  <div key={p._id} className="dropdown-item-text">
-                                    <div className="form-check">
-                                      <input
-                                        className="form-check-input"
-                                        type="checkbox"
-                                        checked={selectedProcesses.includes(p._id)}
-                                        onChange={() => toggleSelection(p._id, selectedProcesses, setSelectedProcesses)}
-                                      />
-                                      <label className="form-check-label ms-1">
-                                        {p.processDescription}
-                                      </label>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-4">
-                            <label className="form-label">Remarks:</label></div>
-                          <div className="col-xl-8">
-                            <input
-                              className="form-control"
-                              value={remarks}
-                              onChange={(e) =>
-                                setRemarks(e.target.value)
-                              }
-                            />
-                          </div></div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-6">
-                            <label className="form-label">Prepared By:</label></div>
-                          <div className="col-xl-6">
-                            <input
-                              className="form-control"
-                              value={preparedby}
-                              onChange={(e) =>
-                                setPreparedby(e.target.value)
-                              }
-                            /></div>
-                        </div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-6">
-                            <label className="form-label">Approved By:</label>
-                          </div>
-                          <div className="col-xl-6">
-                            <input
-                              className="form-control"
-                              value={approvedby}
-                              onChange={(e) =>
-                                setApprovedby(e.target.value)
-                              }
-                            /></div>
-                        </div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-5">
-                            <label className="form-label">PO Number:</label>
-                          </div>
-                          <div className="col-xl-7">
-                            <input
-                              className="form-control form-control-sm"
-                              value={poNumber}
-                              readOnly
-                            />
-                          </div>
-                        </div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-6">
-                            <label className="form-label">
-                              PO Creating date:
-                            </label></div>
-                          <div className="col-xl-6">
-                            <input
-                              type="date"
-                              className="form-control form-control-sm"
-                              value={date}
-                              onChange={(e) => setDate(e.target.value)}
-                            /></div>
-                        </div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-3">
-                            <label className="form-label">Vendor:</label></div>
-                          <div className="col-xl-9">
-                            <div className="input-group">
-                              <input
-                                className="form-control form-control-sm"
-                                value={vendor}
-                                onChange={(e) => setVendor(e.target.value)}
-                                placeholder="Enter vendor name"
-                              />
-                              <button
-                                type="button"
-                                className="btn btn-outline-primary btn-sm"
-                                onClick={() => setShowVendorModal(true)}
-                              >
-                                <i className="ti ti-search"></i>
-                              </button>
-                            </div></div>
-                        </div>
-
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-5">
-                            <label className="form-label">Location:</label></div>
-                          <div className="col-xl-7">
-                            <select
-                              className="form-select"
-                              value={deliveryLocation}
-                              onChange={(e) =>
-                                setDeliveryLocation(e.target.value)
-                              }
-                            >
-                              <option value="">-- Select Location --</option>
-                              {locations.map((loc) => (
-                                <option
-                                  key={loc._id || loc.id || loc.name}
-                                  value={
-                                    loc.name || loc.locationName || loc._id
-                                  }
-                                >
-                                  {loc.name || loc.locationName || loc._id}
-                                </option>
-                              ))}
-                            </select></div>
-                        </div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-5">
-                            <label className="form-label">Buyer Group:</label></div>
-                          <div className="col-xl-7">
-                            <input
-                              className="form-control form-control-sm"
-                              value={buyerGroup}
-                              onChange={(e) => setBuyerGroup(e.target.value)}
-                            /></div>
-                        </div>
-
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-6">
-                            <label className="form-label">
-                              Contact Person:
-                            </label></div>
-                          <div className="col-xl-6">
-                            <input
-                              className="form-control form-control-sm"
-                              value={contactPerson}
-                              onChange={(e) =>
-                                setContactPerson(e.target.value)
-                              }
-                            /></div>
-                        </div>
-                        <div className="col-lg-3 row">
-                          <div className="col-xl-5">
-                            <label className="form-label">
-                              Validity Date:
-                            </label></div>
-                          <div className="col-xl-7">
-                            <input
-                              type="date"
-                              className="form-control form-control-sm"
-                              value={validityDate}
-                              onChange={(e) =>
-                                setValidityDate(e.target.value)
-                              }
-                            />
-                          </div></div>
-
-                        <div className="col-lg-4 row">
-                          <div className="col-xl-3">
-                            <label className="form-label">Payment:</label></div>
-                          <div className="col-xl-9">
-                            <textarea
-                              className="form-control form-control-sm"
-                              value={payTerms}
-                              onChange={(e) => setPayTerms(e.target.value)}
-                              maxLength="250"
-                            />
-                          </div>
-                        </div>
+                      <div className="d-flex align-items-center">
+                        <span><i className="fas fa-clipboard-list me-2"></i></span>
+                        <h5 className="fw-semibold">Purchase Quotation Header</h5>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="accordion-item mb-3">
-              <div className="row align-items-center mb-3 row-gap-3">
-                <div className="col-lg-4 col-sm-6">
-                  <div className="accordion-header" id="headingThree">
-                    <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-controls="collapseThree" aria-expanded="false">
-                      <div className="d-flex align-items-center w-100">
-                        <div className="me-2">
-                          <a href="javascript:void(0);">
-                            <span><i className="fas fa-chevron-down"></i></span>
-                          </a>
+            <div id="collapseTwo" className="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" >
+              <div className="accordion-body">
+                <div className="card">
+                  <div className="card-body">
+                    <div className="row gap-2">
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">Reference_Document:
+                          </label>
                         </div>
-                        <div className="d-flex align-items-center">
-                          <span><i className="fas fa-list me-2"></i></span>
-                          <h5 className="fw-semibold">Item List</h5>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-              <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample" >
-                <div className="accordion-body">
-                  <div className="card">
-                    <div className="card-body">
-                      <div className="table-responsive rounded table-nowrap border-bottom-0 border mb-3">
-                        <table className="table-sm table-bordered mb-0">
-                          <thead className="table-dark">
-                            <tr>
-                              <th>#</th>
-                              <th>Material ID</th>
-                              <th>Description</th>
-                              <th>Qty</th>
-                              <th>Base Unit</th>
-                              <th>Order Unit</th>
-                              <th>Material Group</th>
-                              <th>Price</th>
-                              <th>PriceUnit</th>
-                              <th>Amount</th>
-                              <th>Delivery Date</th>
-                              <th>Note</th>
-                              <th>Action</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {items.map((item, idx) => (
-                              <tr key={idx}>
-                                <td>{idx + 1}</td>
-                                                                <td>
-                                  <input
-                                    value={item.materialId}
-                                    readOnly
-                                    className="form-control form-control-sm"
-                                    onClick={() => {
-                                      setSelectedItemIndex(idx);
-                                      setShowModal(true);
-                                    }}
-                                    style={{
-                                      cursor: "pointer",
-                                      backgroundColor: "#f9f9f9",
-                                    }}
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.description}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "description",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    type="number"
-                                    value={item.quantity}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "quantity",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.baseUnit}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "baseUnit",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.orderUnit}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "orderUnit",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    value={item.materialgroup}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "materialgroup",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    type="number"
-                                    value={item.price}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "price",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <select
-                                    value={item.priceUnit}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "priceUnit",
-                                        e.target.value
-                                      )
-                                    }
-                                    required
-                                    className="form-select form-select-sm"
-                                  >
-                                    <option value="">-- Select --</option>
-                                    <option value="INR">INR</option>
-                                    <option value="USD">USD</option>
-                                    <option value="EXTRA">EXTRA</option>
-                                  </select>
-                                </td>
-                                <td>
-                                  {(item.quantity * item.price).toFixed(2)}
-                                </td>
-                                <td>
-                                  <input
-                                    className="form-control form-control-sm"
-                                    type="date"
-                                    value={item.deliveryDate}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "deliveryDate",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <textarea
-                                    className="form-control form-control-sm"
-                                    value={item.note}
-                                    onChange={(e) =>
-                                      handleItemChange(
-                                        idx,
-                                        "note",
-                                        e.target.value
-                                      )
-                                    }
-                                    maxLength="250"
-                                    rows="2"
-                                  />
-                                </td>
-                                <td>
-                                  <button
-                                    className="btn btn-outline-warning btn-sm"
-                                    type="button"
-                                    onClick={() => deleteItem(idx)}
-                                  >
-                                    <i className="ti ti-trash"></i>
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                        <div className="col-md-12">
-                          <div className="mb-3">
+                        <div className="col-xl-6">
+                          <div className="input-group">
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              placeholder="Enter reference document number"
+                              value={selectedQuotationNumber}
+                              onChange={(e) => {
+                                setSelectedQuotationNumber(e.target.value);
+                                if (e.target.value) {
+                                  handleQuotationChange(e.target.value);
+                                }
+                              }}
+                              required
+                            />
                             <button
+                              className="btn btn-outline-primary btn-sm"
                               type="button"
-                              className="btn btn-link"
-                              onClick={addItem}
+                              onClick={() => setShowQuotationModal(true)}
+                              style={{ border: "0px solid" }}
                             >
-                              <i className="isax isax-add-circle5 text-primary me-1"></i>
-                              Add Item
+                              <i className="ti ti-search"></i>
                             </button>
                           </div>
                         </div>
                       </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">PO Category:</label>
+                        </div>
+                        <div className="col-xl-7">
+                          <select
+                            className="form-select"
+                            onChange={(e) => {
+                              const cat = categories.find(
+                                (c) => c._id === e.target.value
+                              );
+                              setSelectedCategory(cat);
+                            }}
+                            required
+                          >
+                            <option value="">-- Select Category --</option>
+                            {categories.map((c) => (
+                              <option key={c._id} value={c._id}>
+                                {c.categoryName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                     <div className="col-lg-3  row">
+                        <div className="col-xl-4">
+                          <label className="form-label">Header Note:</label></div>
+                        <div className="col-xl-8">
+                          <textarea
+                            className="form-control form-control-sm"
+                            value={payTerms}
+                            onChange={(e) => setPayTerms(e.target.value)}
+                            maxLength="250"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-4">
+                          <label className="form-label">Remarks:</label></div>
+                        <div className="col-xl-8">
+                          <input
+                            className="form-control"
+                            value={remarks}
+                            onChange={(e) =>
+                              setRemarks(e.target.value)
+                            }
+                          />
+                        </div></div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">Prepared By:</label></div>
+                        <div className="col-xl-6">
+                          <input
+                            className="form-control"
+                            value={preparedby}
+                            onChange={(e) =>
+                              setPreparedby(e.target.value)
+                            }
+                          /></div>
+                      </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">Approved By:</label>
+                        </div>
+                        <div className="col-xl-6">
+                          <input
+                            className="form-control"
+                            value={approvedby}
+                            onChange={(e) =>
+                              setApprovedby(e.target.value)
+                            }
+                          /></div>
+                      </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">PO Number:</label>
+                        </div>
+                        <div className="col-xl-7">
+                          <input
+                            className="form-control form-control-sm"
+                            value={poNumber}
+                            readOnly
+                          />
+                        </div>
+                      </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">
+                            PO Creating date:
+                          </label></div>
+                        <div className="col-xl-6">
+                          <input
+                            type="date"
+                            className="form-control form-control-sm"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                          /></div>
+                      </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-3">
+                          <label className="form-label">Vendor:</label></div>
+                        <div className="col-xl-9">
+                          <div className="input-group">
+                            <input
+                              className="form-control form-control-sm"
+                              value={vendor}
+                              onChange={(e) => setVendor(e.target.value)}
+                              placeholder="Enter vendor name"
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary btn-sm"
+                              onClick={() => setShowVendorModal(true)}
+                            >
+                              <i className="ti ti-search"></i>
+                            </button>
+                          </div></div>
+                      </div>
+
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">Location:</label></div>
+                        <div className="col-xl-7">
+                          <select
+                            className="form-select"
+                            value={deliveryLocation}
+                            onChange={(e) =>
+                              setDeliveryLocation(e.target.value)
+                            }
+                          >
+                            <option value="">-- Select Location --</option>
+                            {locations.map((loc) => (
+                              <option
+                                key={loc._id || loc.id || loc.name}
+                                value={
+                                  loc.name || loc.locationName || loc._id
+                                }
+                              >
+                                {loc.name || loc.locationName || loc._id}
+                              </option>
+                            ))}
+                          </select></div>
+                      </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">Buyer Group:</label></div>
+                        <div className="col-xl-7">
+                          <input
+                            className="form-control form-control-sm"
+                            value={buyerGroup}
+                            onChange={(e) => setBuyerGroup(e.target.value)}
+                          /></div>
+                      </div>
+
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">
+                            Contact Person:
+                          </label></div>
+                        <div className="col-xl-6">
+                          <input
+                            className="form-control form-control-sm"
+                            value={contactPerson}
+                            onChange={(e) =>
+                              setContactPerson(e.target.value)
+                            }
+                          /></div>
+                      </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">
+                            Validity Date:
+                          </label></div>
+                        <div className="col-xl-7">
+                          <input
+                            type="date"
+                            className="form-control form-control-sm"
+                            value={validityDate}
+                            onChange={(e) =>
+                              setValidityDate(e.target.value)
+                            }
+                          />
+                        </div></div>
+ <div className="col-xl-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">Select General Conditions</label>
+                        </div>
+                        <div className="col-xl-6">
+                          <div className="dropdown">
+                            <button
+                              className="btn btn-outline-secondary btn-sm w-100 text-start"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                            >
+                              {selectedConditions.length === 0
+                                ? 'Select...'
+                                : `${selectedConditions.length} selected`}
+                            </button>
+                            <div className="dropdown-menu w-200" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                              {generalConditions.map((gc) => (
+                                <div key={gc._id} className="dropdown-item-text">
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      checked={selectedConditions.includes(gc._id)}
+                                      onChange={() => toggleSelection(gc._id, selectedConditions, setSelectedConditions)}
+                                    />
+                                    <label className="form-check-label ms-1">
+                                      {gc.name}
+                                    </label>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col-xl-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">Select Processes</label></div>
+                        <div className="col-xl-6">
+                          <div className="dropdown">
+                            <button
+                              className="btn btn-outline-secondary btn-sm w-100 text-start"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                            >
+                              {selectedProcesses.length === 0 ? 'Select...' : `${selectedProcesses.length} selected`}
+                            </button>
+                            <div className="dropdown-menu w-200" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                              {processes.map((p) => (
+                                <div key={p._id} className="dropdown-item-text">
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      checked={selectedProcesses.includes(p._id)}
+                                      onChange={() => toggleSelection(p._id, selectedProcesses, setSelectedProcesses)}
+                                    />
+                                    <label className="form-check-label ms-1">
+                                      {p.processId}
+                                    </label>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="accordion-item mb-3">
-              <div className="row align-items-center mb-3 row-gap-3">
-                <div className="col-lg-4 col-sm-6">
-                  <div className="accordion-header" id="headingFour">
-                    <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-controls="collapseFour" aria-expanded="false">
-                      <div className="d-flex align-items-center w-100">
-                        <div className="me-2">
-                          <a href="javascript:void(0);">
-                            <span><i className="fas fa-chevron-down"></i></span>
-                          </a>
-                        </div>
-                        <div className="d-flex align-items-center">
-                          <span><i className="fas fa-list me-2"></i></span>
-                          <h5 className="fw-semibold">Order Footer</h5>
+          </div>
+          <div className="accordion-item mb-3">
+            <div className="row align-items-center mb-3 row-gap-3">
+              <div className="col-lg-4 col-sm-6">
+                <div className="accordion-header" id="headingThree">
+                  <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-controls="collapseThree" aria-expanded="false">
+                    <div className="d-flex align-items-center w-100">
+                      <div className="me-2">
+                        <a href="javascript:void(0);">
+                          <span><i className="fas fa-chevron-down"></i></span>
+                        </a>
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <span><i className="fas fa-list me-2"></i></span>
+                        <h5 className="fw-semibold">Item List</h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample" >
+              <div className="accordion-body">
+                <div className="card">
+                  <div className="card-body">
+                    <div className="table-responsive rounded table-nowrap border-bottom-0 border mb-3">
+                      <table className="table-sm table-bordered mb-0">
+                        <thead className="table-dark">
+                          <tr>
+                            <th>#</th>
+                            <th>Material ID</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Base Unit</th>
+                            <th>Order Unit</th>
+                            <th>Material Group</th>
+                            <th>Price</th>
+                            <th>PriceUnit</th>
+                            <th>Amount</th>
+                            <th>Delivery Date</th>
+                            <th>Note</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((item, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>
+                                <input
+                                  value={item.materialId}
+                                  readOnly
+                                  className="form-control form-control-sm"
+                                  onClick={() => {
+                                    setSelectedItemIndex(idx);
+                                    setShowModal(true);
+                                  }}
+                                  style={{
+                                    cursor: "pointer",
+                                    backgroundColor: "#f9f9f9",
+                                  }}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.description}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "description",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "quantity",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.baseUnit}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "baseUnit",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.orderUnit}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "orderUnit",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  value={item.materialgroup}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "materialgroup",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  type="number"
+                                  value={item.price}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "price",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <select
+                                  value={item.priceUnit}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "priceUnit",
+                                      e.target.value
+                                    )
+                                  }
+                                  required
+                                  className="form-select form-select-sm"
+                                >
+                                  <option value="">-- Select --</option>
+                                  <option value="INR">INR</option>
+                                  <option value="USD">USD</option>
+                                  <option value="EXTRA">EXTRA</option>
+                                </select>
+                              </td>
+                              <td>
+                                {(item.quantity * item.price).toFixed(2)}
+                              </td>
+                              <td>
+                                <input
+                                  className="form-control form-control-sm"
+                                  type="date"
+                                  value={item.deliveryDate}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "deliveryDate",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <textarea
+                                  className="form-control form-control-sm"
+                                  value={item.note}
+                                  onChange={(e) =>
+                                    handleItemChange(
+                                      idx,
+                                      "note",
+                                      e.target.value
+                                    )
+                                  }
+                                  maxLength="250"
+                                  rows="2"
+                                />
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-outline-warning btn-sm"
+                                  type="button"
+                                  onClick={() => deleteItem(idx)}
+                                >
+                                  <i className="ti ti-trash"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <div className="col-md-12">
+                        <div className="mb-3">
+                          <button
+                            type="button"
+                            className="btn btn-link"
+                            onClick={addItem}
+                          >
+                            <i className="isax isax-add-circle5 text-primary me-1"></i>
+                            Add Item
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-
               </div>
-              <div id="collapseFour" className="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
-                <div className="accordion-body">
-                  <div className="card">
-                    <div className="card-body">
-                      <form onSubmit={handleSubmit}>
-                        <div className="row">
-                          <div className="col-xl-6">
-                            <div className="card">
-                              <div className="card-header bg-light">
-                                <h6>
-                                  <i className="fas fa-shipping-fast me-2"></i>Delivery
-                                  Information
-                                </h6>
-                              </div>
-                              <div className="card-body">
-                                <div className="mb-3">
-                                  <label className="form-label">Delivery Address:</label>
-                                  <textarea
-                                    className="form-control form-control-sm"
-                                    value={deliveryAddress}
-                                    onChange={(e) => setDeliveryAddress(e.target.value)}
-                                    rows="4"
-                                    placeholder="Enter complete delivery address..."
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-xl-6">
-                            <div className="card">
-                              <div className="card-header bg-light">
-                                <h6 className="">
-                                  <i className="fas fa-calculator me-2"></i>Tax
-                                  Calculation
-                                </h6>
-                              </div>
-                              <div className="card-body">
-                                <div className="row">
-                                  <div className="col-xl-12  row">
-                                    <div className="col-xl-2">
-                                      <label className="form-label">
-                                        Tax:
-                                      </label></div>
-                                    <div className="col-xl-6">
-                                      <select
-                                        className="form-select form-select-sm"
-                                        onChange={(e) => {
-                                          const tax = taxes.find(
-                                            (t) => t.taxName === e.target.value
-                                          );
-                                          setSelectedTax(tax);
-                                          if (tax) {
-                                            const newCgst = tax.cgst || 0;
-                                            const newSgst = tax.sgst || 0;
-                                            const newIgst = tax.igst || 0;
-
-                                            setCgst(newCgst);
-                                            setSgst(newSgst);
-                                            setIgst(newIgst);
-
-                                            // Immediate recalculation with new tax values
-                                            recalculateTotal(
-                                              items,
-                                              newCgst,
-                                              newSgst,
-                                              newIgst,
-                                              taxDiscount
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        <option value="">
-                                          -- Select Tax Template --
-                                        </option>
-                                        {taxes.map((t) => (
-                                          <option key={t._id} value={t.taxName}>
-                                            {t.taxName}
-                                          </option>
-                                        ))}
-                                      </select>
-                                    </div></div>
-                                </div>
-
-                                <div className="row">
-                                  <div className="col-md-6 row">
-                                    <div className="col-xl-6">
-                                      <label className="form-label">CGST (%):</label>
-                                    </div>
-                                    <div className="col-xl-6">
-                                      <input
-                                        type="number"
-                                        className="form-control form-control-sm"
-                                        value={cgst}
-                                        onChange={(e) =>
-                                          handleCgstChange(e.target.value)
-                                        }
-                                        step="0.01"
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <div className="col-md-6 mb-3 row">
-                                    <div className="col-xl-6">
-                                      <label className="form-label">SGST (%):</label></div>
-                                    <div className="col-xl-6">
-                                      <input
-                                        type="number"
-                                        className="form-control form-control-sm"
-                                        value={sgst}
-                                        onChange={(e) =>
-                                          handleSgstChange(e.target.value)
-                                        }
-                                        step="0.01"
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <div className="col-md-6 mb-3 row">
-                                    <div className="col-xl-6">
-                                      <label className="form-label">IGST (%):</label></div>
-                                    <div className="col-xl-6">
-                                      <input
-                                        type="number"
-                                        className="form-control form-control-sm"
-                                        value={igst}
-                                        onChange={(e) =>
-                                          handleIgstChange(e.target.value)
-                                        }
-                                        step="0.01"
-                                      />
-                                    </div>
-                                  </div>
-
-                                  <div className="col-md-6 mb-3 row">
-                                    <div className="col-xl-6">
-                                      <label className="form-label">
-                                        Discount:
-                                      </label></div>
-                                    <div className="col-xl-6">
-                                      <input
-                                        type="number"
-                                        className="form-control form-control-sm"
-                                        value={taxDiscount}
-                                        onChange={(e) =>
-                                          handleTaxDiscountChange(e.target.value)
-                                        }
-
-                                      /></div>
-                                  </div>
-                                </div>
-
-                                {/* Total Summary */}
-                                <div className="border-top ">
-                                  <div className="row">
-                                    <div className="col-6">
-                                      <div className="d-flex justify-content-between">
-                                        <span>Subtotal:</span>
-                                        <strong>₹{total}</strong>
-                                      </div>
-                                      <div className="d-flex justify-content-between text-muted small">
-                                        <span>CGST:</span>
-                                        <span>₹{cgstAmount}</span>
-                                      </div>
-                                      <div className="d-flex justify-content-between text-muted small">
-                                        <span>SGST:</span>
-                                        <span>₹{sgstAmount}</span>
-                                      </div>
-                                      <div className="d-flex justify-content-between text-muted small">
-                                        <span>IGST:</span>
-                                        <span>₹{igstAmount}</span>
-                                      </div>
-                                      <div className="d-flex justify-content-between text-muted small">
-                                        <span>Discount:</span>
-                                        <span>- ₹{taxDiscount}</span>
-                                      </div>
-                                      <hr className="my-2" />
-                                      <div className="d-flex justify-content-between">
-                                        <strong>Final Total:</strong>
-                                        <strong className="text-success">
-                                          ₹{finalTotal}
-                                        </strong>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="d-flex align-items-center justify-content-between">
-                          <button type="submit" className="btn btn-primary">
-                            Submit PO
-                          </button>
-                        </div>
-                      </form>
+            </div>
+          </div>
+          <div className="accordion-item mb-3">
+            <div className="row align-items-center mb-3 row-gap-3">
+              <div className="col-lg-4 col-sm-6">
+                <div className="accordion-header" id="headingFour">
+                  <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-controls="collapseFour" aria-expanded="false">
+                    <div className="d-flex align-items-center w-100">
+                      <div className="me-2">
+                        <a href="javascript:void(0);">
+                          <span><i className="fas fa-chevron-down"></i></span>
+                        </a>
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <span><i className="fas fa-list me-2"></i></span>
+                        <h5 className="fw-semibold">Order Footer</h5>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+
             </div>
-            {showModal && <MaterialModal />}
-            {showQuotationModal && <QuotationSearchModal />}
-            {showVendorModal && <VendorSearchModal />}
-            {showPOModal && <POGenerationModal />}
+            <div id="collapseFour" className="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+              <div className="accordion-body">
+                <div className="card">
+                  <div className="card-body">
+                    <form onSubmit={handleSubmit}>
+                      <div className="row">
+                        <div className="col-xl-6">
+                          <div className="card">
+                            <div className="card-header bg-light">
+                              <h6>
+                                <i className="fas fa-shipping-fast me-2"></i>Delivery
+                                Information
+                              </h6>
+                            </div>
+                            <div className="card-body">
+                              <div className="mb-3">
+                                <label className="form-label">Delivery Address:</label>
+                                <textarea
+                                  className="form-control form-control-sm"
+                                  value={deliveryAddress}
+                                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                                  rows="4"
+                                  placeholder="Enter complete delivery address..."
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-xl-6">
+                          <div className="card">
+                            <div className="card-header bg-light">
+                              <h6 className="">
+                                <i className="fas fa-calculator me-2"></i>Tax
+                                Calculation
+                              </h6>
+                            </div>
+                            <div className="card-body">
+                              <div className="row">
+                                <div className="col-xl-12  row">
+                                  <div className="col-xl-2">
+                                    <label className="form-label">
+                                      Tax:
+                                    </label></div>
+                                  <div className="col-xl-6">
+                                    <select
+                                      className="form-select form-select-sm"
+                                      onChange={(e) => {
+                                        const tax = taxes.find(
+                                          (t) => t.taxName === e.target.value
+                                        );
+                                        setSelectedTax(tax);
+                                        if (tax) {
+                                          const newCgst = tax.cgst || 0;
+                                          const newSgst = tax.sgst || 0;
+                                          const newIgst = tax.igst || 0;
+
+                                          setCgst(newCgst);
+                                          setSgst(newSgst);
+                                          setIgst(newIgst);
+
+                                          // Immediate recalculation with new tax values
+                                          recalculateTotal(
+                                            items,
+                                            newCgst,
+                                            newSgst,
+                                            newIgst,
+                                            taxDiscount
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      <option value="">
+                                        -- Select Tax Template --
+                                      </option>
+                                      {taxes.map((t) => (
+                                        <option key={t._id} value={t.taxName}>
+                                          {t.taxName}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div></div>
+                              </div>
+
+                              <div className="row">
+                                <div className="col-md-6 row">
+                                  <div className="col-xl-6">
+                                    <label className="form-label">CGST (%):</label>
+                                  </div>
+                                  <div className="col-xl-6">
+                                    <input
+                                      type="number"
+                                      className="form-control form-control-sm"
+                                      value={cgst}
+                                      onChange={(e) =>
+                                        handleCgstChange(e.target.value)
+                                      }
+                                      step="0.01"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="col-md-6 mb-3 row">
+                                  <div className="col-xl-6">
+                                    <label className="form-label">SGST (%):</label></div>
+                                  <div className="col-xl-6">
+                                    <input
+                                      type="number"
+                                      className="form-control form-control-sm"
+                                      value={sgst}
+                                      onChange={(e) =>
+                                        handleSgstChange(e.target.value)
+                                      }
+                                      step="0.01"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="col-md-6 mb-3 row">
+                                  <div className="col-xl-6">
+                                    <label className="form-label">IGST (%):</label></div>
+                                  <div className="col-xl-6">
+                                    <input
+                                      type="number"
+                                      className="form-control form-control-sm"
+                                      value={igst}
+                                      onChange={(e) =>
+                                        handleIgstChange(e.target.value)
+                                      }
+                                      step="0.01"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="col-md-6 mb-3 row">
+                                  <div className="col-xl-6">
+                                    <label className="form-label">
+                                      Discount:
+                                    </label></div>
+                                  <div className="col-xl-6">
+                                    <input
+                                      type="number"
+                                      className="form-control form-control-sm"
+                                      value={taxDiscount}
+                                      onChange={(e) =>
+                                        handleTaxDiscountChange(e.target.value)
+                                      }
+
+                                    /></div>
+                                </div>
+                              </div>
+
+                              {/* Total Summary */}
+                              <div className="border-top ">
+                                <div className="row">
+                                  <div className="col-6">
+                                    <div className="d-flex justify-content-between">
+                                      <span>Subtotal:</span>
+                                      <strong>₹{total}</strong>
+                                    </div>
+                                    <div className="d-flex justify-content-between text-muted small">
+                                      <span>CGST:</span>
+                                      <span>₹{cgstAmount}</span>
+                                    </div>
+                                    <div className="d-flex justify-content-between text-muted small">
+                                      <span>SGST:</span>
+                                      <span>₹{sgstAmount}</span>
+                                    </div>
+                                    <div className="d-flex justify-content-between text-muted small">
+                                      <span>IGST:</span>
+                                      <span>₹{igstAmount}</span>
+                                    </div>
+                                    <div className="d-flex justify-content-between text-muted small">
+                                      <span>Discount:</span>
+                                      <span>- ₹{taxDiscount}</span>
+                                    </div>
+                                    <hr className="my-2" />
+                                    <div className="d-flex justify-content-between">
+                                      <strong>Final Total:</strong>
+                                      <strong className="text-success">
+                                        ₹{finalTotal}
+                                      </strong>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="d-flex align-items-center justify-content-between">
+                        <button type="submit" className="btn btn-primary">
+                          Submit PO
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+          {showModal && <MaterialModal />}
+          {showQuotationModal && <QuotationSearchModal />}
+          {showVendorModal && <VendorSearchModal />}
+          {showPOModal && <POGenerationModal />}
         </div>
       </div>
-    </>
+    </div>
+
   );
 }
 

@@ -62,11 +62,11 @@ function PurchaseContractCategoryForm() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/purchase-contract-categories');
+      const res = await axios.get('http://localhost:8080/api/purchase-contract-categories', { params: { companyId, financialYear } });
       setCategories(res.data);
     } catch (err) {
       console.error('Error fetching purchase contract categories:', err);
-      alert('Error loading purchase contract categories');
+      // alert('Error loading purchase contract categories');
     }
   };
 
@@ -127,9 +127,9 @@ function PurchaseContractCategoryForm() {
   return (
     <div className='content'>
       {/* Page Header */}
-      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-        <div className="my-auto mb-2">
-          <h2 className="mb-1">Purchase Contract Categories</h2>
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-1">
+        <div className="my-auto ">
+          <h2 className="">Purchase Contract Categories</h2>
           <nav>
             <ol className="breadcrumb mb-0">
               <li className="breadcrumb-item">
@@ -143,16 +143,12 @@ function PurchaseContractCategoryForm() {
       </div>
 
       {/* Action Buttons */}
-      <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3">
+      <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2">
         <div>
-          <h6>
-            <i className="fas fa-file-contract me-2"></i>
-            Purchase Contract Category Management
-          </h6>
-          <p className="text-muted mb-0">Create and manage purchase contract categories with number ranges</p>
+         
         </div>
         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-          <div className="dropdown">
+          {/* <div className="dropdown">
             <a href="#" onClick={handleOpendropdown} className="btn btn-outline-primary d-inline-flex align-items-center" data-bs-toggle="dropdown">
               <i className="fas fa-download me-1"></i>Export
             </a>
@@ -168,7 +164,7 @@ function PurchaseContractCategoryForm() {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
           <div>
             <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center">
               <i className="fas fa-plus me-1"></i>New Contract Category
@@ -273,33 +269,18 @@ function PurchaseContractCategoryForm() {
 
       {/* Categories Table */}
       <div className="card">
-        <div className="card-header">
-          <h5 className="card-title mb-0">
-            <i className="fas fa-list me-2"></i>
-            Purchase Contract Categories ({categories.length})
-          </h5>
-        </div>
         <div className="card-body">
-          {categories.length === 0 ? (
-            <div className="text-center py-4">
-              <i className="fas fa-file-contract fa-3x text-muted mb-3"></i>
-              <p className="text-muted">No purchase contract categories found. Create your first category!</p>
-              <button onClick={handleOpenModal} className="btn btn-success">
-                <i className="fas fa-plus me-1"></i>Create First Category
-              </button>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className='table table-hover table-bordered'>
-                <thead className="table-dark">
-                  <tr>
-                    <th width="5%">#</th>
-                    <th width="25%">Category Name</th>
+          <div className="table-responsive">
+            <table className='table table-sm table-bordered'>
+              <thead className="table-dark">
+                <tr>
+                  <th >#</th>
+                    <th >Category Name</th>
                     {/* <th width="15%">Prefix</th> */}
-                    <th width="15%">Range From</th>
-                    <th width="15%">Range To</th>
-                    <th width="10%">Available Numbers</th>
-                    <th width="15%">Actions</th>
+                    <th >Range From</th>
+                    <th >Range To</th>
+                    {/* <th >Available Numbers</th> */}
+                    <th >Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -317,11 +298,11 @@ function PurchaseContractCategoryForm() {
                       </td> */}
                       <td>{cat.rangeFrom?.toLocaleString()}</td>
                       <td>{cat.rangeTo?.toLocaleString()}</td>
-                      <td>
+                      {/* <td>
                         <span className="text-success fw-medium">
                           {((cat.rangeTo - cat.rangeFrom) + 1).toLocaleString()}
                         </span>
-                      </td>
+                      </td> */}
                       <td>
                         <div className="d-flex gap-1">
                           <button 
@@ -331,13 +312,13 @@ function PurchaseContractCategoryForm() {
                           >
                             <i className="fas fa-edit"></i>
                           </button>
-                          <button 
+                          {/* <button 
                             className='btn btn-sm btn-outline-danger' 
                             onClick={() => handleDelete(cat._id)}
                             title="Delete Category"
                           >
                             <i className="fas fa-trash"></i>
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -345,7 +326,6 @@ function PurchaseContractCategoryForm() {
                 </tbody>
               </table>
             </div>
-          )}
         </div>
       </div>
     </div>

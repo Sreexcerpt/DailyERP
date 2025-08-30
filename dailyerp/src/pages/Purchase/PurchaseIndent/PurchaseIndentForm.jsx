@@ -104,7 +104,7 @@ const PurchaseIndent = () => {
 
   // Fetch purchase categories
   useEffect(() => {
-    axios.get('http://localhost:8080/api/purchasecategory',{
+    axios.get('http://localhost:8080/api/purchasecategory', {
       params: { companyId, financialYear },
     })
       .then(res => setCategories(res.data))
@@ -266,7 +266,12 @@ const PurchaseIndent = () => {
 
   const [savedIndents, setSavedIndents] = useState([]);
   useEffect(() => {
-    axios.get('http://localhost:8080/api/indent/get')
+    axios.get('http://localhost:8080/api/indent/get', {
+      params: {
+        companyId: localStorage.getItem('selectedCompanyId'),
+        financialYear: localStorage.getItem('financialYear')
+      }
+    })
       .then(res => setSavedIndents(res.data))
       .catch(err => console.error("Failed to fetch saved indents", err));
   }, []);
@@ -298,8 +303,8 @@ const PurchaseIndent = () => {
     const selectedCategoryObj = categories.find(cat =>
       cat.name === selectedCategory || cat.categoryName === selectedCategory || cat._id === selectedCategory
     );
- const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-      const financialYear = localStorage.getItem('financialYear');
+    const selectedCompanyId = localStorage.getItem('selectedCompanyId');
+    const financialYear = localStorage.getItem('financialYear');
     try {
       const payload = {
         indentIdType: indentIdType,
@@ -310,7 +315,7 @@ const PurchaseIndent = () => {
         buyerGroup: commonBuyerGroup,
         documentDate: documentDate,
         items: validItems,
-          companyId: selectedCompanyId,
+        companyId: selectedCompanyId,
         financialYear: financialYear
       };
       if (indentIdType === "") {
@@ -342,7 +347,12 @@ const PurchaseIndent = () => {
         setCurrentPage(1);
       }
       // Refresh saved indents
-      axios.get('http://localhost:8080/api/indent/get')
+      axios.get('http://localhost:8080/api/indent/get', {
+        params: {
+          companyId: localStorage.getItem('selectedCompanyId'),
+          financialYear: localStorage.getItem('financialYear')
+        }
+      })
         .then(res => setSavedIndents(res.data))
         .catch(err => console.error("Failed to fetch saved indents", err));
     } catch (err) {
@@ -449,57 +459,59 @@ const PurchaseIndent = () => {
 
   };
   return (
-    <>
-      <div className="content">
-        {/* Header Section */}
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
-            <h2 className="mb-1">Purchase Enquiry</h2>
-            <nav>
-              <ol className="breadcrumb mb-0">
-                <li className="breadcrumb-item">
-                  <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
-                </li>
-                <li className="breadcrumb-item">
-                  Purchase
-                </li>
-                <li className="breadcrumb-item active" aria-current="page">Purchase Enquiry</li>
-              </ol>
-            </nav>
-          </div>
 
+    <div className="content">
+      {/* Header Section */}
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto mb-2">
+          <h2 className="mb-1">Purchase Enquiry</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Purchase
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Purchase Enquiry</li>
+            </ol>
+          </nav>
         </div>
-        <div className="accordion todo-accordion" id="accordionExample">
-          <div className="accordion-item mb-3">
-            <div className="row align-items-center mb-3 row-gap-3">
-              <div className="col-lg-4 col-sm-6">
-                <div className="accordion-header" id="headingTwo">
-                  <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-controls="collapseTwo" aria-expanded="false">
-                    <div className="d-flex align-items-center w-100">
-                      <div className="me-2">
-                        <a href="javascript:void(0);">
-                          <span><i className="fas fa-chevron-down"></i></span>
-                        </a>
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <span><i className="fas fa-clipboard-list me-2"></i></span>
-                        <h5 className="fw-semibold">Indent Header</h5>
-                      </div>
+
+      </div>
+      <div className="accordion todo-accordion" id="accordionExample">
+        <div className="accordion-item mb-3">
+          <div className="row align-items-center mb-3 row-gap-3">
+            <div className="col-lg-4 col-sm-6">
+              <div className="accordion-header" id="headingTwo">
+                <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-controls="collapseTwo" aria-expanded="false">
+                  <div className="d-flex align-items-center w-100">
+                    <div className="me-2">
+                      <a href="javascript:void(0);">
+                        <span><i className="fas fa-chevron-down"></i></span>
+                      </a>
+                    </div>
+                    <div className="d-flex align-items-center">
+                      <span><i className="fas fa-clipboard-list me-2"></i></span>
+                      <h5 className="fw-semibold">Indent Header</h5>
                     </div>
                   </div>
                 </div>
               </div>
-
             </div>
-            <div id="collapseTwo" className="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" >
-              <div className="accordion-body">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-xl-3  row">
-                        <div className="col-xl-6 col-lg-6 ">
-                          <label className="form-label-sm">Purchase Category<span className="text-danger">*</span></label></div>
-                        <div className="col-xl-6">
+
+          </div>
+          <div id="collapseTwo" className="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample" >
+            <div className="accordion-body">
+              <div className="card">
+                <div className="card-body">
+                  <div className="row align-items-center">
+                    <div className="col-xl-3">
+                      <div className="row align-items-center">
+                        <div className="col-6">
+                          <label className="form-label-sm mb-0">Purchase Category<span className="text-danger">*</span></label>
+                        </div>
+                        <div className="col-6">
                           <select
                             className="form-select form-select-sm"
                             value={selectedCategory}
@@ -511,25 +523,33 @@ const PurchaseIndent = () => {
                                 {cat.name || cat.categoryName || `Category ${idx + 1}`}
                               </option>
                             ))}
-                          </select></div>
+                          </select>
+                        </div>
                       </div>
-                      <div className="col-md-3 row">
-                        <div className="col-xl-4">
-                          <label className="form-label-sm">Doc Date <span className="text-danger">*</span></label></div>
-                        <div className="col-xl-8">
+                    </div>
+
+                    <div className="col-xl-3">
+                      <div className="row align-items-center">
+                        <div className="col-4">
+                          <label className="form-label-sm mb-0">Doc Date<span className="text-danger">*</span></label>
+                        </div>
+                        <div className="col-8">
                           <input
                             type="date"
-                            className="form-control form-control-date-sm"
+                            className="form-control form-control-sm"
                             value={documentDate}
                             onChange={(e) => setDocumentDate(e.target.value)}
                           />
                         </div>
                       </div>
-                      <div className="col-md-2 row">
-                        <div className="col-xl-5">
-                          <label className="form-label-sm">Location<span className="text-danger">*</span></label>
+                    </div>
+
+                    <div className="col-xl-3">
+                      <div className="row align-items-center">
+                        <div className="col-4">
+                          <label className="form-label-sm mb-0">Location<span className="text-danger">*</span></label>
                         </div>
-                        <div className="col-xl-7 ">
+                        <div className="col-8">
                           <select
                             className="form-select form-select-sm"
                             value={commonLocation}
@@ -541,412 +561,423 @@ const PurchaseIndent = () => {
                                 {loc.name || loc._id}
                               </option>
                             ))}
-                          </select></div>
-                      </div>
-                      <div className="col-md-3 row">
-                        <div className="col-xl-5">
-                          <label className="form-label-sm">Buyer Group <span className="text-danger">*</span></label>
+                          </select>
                         </div>
-                        <div className="col-xl-7 ">
+                      </div>
+                    </div>
+
+                    <div className="col-xl-3">
+                      <div className="row align-items-center">
+                        <div className="col-5">
+                          <label className="form-label-sm mb-0">Buyer Group<span className="text-danger">*</span></label>
+                        </div>
+                        <div className="col-7">
                           <input
                             type="text"
-                            className="form-control form-control"
+                            className="form-control form-control-sm"
                             value={commonBuyerGroup}
                             onChange={(e) => setCommonBuyerGroup(e.target.value)}
                             placeholder="Buyer Group"
-                          /></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="accordion-item mb-3">
-            <div className="row align-items-center mb-3 row-gap-3">
-              <div className="col-lg-4 col-sm-6">
-                <div className="accordion-header" id="headingThree">
-                  <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-controls="collapseThree" aria-expanded="false">
-                    <div className="d-flex align-items-center w-100">
-                      <div className="me-2">
-                        <a href="javascript:void(0);">
-                          <span><i className="fas fa-chevron-down"></i></span>
-                        </a>
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <span><i className="fas fa-list me-2"></i></span>
-                        <h5 className="fw-semibold">Item List</h5>
-                        <span className="badge bg-light rounded-pill ms-2">({selectedItems.length})</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-            <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample" >
-              <div className="accordion-body">
-                <div className="card">
-
-                  <div className="card-body ">
-                    {selectedItems.length > 0 ? (
-                      <>
-                        <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                          <table className=" table-bordered table-sm mb-0">
-                            <thead className=" sticky-top">
-                              <tr>
-                                <th >S.No</th>
-                                <th >Material No</th>
-                                <th >Description</th>
-                                <th >Qty</th>
-                                <th >Base Unit</th>
-                                <th >Delivery Date</th>
-                                <th >Order Unit</th>
-                                <th >Material Group</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {currentItems.map((item, idx) => {
-                                const actualIndex = indexOfFirstItem + idx;
-                                return (
-                                  <tr key={actualIndex}>
-                                    <td className="text-center fw-bold">{actualIndex + 1}</td>
-                                    <td>
-                                      {item.isManual ? (
-                                        <div className="input-group input-group-sm">
-                                          <input
-                                            className="form-control form-control-sm w-50"
-                                            value={item.materialId}
-                                            onChange={(e) => updateField(actualIndex, 'materialId', e.target.value)}
-                                            placeholder="Material ID"
-                                          />
-                                          <button
-                                            className="btn btn-outline-info btn-sm"
-                                            onClick={() => openSearchModal(actualIndex)}
-                                            title="Search Material"
-                                          >
-                                            <i className="fas fa-search"></i>
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <span className="badge ">{item.materialId}</span>
-                                      )}
-                                    </td>
-                                    <td>
-                                      {item.isManual ? (
-                                        <input
-                                          className="form-control form-control-sm"
-                                          value={item.description}
-                                          onChange={(e) => updateField(actualIndex, 'description', e.target.value)}
-                                          placeholder="Description"
-                                          readOnly={item.materialId ? true : false}
-                                        />
-                                      ) : (
-                                        <span title={item.description}>{item.description}</span>
-                                      )}
-                                    </td>
-                                    <td>
-                                      <input
-                                        type="number"
-                                        className="form-control form-control-sm"
-                                        value={item.qty}
-                                        onChange={(e) => updateField(actualIndex, 'qty', e.target.value)}
-                                        min="1"
-                                      />
-                                    </td>
-                                    <td>
-                                      <select
-                                        value={item.baseUnit}
-                                        onChange={(e) => updateField(actualIndex, 'baseUnit', e.target.value)}
-                                        className="form-select form-select-sm"
-                                      >
-                                        <option value="">--Select--</option>
-                                        {baseUnits.map(unit => (
-                                          <option key={unit} value={unit}>{unit}</option>
-                                        ))}
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <input
-                                        type="date"
-                                        className="form-control form-control-sm"
-                                        value={item.deliveryDate}
-                                        onChange={(e) => updateField(actualIndex, 'deliveryDate', e.target.value)}
-                                      />
-                                    </td>
-                                    <td>
-                                      <select
-                                        value={item.orderUnit}
-                                        onChange={(e) => updateField(actualIndex, 'orderUnit', e.target.value)}
-                                        className="form-select form-select-sm"
-                                      >
-                                        <option value="">--Select--</option>
-                                        {baseUnits.map(unit => (
-                                          <option key={unit} value={unit}>{unit}</option>
-                                        ))}
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <span className="badge bg-secondary">{item.materialgroup || '-'}</span>
-                                    </td>
-                                    <td>
-                                      <button
-                                        className="btn btn-warning btn-sm"
-                                        onClick={() => removeItem(actualIndex)}
-                                        title="Delete Item"
-                                      >
-                                        <i className="fas fa-trash"></i>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
+                          />
                         </div>
-                        {/* Pagination for Selected Items */}
-                        <PaginationComponent
-                          currentPage={currentPage}
-                          totalPages={totalPages}
-                          onPageChange={paginate}
-                          size="small"
-
-                        />
-                      </>
-                    ) : (
-                      <div className="text-center py-5">
-                        <i className="fas fa-inbox fa-3x text-muted mb-3"></i>
-                        <p className="text-muted">No materials selected. Click "Add Manual Entry" to start.</p>
                       </div>
-                    )}   <div className="col-xl-2">
-                      <button onClick={addManualRow} className="btn btn-outline-primary btn-sm me-2 mt-2">
-                        <i className="fas fa-plus me-1"></i>Add Manual Entry
-                      </button></div>
+                    </div>
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
-
         </div>
-        {/* Selected Materials Section */}
-        <div className="row mb-4">
+        <div className="accordion-item mb-3">
+          <div className="row align-items-center mb-3 row-gap-3">
+            <div className="col-lg-4 col-sm-6">
+              <div className="accordion-header" id="headingThree">
+                <div className="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-controls="collapseThree" aria-expanded="false">
+                  <div className="d-flex align-items-center w-100">
+                    <div className="me-2">
+                      <a href="javascript:void(0);">
+                        <span><i className="fas fa-chevron-down"></i></span>
+                      </a>
+                    </div>
+                    <div className="d-flex align-items-center">
+                      <span><i className="fas fa-list me-2"></i></span>
+                      <h5 className="fw-semibold">Item List</h5>
+                      <span className="badge bg-light rounded-pill ms-2">({selectedItems.length})</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div className="col-md-6 col-xl-2 col-sm-12">
-            <button
-              onClick={handleSubmitIndent}
-              className="btn btn-success btn-sm"
-              disabled={!selectedCategory || selectedItems.length === 0}
-            >
-              <i className="fas fa-save me-1"></i>Save Indent
-            </button>
+          </div>
+          <div id="collapseThree" className="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample" >
+            <div className="accordion-body">
+              <div className="card">
+
+                <div className="card-body ">
+                  {selectedItems.length > 0 ? (
+                    <>
+                      <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        <table className=" table-bordered table-sm mb-0">
+                          <thead className=" sticky-top">
+                            <tr>
+                              <th >S.No</th>
+                              <th >Material No</th>
+                              <th >Description</th>
+                              <th >Qty</th>
+                              <th >Base Unit</th>
+                              <th >Delivery Date</th>
+                              <th >Order Unit</th>
+                              <th >Material Group</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {currentItems.map((item, idx) => {
+                              const actualIndex = indexOfFirstItem + idx;
+                              return (
+                                <tr key={actualIndex}>
+                                  <td className="text-center fw-bold">{actualIndex + 1}</td>
+                                  <td>
+                                    {item.isManual ? (
+                                      <div className="input-group input-group-sm">
+                                        <input
+                                          className="form-control form-control-sm w-50"
+                                          value={item.materialId}
+                                          onChange={(e) => updateField(actualIndex, 'materialId', e.target.value)}
+                                          placeholder="Material ID"
+                                        />
+                                        <button
+                                          className="btn btn-outline-info btn-sm"
+                                          onClick={() => openSearchModal(actualIndex)}
+                                          title="Search Material"
+                                        >
+                                          <i className="fas fa-search"></i>
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <span className="badge ">{item.materialId}</span>
+                                    )}
+                                  </td>
+                                  <td>
+                                    {item.isManual ? (
+                                      <input
+                                        className="form-control form-control-sm"
+                                        value={item.description}
+                                        onChange={(e) => updateField(actualIndex, 'description', e.target.value)}
+                                        placeholder="Description"
+                                        readOnly={item.materialId ? true : false}
+                                      />
+                                    ) : (
+                                      <span title={item.description}>{item.description}</span>
+                                    )}
+                                  </td>
+                                  <td>
+                                    <input
+                                      type="number"
+                                      className="form-control form-control-sm"
+                                      value={item.qty}
+                                      onChange={(e) => updateField(actualIndex, 'qty', e.target.value)}
+                                      min="1"
+                                    />
+                                  </td>
+                                  <td>
+                                    <select
+                                      value={item.baseUnit}
+                                      onChange={(e) => updateField(actualIndex, 'baseUnit', e.target.value)}
+                                      className="form-select form-select-sm"
+                                    >
+                                      <option value="">--Select--</option>
+                                      {baseUnits.map(unit => (
+                                        <option key={unit} value={unit}>{unit}</option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <input
+                                      type="date"
+                                      className="form-control form-control-sm"
+                                      value={item.deliveryDate}
+                                      onChange={(e) => updateField(actualIndex, 'deliveryDate', e.target.value)}
+                                    />
+                                  </td>
+                                  <td>
+                                    <select
+                                      value={item.orderUnit}
+                                      onChange={(e) => updateField(actualIndex, 'orderUnit', e.target.value)}
+                                      className="form-select form-select-sm"
+                                    >
+                                      <option value="">--Select--</option>
+                                      {baseUnits.map(unit => (
+                                        <option key={unit} value={unit}>{unit}</option>
+                                      ))}
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <span className="badge bg-secondary">{item.materialgroup || '-'}</span>
+                                  </td>
+                                  <td>
+                                    <button
+                                      className="btn btn-warning btn-sm"
+                                      onClick={() => removeItem(actualIndex)}
+                                      title="Delete Item"
+                                    >
+                                      <i className="fas fa-trash"></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                      {/* Pagination for Selected Items */}
+                      <PaginationComponent
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={paginate}
+                        size="small"
+
+                      />
+                    </>
+                  ) : (
+                    <div className="text-center py-5">
+                      <i className="fas fa-inbox fa-3x text-muted mb-3"></i>
+                      <p className="text-muted">No materials selected. Click "Add Manual Entry" to start.</p>
+                    </div>
+                  )}   <div className="col-xl-2">
+                    <button onClick={addManualRow} className="btn btn-outline-primary btn-sm me-2 mt-2">
+                      <i className="fas fa-plus me-1"></i>Add Manual Entry
+                    </button></div>
+                </div>
+
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Material Search Modal */}
-        {showSearchModal && (
-          <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className="modal-dialog modal-xl">
+      </div>
+      {/* Selected Materials Section */}
+      <div className="row mb-4">
+
+        <div className="col-md-6 col-xl-2 col-sm-12">
+          <button
+            onClick={handleSubmitIndent}
+            className="btn btn-success btn-sm"
+            disabled={!selectedCategory || selectedItems.length === 0}
+          >
+            <i className="fas fa-save me-1"></i>Save Indent
+          </button>
+        </div>
+      </div>
+
+      {/* Material Search Modal */}
+      {showSearchModal && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-xl">
+            <div className="modal-content">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title">
+                  <i className="fas fa-search me-2"></i>Search Materials
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={closeSearchModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                {/* Search Controls */}
+                <div className="row mb-3">
+                  <div className="col-md-3">
+                    <label className="form-label">Search Type</label>
+                    <select
+                      className="form-select form-select-sm"
+                      value={searchType}
+                      onChange={(e) => setSearchType(e.target.value)}
+                    >
+                      <option value="materialId">Material ID</option>
+                      <option value="description">Description</option>
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Search Query</label>
+                    <div className="input-group input-group-sm">
+                      <span className="input-group-text">
+                        <i className="fas fa-search"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder={
+                          searchType === 'materialId'
+                            ? 'Enter Material ID (e.g., MMNR-100000 or 100000)'
+                            : 'Search by Description...'
+                        }
+                        value={searchQuery}
+                        onChange={handleSearchInputChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">&nbsp;</label>
+                    <div className="d-flex gap-2">
+                      <button className="btn btn-info btn-sm" onClick={handleViewAll}>
+                        <i className="fas fa-list me-1"></i>View All
+                      </button>
+                      {searchResults.length > 0 && (
+                        <button className="btn btn-outline-secondary btn-sm" onClick={handleClearResults}>
+                          <i className="fas fa-times me-1"></i>Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {/* Search Results */}
+                <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                  {searchResults.length > 0 ? (
+                    <table className="table table-bordered table-sm">
+                      <thead className="table-light sticky-top">
+                        <tr>
+                          <th>Material ID</th>
+                          <th>Description</th>
+                          <th>Base Unit</th>
+                          <th>Location</th>
+                          <th>Material Group</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {searchResults.map((material, idx) => (
+                          <tr key={idx}>
+                            <td><span >{material.materialId}</span></td>
+                            <td>{material.description}</td>
+                            <td><span className="badge bg-secondary">{material.baseUnit}</span></td>
+                            <td>{material.location}</td>
+                            <td><span className="badge bg-info">{material.materialgroup}</span></td>
+                            <td>
+                              <button
+                                className="btn btn-success btn-sm"
+                                onClick={() => selectMaterialFromSearch(material)}
+                              >
+                                <i className="fas fa-check me-1"></i>Select
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="text-center py-4">
+                      <i className="fas fa-search fa-3x text-muted mb-3"></i>
+                      <p className="text-muted">
+                        {materials.length === 0
+                          ? 'No materials loaded from API'
+                          : searchQuery
+                            ? `No materials found matching "${searchQuery}"`
+                            : 'Enter search term or click "View All"'
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={closeSearchModal}
+                >
+                  <i className="fas fa-times me-1"></i>Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Indent ID Type Modal */}
+      {showIndentIdModal && (
+        <>
+          <div className="modal-backdrop fade show"></div>
+          <div
+            className="modal fade show"
+            style={{ display: "block" }}
+            tabIndex="-1"
+            aria-modal="true"
+            role="dialog"
+          >
+            <div className="modal-dialog modal-md">
               <div className="modal-content">
-                <div className="modal-header bg-primary text-white">
-                  <h5 className="modal-title">
-                    <i className="fas fa-search me-2"></i>Search Materials
-                  </h5>
+                <div className="modal-header">
+                  <h4 className="modal-title">Select Indent ID Type</h4>
                   <button
                     type="button"
-                    className="btn-close btn-close-white"
-                    onClick={closeSearchModal}
+                    className="btn-close"
+                    onClick={handleCloseIndentIdModal}
+                    aria-label="Close"
                   ></button>
                 </div>
                 <div className="modal-body">
-                  {/* Search Controls */}
-                  <div className="row mb-3">
-                    <div className="col-md-3">
-                      <label className="form-label">Search Type</label>
-                      <select
-                        className="form-select form-select-sm"
-                        value={searchType}
-                        onChange={(e) => setSearchType(e.target.value)}
+                  <p className="mb-4">
+                    Choose how you want to create the Indent ID:
+                  </p>
+                  <div className="row">
+                    <div className="col-xl-6">
+                      <button
+                        className="btn btn-primary btn-md"
+                        onClick={() => handleIndentIdTypeSelection("internal")}
                       >
-                        <option value="materialId">Material ID</option>
-                        <option value="description">Description</option>
-                      </select>
+                        <i className="ti ti-user me-2"></i>
+                        Internal (Auto-generate)
+                      </button>
                     </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Search Query</label>
-                      <div className="input-group input-group-sm">
-                        <span className="input-group-text">
-                          <i className="fas fa-search"></i>
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          placeholder={
-                            searchType === 'materialId'
-                              ? 'Enter Material ID (e.g., MMNR-100000 or 100000)'
-                              : 'Search by Description...'
+                    <div className="col-xl-6">
+                      <button
+                        className="btn btn-secondary btn-md"
+                        onClick={() => setIndentIdType("external")}
+                      >
+                        <i className="ti ti-edit me-2"></i>
+                        External (Manual Entry)
+                      </button>
+                    </div>
+                  </div>
+                  {indentIdType === "external" && (
+                    <div className="mt-4">
+                      <label className="form-label">External Indent ID</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter External Indent ID (max 50 characters)"
+                        value={externalIndentId}
+                        onChange={(e) => setExternalIndentId(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter" && externalIndentId.trim()) {
+                            handleSubmitIndent();
                           }
-                          value={searchQuery}
-                          onChange={handleSearchInputChange}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">&nbsp;</label>
-                      <div className="d-flex gap-2">
-                        <button className="btn btn-info btn-sm" onClick={handleViewAll}>
-                          <i className="fas fa-list me-1"></i>View All
+                        }}
+                        maxLength={50}
+                      />
+                      <div className="form-text">{externalIndentId.length}/50 characters</div>
+                      <div className="mt-3">
+                        <button
+                          className="btn btn-primary"
+                          onClick={handleSubmitIndent}
+                          disabled={!externalIndentId.trim()}
+                        >
+                          Create Indent
                         </button>
-                        {searchResults.length > 0 && (
-                          <button className="btn btn-outline-secondary btn-sm" onClick={handleClearResults}>
-                            <i className="fas fa-times me-1"></i>Clear
-                          </button>
-                        )}
                       </div>
                     </div>
-                  </div>
-                  {/* Search Results */}
-                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                    {searchResults.length > 0 ? (
-                      <table className="table table-bordered table-sm">
-                        <thead className="table-light sticky-top">
-                          <tr>
-                            <th>Material ID</th>
-                            <th>Description</th>
-                            <th>Base Unit</th>
-                            <th>Location</th>
-                            <th>Material Group</th>
-                            <th>Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {searchResults.map((material, idx) => (
-                            <tr key={idx}>
-                              <td><span >{material.materialId}</span></td>
-                              <td>{material.description}</td>
-                              <td><span className="badge bg-secondary">{material.baseUnit}</span></td>
-                              <td>{material.location}</td>
-                              <td><span className="badge bg-info">{material.materialgroup}</span></td>
-                              <td>
-                                <button
-                                  className="btn btn-success btn-sm"
-                                  onClick={() => selectMaterialFromSearch(material)}
-                                >
-                                  <i className="fas fa-check me-1"></i>Select
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <div className="text-center py-4">
-                        <i className="fas fa-search fa-3x text-muted mb-3"></i>
-                        <p className="text-muted">
-                          {materials.length === 0
-                            ? 'No materials loaded from API'
-                            : searchQuery
-                              ? `No materials found matching "${searchQuery}"`
-                              : 'Enter search term or click "View All"'
-                          }
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={closeSearchModal}
-                  >
-                    <i className="fas fa-times me-1"></i>Close
-                  </button>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </>
+      )}
+    </div>
 
-        {/* Indent ID Type Modal */}
-        {showIndentIdModal && (
-          <>
-            <div className="modal-backdrop fade show"></div>
-            <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" aria-modal="true" role="dialog">
-              <div className="modal-dialog modal-dialog-centered">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h4 className="modal-title">Select Indent ID Type</h4>
-                    <button type="button" className="btn-close" onClick={handleCloseIndentIdModal} aria-label="Close"></button>
-                  </div>
-                  <div className="modal-body">
-                    <p className="mb-4">Choose how you want to create the Indent ID:</p>
-
-                    {indentIdType === 'external' ? (
-                      <div>
-                        <div className="mb-3">
-                          <label className="form-label">External Indent ID</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={externalIndentId}
-                            onChange={(e) => setExternalIndentId(e.target.value)}
-                            maxLength={50}
-                            required
-                            placeholder="Enter custom Indent ID (max 50 characters)"
-                          />
-                          <small className="form-text text-muted">
-                            {externalIndentId.length}/50 characters
-                          </small>
-                        </div>
-                        <div className="d-flex gap-2">
-                          <button
-                            className="btn btn-primary"
-                            onClick={handleSubmitIndent}
-                            disabled={!externalIndentId.trim()}
-                          >
-                            Create Indent
-                          </button>
-                          <button
-                            className="btn btn-secondary"
-                            onClick={() => setIndentIdType('')}
-                          >
-                            Back
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <div className="d-flex justify-content-center gap-3">
-                          <button
-                            className="btn btn-primary btn-lg"
-                            onClick={() => handleIndentIdTypeSelection('internal')}
-                          >
-                            <i className="isax isax-setting-2 me-2"></i>
-                            Internal
-                            <small className="d-block mt-1">Auto-generated ID</small>
-                          </button>
-                          <button
-                            className="btn btn-secondary btn-lg"
-                            onClick={() => handleIndentIdTypeSelection('external')}
-                          >
-                            <i className="isax isax-edit me-2"></i>
-                            External
-                            <small className="d-block mt-1">Custom ID</small>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </>
   );
 };
 

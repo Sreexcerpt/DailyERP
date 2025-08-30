@@ -8,7 +8,8 @@ const GoodsTransferSchema = new mongoose.Schema({
   postDate: { type: String, required: true },
   reference: { type: String },
   location: { type: String },
-
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  financialYear: { type: String },
   items: [
     {
       materialId: { type: String },

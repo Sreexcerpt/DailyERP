@@ -23,10 +23,10 @@ exports.createMaterial = async (req, res) => {
     const { materialId, materialIdType, ...materialData } = req.body;
     console.log("material body", req.body)
     // Check if material ID already exists
-    const existingMaterial = await Material.findOne({ materialId });
-    if (existingMaterial) {
-      return res.status(400).json({ error: 'Material ID already exists' });
-    }
+    // const existingMaterial = await Material.findOne({ materialId });
+    // if (existingMaterial) {
+    //   return res.status(400).json({ error: 'Material ID already exists' });
+    // }
 
     // Validation for external material ID
     if (materialIdType === 'external') {

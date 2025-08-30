@@ -145,7 +145,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/invoicecategory', invoiceCategoryRoutes);
 app.use('/api/billingcategory', billingCategoryRoutes);
 app.use('/api', invoiceRoutes);
-app.use('/api', stockRoutes); // Ensure this is the correct path for stock routes
+app.use('/api/stock', stockRoutes); // Ensure this is the correct path for stock routes
 app.use('/api', billingRoutes);
 app.use('/api/purchase-contract-categories', require('./routes/categories/PurchaseContractCategoryRoutes'));
 app.use('/api/companies', companyRoutes); // Ensure this is the correct path for company routes

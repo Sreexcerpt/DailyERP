@@ -16,7 +16,7 @@ const InvoiceDisplay = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/invoiceform');
+      const response = await axios.get('http://localhost:8080/api/invoiceform', { params: { companyId, financialYear } });
       const sorted = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setInvoices(sorted);
       setError(null);

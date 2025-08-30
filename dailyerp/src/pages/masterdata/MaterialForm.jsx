@@ -32,7 +32,6 @@ const MaterialPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [showMaterialIdModal, setShowMaterialIdModal] = useState(false);
@@ -318,7 +317,9 @@ const MaterialPage = () => {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const res = await axios.get('http://localhost:8080/api/locations');
+        const res = await axios.get('http://localhost:8080/api/locations', {
+          params: { companyId }
+        });
         setLocations(res.data);
       } catch (err) {
         console.error('Error fetching locations:', err);
@@ -337,45 +338,15 @@ const MaterialPage = () => {
     setCurrentPage(pageNumber);
   };
 
-  // Generate page numbers for pagination
-  const getPageNumbers = () => {
-    const pageNumbers = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 5; i++) {
-          pageNumbers.push(i);
-        }
-      } else if (currentPage >= totalPages - 2) {
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pageNumbers.push(i);
-        }
-      } else {
-        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
-          pageNumbers.push(i);
-        }
-      }
-    }
-
-    return pageNumbers;
-  };
-
   const handleImportSuccess = (result) => {
-    alert(`Import completed: ${result.results.imported} records imported`);
-    fetchMaterials(); // Refresh the data
-    setShowImportModal(false); // Close the modal
+    console.log('Import successful:', result);
+    fetchMaterials();
   };
-
   return (
     <div className="content">
       {/* Header Section */}
-      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-        <div className="my-auto mb-2">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
           <h2 className="mb-1">Material Master</h2>
           <nav>
             <ol className="breadcrumb mb-0">
@@ -389,10 +360,7 @@ const MaterialPage = () => {
             </ol>
           </nav>
         </div>
-
       </div>
-
-
 
       <div className="card">
         <div className="card-header">
@@ -464,6 +432,7 @@ const MaterialPage = () => {
                   <th>Location</th>
                   <th>Delete</th>
                   <th>Block</th>
+                  <th>Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -527,6 +496,26 @@ const MaterialPage = () => {
                         </div>
                       </td>
                       <td>
+                        <span className={`badge ${(!mat.isDeleted && !mat.isBlocked)
+                          ? 'bg-success'
+                          : (mat.isDeleted && mat.isBlocked)
+                            ? 'bg-dark'
+                            : mat.isDeleted
+                              ? 'bg-secondary'
+                              : 'bg-danger'
+                          }`}>
+                          {
+                            (!mat.isDeleted && !mat.isBlocked)
+                              ? 'Active'
+                              : (mat.isDeleted && mat.isBlocked)
+                                ? 'Deleted & Blocked'
+                                : mat.isDeleted
+                                  ? 'Deleted'
+                                  : 'Blocked'
+                          }
+                        </span>
+                      </td>
+                      <td>
                         <button
                           className="btn btn-sm btn-primary"
                           onClick={() => {
@@ -546,58 +535,92 @@ const MaterialPage = () => {
         </div>
       </div>
 
-      {/* <div className="col-md-8 d-flex align-items-center">
-        <span className="text-muted">
-          Showing {indexOfFirstItem + 1} to{" "}
-          {Math.min(indexOfLastItem, filteredMaterials.length)} of{" "}
-          {filteredMaterials.length} entries
-          {searchTerm && ` (filtered from ${materials.length} total entries)`}
-        </span>
-      </div> */}
-
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="row mb-3">
           <div className="col-md-12">
             <nav aria-label="Page navigation">
-              <ul className="pagination justify-content-center">
+              <ul className="pagination justify-content-end">
                 <li
                   className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
                 >
                   <button
-                    className="page-link"
+                    className="page-link btn-sm"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
-                    Previous
+                    <span aria-hidden="true"><i className="fas fa-angle-left"></i></span>
                   </button>
                 </li>
 
-                {getPageNumbers().map((number) => (
-                  <li
-                    key={number}
-                    className={`page-item ${currentPage === number ? "active" : ""
-                      }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => handlePageChange(number)}
-                    >
-                      {number}
-                    </button>
-                  </li>
-                ))}
+                {(() => {
+                  const delta = 2; // Number of pages to show on each side of current page
+                  const range = [];
+                  const rangeWithDots = [];
+
+                  // Always show first page
+                  range.push(1);
+
+                  // Add pages around current page
+                  for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+                    range.push(i);
+                  }
+
+                  // Always show last page if there are more than 1 page
+                  if (totalPages > 1) {
+                    range.push(totalPages);
+                  }
+
+                  // Remove duplicates and sort
+                  const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+                  let prev;
+                  for (let i of uniqueRange) {
+                    if (prev) {
+                      if (i - prev === 2) {
+                        rangeWithDots.push(prev + 1);
+                      } else if (i - prev !== 1) {
+                        rangeWithDots.push('...');
+                      }
+                    }
+                    rangeWithDots.push(i);
+                    prev = i;
+                  }
+
+                  return rangeWithDots.map((number, index) => {
+                    if (number === '...') {
+                      return (
+                        <li key={`ellipsis-${index}`} className="page-item disabled">
+                          <span className="page-link">...</span>
+                        </li>
+                      );
+                    }
+
+                    return (
+                      <li
+                        key={number}
+                        className={`page-item ${currentPage === number ? "active" : ""}`}
+                      >
+                        <button
+                          className="page-link"
+                          onClick={() => handlePageChange(number)}
+                        >
+                          {number}
+                        </button>
+                      </li>
+                    );
+                  });
+                })()}
 
                 <li
-                  className={`page-item ${currentPage === totalPages ? "disabled" : ""
-                    }`}
+                  className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
                 >
                   <button
-                    className="page-link"
+                    className="page-link btn-sm"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                   >
-                    Next
+                    <span aria-hidden="true"><i className="fas fa-angle-right"></i></span>
                   </button>
                 </li>
               </ul>
@@ -908,7 +931,10 @@ const MaterialPage = () => {
                                 type="number"
                                 name="minstock"
                                 value={formData.minstock}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                  e.target.value = Math.max(0, e.target.value);
+                                  handleChange(e);
+                                }}
                                 className="form-control"
                               />
                             </div>
@@ -924,7 +950,7 @@ const MaterialPage = () => {
                                 type="number"
                                 name="safetyStock"
                                 value={formData.safetyStock}
-                                onChange={handleChange}
+                                onChange={(e) => { e.target.value = Math.max(0, e.target.value); handleChange(e) }}
                                 className="form-control"
                               />
                             </div>
@@ -940,7 +966,10 @@ const MaterialPage = () => {
                                 type="number"
                                 name="maxstock"
                                 value={formData.maxstock}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                  e.target.value = Math.max(0, e.target.value);
+                                  handleChange(e);
+                                }}
                                 className="form-control"
                               />
                             </div>
@@ -968,12 +997,18 @@ const MaterialPage = () => {
                               <label>Location</label>
                             </div>
                             <div className="col-8">
-                              <input
+                              <select
                                 name="location"
                                 value={formData.location}
                                 onChange={handleChange}
-                                className="form-control"
-                              />
+                                className="form-select form-select-sm">
+                                <option value="">Select Location</option>
+                                {locations.map((location) => (
+                                  <option key={location.name} value={location.name}>
+                                    {location.name}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                           </div>
                         </div>

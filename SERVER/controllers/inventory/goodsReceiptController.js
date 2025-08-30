@@ -1,6 +1,7 @@
 const GoodsReceipt = require('../../models/inventry/GoodsReceipt');
 const GoodsReceiptCategory =require('../../models/categories/GoodsReceiptCategory')// reused for receipt category
 const StockItem = require('../../models/inventry/StockItemModel'); // Assuming you have a StockItem model
+const Material = require('../../models/masterdata/Material');
 // POST /api/goodsreceipt
 const createGoodsReceipt = async (req, res) => {
   try {
@@ -30,6 +31,9 @@ const createGoodsReceipt = async (req, res) => {
       docnumber
     });
 
+    console.log("New Goods Receipt Data:", newReceipt);
+    console.log("data:", data.items);
+
     // Update stock for each item in the receipt
     if (Array.isArray(data.items)) {
       for (const item of data.items) {
@@ -41,9 +45,14 @@ const createGoodsReceipt = async (req, res) => {
         stockItem.updatedAt = new Date();
         await stockItem.save();
       } else {
+        const material = await Material.findOne({ materialId: item.materialId , companyId: data.companyId });
+        console.log("Material found for stock item:", material);
         await StockItem.create({
         materialId: item.materialId,
         description: item.description,
+        companyId: data.companyId,
+        financialYear: data.financialYear,
+        categoryId: material.categoryId,
         baseUnit: item.baseUnit,
         location: data.location || newReceipt.location,
         quantityAvailable: item.quantity,
@@ -63,6 +72,7 @@ const createGoodsReceipt = async (req, res) => {
 
 // GET /api/goodsreceipt
 const getAllGoodsReceipts = async (req, res) => {
+  
   try {
     const receipts = await GoodsReceipt.find().sort({ createdAt: -1 });
     res.json(receipts);

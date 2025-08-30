@@ -64,10 +64,10 @@ function PurchaseContractForm() {
       );
     });
 
-    axios.get("http://localhost:8080/api/purchase-contract-categories").then((res) => {
+    axios.get("http://localhost:8080/api/purchase-contract-categories", { params: { companyId, financialYear } }).then((res) => {
       setCategories(
         res.data.map((cat) => ({
-          label: `${cat.categoryName} (${cat.prefix})`,
+          label: `${cat.categoryName}`,
           value: cat._id,
         }))
       );
@@ -152,7 +152,7 @@ function PurchaseContractForm() {
         buyerGroup: "",
         unit: "",
         materialGroup: "",
-        deliveryDate: new Date().toISOString().slice(0, 10),
+        deliveryDate: new Date(new Date().setDate(new Date().getDate() + 5)).toISOString().slice(0, 10),
         price: 0,
       },
     ]);
@@ -221,118 +221,107 @@ function PurchaseContractForm() {
   // Add this new ContractNumberModal component before your return statement
   const ContractNumberModal = () => {
     return (
-      <div
-        className="modal show d-block"
-        tabIndex="-1"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      >
-        <div className="modal-dialog modal-md">
-          <div className="modal-content">
-            <div className="modal-header bg-primary text-white">
-              <h5 className="modal-title">
-                <i className="fas fa-hashtag me-2"></i>Contract Number Generation
-              </h5>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={() => setShowContractModal(false)}
-              ></button>
-            </div>
-
-            <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label">Select Generation Type</label>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="contractGenType"
-                    id="internal"
-                    value="internal"
-                    checked={contractGenType === 'internal'}
-                    onChange={(e) => setContractGenType(e.target.value)}
-                  />
-                  <label className="form-check-label" htmlFor="internal">
-                    <strong>Internal Generation</strong>
-                    <br />
-                    <small className="text-muted">
-                      Auto-generate based on category and range count
-                    </small>
-                  </label>
-                </div>
-
-                <div className="form-check mt-2">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="contractGenType"
-                    id="external"
-                    value="external"
-                    checked={contractGenType === 'external'}
-                    onChange={(e) => setContractGenType(e.target.value)}
-                  />
-                  <label className="form-check-label" htmlFor="external">
-                    <strong>External Generation</strong>
-                    <br />
-                    <small className="text-muted">
-                      Manually enter contract number
-                    </small>
-                  </label>
-                </div>
+      <>
+        <div className="modal-backdrop fade show"></div>
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-md">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">
+                  <i className="fas fa-hashtag me-2"></i>Contract Number Generation
+                </h4>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowContractModal(false)}
+                  aria-label="Close"
+                ></button>
               </div>
-
-              {contractGenType === 'external' && (
-                <div className="mt-4">
-                  <label className="form-label">Enter Contract Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter custom contract number (max 50 characters)"
-                    value={externalContractNumber}
-                    onChange={(e) => {
-                      if (e.target.value.length <= 50) {
-                        setExternalContractNumber(e.target.value);
-                      }
-                    }}
-                    onFocus={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    maxLength="50"
-                    autoFocus
-                  />
-                  <div className="form-text">
-                    {externalContractNumber.length}/50 characters
+              <div className="modal-body">
+                <p className="mb-4">
+                  Choose how you want to create the Contract Number:
+                </p>
+                <div className="row">
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-primary btn-md"
+                      onClick={() => {
+                        setContractGenType("internal");
+                        handleFinalSubmit();
+                      }}
+                    >
+                      <i className="ti ti-user me-2"></i>
+                      Internal (Auto-generate)
+                    </button>
+                  </div>
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-secondary btn-md"
+                      onClick={() => setContractGenType("external")}
+                    >
+                      <i className="ti ti-edit me-2"></i>
+                      External (Manual Entry)
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowContractModal(false)}
-              >
-                <i className="fas fa-times me-1"></i>Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleFinalSubmit}
-                disabled={contractGenType === 'external' && !externalContractNumber.trim()}
-              >
-                <i className="fas fa-save me-1"></i>Create Contract
-              </button>
+                {contractGenType === "external" && (
+                  <div className="mt-4">
+                    <label className="form-label">Enter Contract Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter custom contract number (max 50 characters)"
+                      value={externalContractNumber}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 50) {
+                          setExternalContractNumber(e.target.value);
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && externalContractNumber.trim()) {
+                          handleFinalSubmit();
+                        }
+                      }}
+                      maxLength={50}
+                      autoFocus
+                    />
+                    <div className="form-text">{externalContractNumber.length}/50 characters</div>
+                    <div className="mt-3">
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleFinalSubmit}
+                        disabled={!externalContractNumber.trim()}
+                      >
+                        <i className="fas fa-save me-1"></i>Create Contract
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {contractGenType === "internal" && (
+                  <div className="mt-4">
+                    <div className="alert alert-info" role="alert">
+                      Contract number will be auto-generated based on category and range count.
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   };
   const openMaterialModal = (itemIndex) => {
-  console.log('Opening modal for item at index:', itemIndex); // Debug log
-  setSelectedItemIndex(itemIndex);
-  setShowModal(true);
-};
+    console.log('Opening modal for item at index:', itemIndex); // Debug log
+    setSelectedItemIndex(itemIndex);
+    setShowModal(true);
+  };
   const MaterialModal = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [searchType, setSearchType] = useState("materialId");
@@ -821,8 +810,8 @@ function PurchaseContractForm() {
   return (
     <>
       <div className="content">
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+          <div className="my-auto ">
             <h2 className="mb-1">Purchase Contract</h2>
             <nav>
               <ol className="breadcrumb mb-0">
@@ -1103,7 +1092,7 @@ function PurchaseContractForm() {
                                   {/* <th>Unit</th> */}
                                   <th>Material Group</th>
                                   <th>Delivery Date</th>
-                                  <th>Vendor</th>
+                                  {/* <th>Vendor</th> */}
                                   <th>Price</th>
                                 </tr>
                               </thead>
@@ -1113,12 +1102,12 @@ function PurchaseContractForm() {
                                     <td>{index + 1}</td>
                                     <td>
                                       <div className="input-group">
-                                      <input
-                                        className="form-control form-control-sm"
-                                        value={item.materialId} 
-                                        readOnly
-                                      />
-                                      <button
+                                        <input
+                                          className="form-control form-control-sm"
+                                          value={item.materialId}
+                                          readOnly
+                                        />
+                                        <button
                                           type="button"
                                           className="btn btn-link btn-sm btn-outline-info"
                                           onClick={() => openMaterialModal(index)}
@@ -1220,7 +1209,7 @@ function PurchaseContractForm() {
                                         }
                                       />
                                     </td>
-                                    <td>{vendorName}</td>
+                                    {/* <td>{vendorName}</td> */}
                                     <td>
                                       <input
                                         className="form-control form-control-sm"
@@ -1256,7 +1245,7 @@ function PurchaseContractForm() {
 
                         <div className="d-flex align-items-center justify-content-between">
                           <button type="submit" className="btn btn-primary">
-                            Submit Quotation
+                            Submit
                           </button>
                         </div>
                       </form>

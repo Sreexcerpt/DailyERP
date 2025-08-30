@@ -190,7 +190,7 @@ const GoodsReceiptList = () => {
 
   const fetchGoodsReceipts = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/goodsreceipt');
+      const response = await axios.get('http://localhost:8080/api/goodsreceipt', { params: { companyId, financialYear } });
       setGoodsReceipts(response.data);
     } catch (error) {
       console.error('Error fetching Goods Receipts:', error);
@@ -308,8 +308,9 @@ const GoodsReceiptList = () => {
   return (
     <>
       <div className="content">
-        <div className="row mb-3">
+        <div className="row ">
           <div className="col-md-3 mb-2">
+            <label className="form-label">Search</label>
             <input
               type="text"
               className="form-control"

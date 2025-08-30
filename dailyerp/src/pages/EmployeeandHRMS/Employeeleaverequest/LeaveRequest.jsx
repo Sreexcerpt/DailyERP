@@ -140,28 +140,20 @@ useEffect(() => {
 
   return (
     
-    <div className="d-flex justify-content-between align-items-center mb-3" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    <div className="d-flex justify-content-between align-items-center" style={{  backgroundColor: '#f8f9fa' }}>
       {/* Main content */}
-      <div className="content container-fluid" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <div className="content container-fluid" style={{ padding: '20px', margin: '0 auto' }}>
         {/* Page Header */}
-        <div className="page-header" style={{ marginBottom: '30px' }}>
+        <div className="page-header" >
           <div className="row align-items-center" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="col">
               <h3 className="page-title" style={{ color: '#333', fontSize: '24px', margin: 0 }}>Employee Leave Request</h3>
             </div>
             <div className="col-auto text-end">
               <button 
-                className="btn btn-danger" 
+                className="btn btn-primary" 
                 onClick={() => setShowModal(true)}
-                style={{
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  padding: '10px 20px',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
+               
               >
                 <span style={{ marginRight: '5px' }}>+</span> Apply for Leave
               </button>

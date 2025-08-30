@@ -8,7 +8,8 @@ function GoodsReceipt() {
   const [vendors, setVendors] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [categories, setCategories] = useState([]);
-
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const [selectedPO, setSelectedPO] = useState(null);
   const [showPOModal, setShowPOModal] = useState(false);
   const [showGRModal, setShowGRModal] = useState(false);
@@ -42,19 +43,36 @@ function GoodsReceipt() {
 
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/purchase-orders')
+    axios.get('http://localhost:8080/api/purchase-orders', {
+      params: {
+        companyId,
+        financialYear
+      }
+    })
       .then(res => setPurchaseOrders(res.data))
       .catch(err => console.error('Error fetching POs:', err));
 
-    axios.get('http://localhost:8080/api/vendors')
+    axios.get('http://localhost:8080/api/vendors', {
+      params: {
+        companyId
+      }
+    })
       .then(res => setVendors(res.data))
       .catch(err => console.error('Error fetching vendors:', err));
 
-    axios.get("http://localhost:8080/api/material")
+    axios.get("http://localhost:8080/api/material", {
+      params: {
+        companyId
+      }
+    })
       .then(res => setMaterials(res.data))
       .catch(err => console.error("Error fetching materials:", err));
 
-    axios.get('http://localhost:8080/api/goodsreceiptcategory')
+    axios.get('http://localhost:8080/api/goodsreceiptcategory', {
+      params: {
+        companyId
+      }
+    })
       .then(res => setCategories(res.data))
       .catch(err => console.error("Error fetching categories:", err));
   }, []);
@@ -121,7 +139,9 @@ function GoodsReceipt() {
       ...formData,
       purchaseOrderId: selectedPO._id,
       items: selectedPO.items,
-      receiptDate: today
+      receiptDate: today,
+      companyId,
+      financialYear
     };
 
     try {
@@ -173,7 +193,7 @@ function GoodsReceipt() {
   const [grSearch, setGRSearch] = useState("");
   const [viewAllGRs, setViewAllGRs] = useState(false);
   useEffect(() => {
-    axios.get("http://localhost:8080/api/goodsreceipt")
+    axios.get("http://localhost:8080/api/goodsreceipt", { params: { companyId, financialYear } })
       .then(res => setGoodsReceipts(res.data))
       .catch(err => console.error("Error fetching goods receipts:", err));
   }, []);
@@ -262,7 +282,7 @@ function GoodsReceipt() {
               </div>
               <div className="col-md-3">
                 <label>Reference</label>
-                <input type="text" className="form-control" value={formData.reference} onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))} readOnly={isDisplayMode}/>
+                <input type="text" className="form-control" value={formData.reference} onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))} readOnly={isDisplayMode} />
               </div>
               <div className="col-md-3">
                 <label>Vendor</label>
@@ -281,112 +301,112 @@ function GoodsReceipt() {
 
           <div className="card-body">
             <div className="table-responsive">
-            <table className="table table-bordered">
-              <thead>
-                <tr>
-                  <th>S. No</th>
-                  <th>Mat No</th>
-                  <th>Description</th>
-                  <th>QTY</th>
-                  <th>UOM</th>
-                  <th>Del Date</th>
-                  <th>LOT No</th>
-                  <th>Price</th>
-                  {docNumberReadOnly && !isDisplayMode && <th>Cancel</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {(selectedPO?.items?.length ? selectedPO.items : [{}]).map((item, idx) => (
-                  <tr key={idx}>
-                    <td>{idx + 1}</td>
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>S. No</th>
+                    <th>Mat No</th>
+                    <th>Description</th>
+                    <th>QTY</th>
+                    <th>UOM</th>
+                    <th>Del Date</th>
+                    <th>LOT No</th>
+                    <th>Price</th>
+                    {docNumberReadOnly && !isDisplayMode && <th>Cancel</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(selectedPO?.items?.length ? selectedPO.items : [{}]).map((item, idx) => (
+                    <tr key={idx}>
+                      <td>{idx + 1}</td>
 
-                    <td>
-                      <div className="input-group">
+                      <td>
+                        <div className="input-group">
+                          <input
+                            className="form-control form-control-sm"
+                            value={item.materialId || ""}
+                            readOnly
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={() => {
+                              setSearchRowIndex(idx);
+                              setShowMaterialModal(true);
+                            }}
+                            disabled={docNumberReadOnly || isDisplayMode}
+                          >
+                            🔍
+                          </button>
+                        </div>
+                      </td>
+
+                      <td>
                         <input
-                          className="form-control form-control-sm"
-                          value={item.materialId || ""}
+                          type="text"
+                          className="form-control"
+                          value={item.description || ""}
                           readOnly
                         />
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={() => {
-                            setSearchRowIndex(idx);
-                            setShowMaterialModal(true);
-                          }}
-                          disabled={docNumberReadOnly||isDisplayMode}
-                        >
-                          🔍
-                        </button>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.description || ""}
-                        readOnly
-                      />
-                    </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={item.quantity || ""}
+                          onChange={(e) => handleItemChange(idx, "quantity", e.target.value)}
+                          readOnly={docNumberReadOnly || isDisplayMode}
+                        />
+                      </td>
 
-                    <td>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={item.quantity || ""}
-                        onChange={(e) => handleItemChange(idx, "quantity", e.target.value)}
-                        readOnly={docNumberReadOnly||isDisplayMode}
-                      />
-                    </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={item.baseUnit || ""}
+                          readOnly
+                        />
+                      </td>
 
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.baseUnit || ""}
-                        readOnly
-                      />
-                    </td>
+                      <td>
+                        <input
+                          type="date"
+                          className="form-control"
+                          value={item.deliveryDate || today}
+                          onChange={(e) =>
+                            handleItemChange(idx, "deliveryDate", e.target.value)
+                          }
+                          readOnly={docNumberReadOnly || isDisplayMode}
+                        />
+                      </td>
 
-                    <td>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={item.deliveryDate || today}
-                        onChange={(e) =>
-                          handleItemChange(idx, "deliveryDate", e.target.value)
-                        }
-                        readOnly={docNumberReadOnly||isDisplayMode}
-                      />
-                    </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={item.lotNo || ""}
+                          onChange={(e) => handleItemChange(idx, "lotNo", e.target.value)}
+                          readOnly={docNumberReadOnly || isDisplayMode}
+                        />
+                      </td>
 
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.lotNo || ""}
-                        onChange={(e) => handleItemChange(idx, "lotNo", e.target.value)}
-                        readOnly={docNumberReadOnly||isDisplayMode}
-                      />
-                    </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={item.price || ""}
+                          readOnly
+                        />
+                      </td>
+                      {docNumberReadOnly && !isDisplayMode && <td>
+                        <input type="checkbox" onChange={(e) => handleItemChange(idx, "cancel", e.target.checked)} />
+                      </td>}
+                    </tr>
+                  ))}
+                </tbody>
 
-                    <td>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={item.price || ""}
-                        readOnly
-                      />
-                    </td>
-                    {docNumberReadOnly && !isDisplayMode && <td>
-                      <input type="checkbox" onChange={(e) => handleItemChange(idx, "cancel", e.target.checked)} />
-                    </td>}
-                  </tr>
-                ))}
-              </tbody>
-
-            </table>
+              </table>
             </div>
           </div>
         </div>

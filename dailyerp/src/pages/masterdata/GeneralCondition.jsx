@@ -8,9 +8,17 @@ function GeneralCondition() {
   const [conditions, setConditions] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingData, setEditingData] = useState(null);
-  const companyId = localStorage.getItem('companyId');
+  const companyId = localStorage.getItem('selectedCompanyId');
   const financialYear = localStorage.getItem('financialYear');
   const [showDataImportModal, setShowDataImportModal] = useState(false);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -26,10 +34,59 @@ function GeneralCondition() {
     fetchData(); // Refresh the list after import
   };
 
+  // Filter conditions based on search term
+  const filteredConditions = conditions.filter(condition => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const status = (!condition.isDeleted && !condition.isBlocked) ? 'Active' : 
+                  (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
+                  condition.isDeleted ? 'Deleted' : 'Blocked';
+    
+    return (
+      condition.name?.toLowerCase().includes(searchLower) ||
+      condition.description?.toLowerCase().includes(searchLower) ||
+      status.toLowerCase().includes(searchLower) ||
+      (condition.isDeleted ? 'yes deleted' : 'no active').includes(searchLower) ||
+      (condition.isBlocked ? 'yes blocked' : 'no active').includes(searchLower)
+    );
+  });
+
+  // Pagination calculations (based on filtered data)
+  const totalPages = Math.ceil(filteredConditions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentConditions = filteredConditions.slice(startIndex, endIndex);
+
+  // Search handler
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  // Pagination handlers
+  const handlePageClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page
+  };
+
   // Export to Excel Function
   const exportToExcel = () => {
+    // Use filtered data for export if search is active
+    const dataToExport = searchTerm ? filteredConditions : conditions;
+    
     // Prepare data for Excel
-    const excelData = conditions.map((condition, index) => ({
+    const excelData = dataToExport.map((condition, index) => ({
       'S.No': index + 1,
       'Condition Name': condition.name || '',
       'Description': condition.description || '',
@@ -66,13 +123,15 @@ function GeneralCondition() {
     const now = new Date();
     const currentDate = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // DD-MM-YYYY format
     const currentTime = now.toLocaleTimeString('en-GB', { hour12: false }).replace(/:/g, '-'); // HH-MM-SS format
-    const filename = `General-Condition-Master-${currentDate}-${currentTime}.xlsx`;
+    const searchSuffix = searchTerm ? `-Filtered-${searchTerm.replace(/[^a-zA-Z0-9]/g, '_')}` : '';
+    const filename = `General-Condition-Master${searchSuffix}-${currentDate}-${currentTime}.xlsx`;
 
     // Save the file
     XLSX.writeFile(wb, filename);
     
     // Show success message
-    alert(`Excel file exported successfully as: ${filename}`);
+    const recordCount = searchTerm ? filteredConditions.length : conditions.length;
+    alert(`Excel file exported successfully: ${recordCount} records exported as ${filename}`);
   };
 
   // Fetch all data
@@ -85,6 +144,7 @@ function GeneralCondition() {
         }
       });
       setConditions(res.data);
+      setCurrentPage(1); // Reset to first page when data is fetched
     } catch (err) {
       console.error('Failed to fetch:', err);
       alert('Error loading general conditions');
@@ -126,11 +186,17 @@ function GeneralCondition() {
         return;
       }
 
+      const submissionData = {
+        ...formData,
+        companyId: companyId,
+        financialYear: financialYear
+      };
+
       if (editingData) {
-        await axios.put(`http://localhost:8080/api/general-conditions/${editingData._id}`, formData);
+        await axios.put(`http://localhost:8080/api/general-conditions/${editingData._id}`, submissionData);
         alert('General condition updated successfully!');
       } else {
-        await axios.post('http://localhost:8080/api/general-conditions', formData);
+        await axios.post('http://localhost:8080/api/general-conditions', submissionData);
         alert('General condition added successfully!');
       }
       
@@ -143,11 +209,16 @@ function GeneralCondition() {
     }
   };
 
-
   // Toggle isDeleted / isBlocked
   const handleStatusChange = async (id, field, value) => {
     try {
-      await axios.put(`http://localhost:8080/api/general-conditions/${id}`, { [field]: value });
+      const updateData = {
+        [field]: value,
+        companyId: companyId,
+        financialYear: financialYear
+      };
+      
+      await axios.put(`http://localhost:8080/api/general-conditions/${id}`, updateData);
       alert(`General condition ${field === 'isDeleted' ? 'delete status' : 'block status'} updated successfully!`);
       fetchData();
     } catch (err) {
@@ -174,8 +245,8 @@ function GeneralCondition() {
   return (
     <div className="content">
       {/* Header Section */}
-      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-        <div className="my-auto mb-2">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
           <h2 className="mb-1">General Condition Master</h2>
           <nav>
             <ol className="breadcrumb mb-0">
@@ -194,7 +265,25 @@ function GeneralCondition() {
       <div className="card">
         <div className="card-header">
           <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3">
-            <div></div>
+            {/* Search Box */}
+            <div className="d-flex align-items-center gap-2">
+              <div className="input-group" style={{ width: '300px' }}>
+                <span className="input-group-text">
+                  <i className="ti ti-search"></i>
+                </span>
+                 <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by name, description, or status..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                />
+               
+               
+              </div>
+              
+            </div>
+
             <div className="d-flex gap-2">
               <button 
                 className="btn btn-outline-primary btn-sm" 
@@ -203,13 +292,13 @@ function GeneralCondition() {
                 <i className="ti ti-file-import me-1"></i>Import
               </button>
 
-              {/* Updated Export Button - Direct Excel Export */}
               <button
                 className="btn btn-outline-success btn-sm"
                 onClick={exportToExcel}
-                title="Export to Excel"
+                title={searchTerm ? "Export filtered results to Excel" : "Export all data to Excel"}
               >
                 <i className="ti ti-file-export me-1"></i>Export Excel
+                {searchTerm && <span className="badge bg-primary ms-1">{filteredConditions.length}</span>}
               </button>
 
               <button 
@@ -223,7 +312,7 @@ function GeneralCondition() {
         </div>
 
         <div className="card-body">
-          <div className="table-responsive">
+        <div className="table-responsive">
             <table className="table table-sm table-bordered">
               <thead>
                 <tr>
@@ -232,21 +321,21 @@ function GeneralCondition() {
                   <th>Description</th>
                   <th>Deleted</th>
                   <th>Blocked</th>
-                  {/* <th>Status</th> */}
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {conditions.length === 0 ? (
+                {currentConditions.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center">
-                      No general conditions found
+                      {searchTerm ? 'No general conditions found matching your search criteria' : 'No general conditions found'}
                     </td>
                   </tr>
                 ) : (
-                  conditions.map((condition, index) => (
+                  currentConditions.map((condition, index) => (
                     <tr key={condition._id}>
-                      <td>{index + 1}</td>
+                      <td>{startIndex + index + 1}</td>
                       <td><strong>{condition.name}</strong></td>
                       <td className='text-wrap'>{condition.description}</td>
                       <td className="text-center">
@@ -267,7 +356,7 @@ function GeneralCondition() {
                           onChange={(e) => handleStatusChange(condition._id, 'isBlocked', e.target.checked)}
                         />
                       </td>
-                      {/* <td>
+                      <td>
                         <span className={`badge ${
                           (!condition.isDeleted && !condition.isBlocked) ? 'bg-success' : 
                           (condition.isDeleted && condition.isBlocked) ? 'bg-danger' :
@@ -277,7 +366,7 @@ function GeneralCondition() {
                            (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
                            condition.isDeleted ? 'Deleted' : 'Blocked'}
                         </span>
-                      </td> */}
+                      </td>
                       <td>
                         <button 
                           className="btn btn-sm btn-primary me-2" 
@@ -300,9 +389,72 @@ function GeneralCondition() {
               </tbody>
             </table>
           </div>
+
+         
         </div>
       </div>
+ {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="d-md-flex d-block align-items-center justify-content-between mt-3">
+              <nav aria-label="Page navigation">
+                <ul className="pagination mb-0">
+                  <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                    <a
+                      className="page-link"
+                      href="javascript:void(0);"
+                      aria-label="Previous"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) {
+                          handlePageClick(currentPage - 1);
+                        }
+                      }}
+                    >
+                      <span aria-hidden="true">
+                        <i className="fas fa-angle-left"></i>
+                      </span>
+                    </a>
+                  </li>
 
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <li
+                      key={i}
+                      className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                    >
+                      <a
+                        className="page-link"
+                        href="javascript:void(0);"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageClick(i + 1);
+                        }}
+                      >
+                        {i + 1}
+                      </a>
+                    </li>
+                  ))}
+
+                  <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                    <a
+                      className="page-link"
+                      href="javascript:void(0);"
+                      aria-label="Next"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages) {
+                          handlePageClick(currentPage + 1);
+                        }
+                      }}
+                    >
+                      <span aria-hidden="true">
+                        <i className="fas fa-angle-right"></i>
+                      </span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          )}
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>{editingData ? 'Edit' : 'Add'} General Condition</Modal.Title>

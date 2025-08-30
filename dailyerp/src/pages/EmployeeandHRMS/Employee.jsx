@@ -54,8 +54,7 @@ const Employee = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/departments'
-     );
+      const response = await axios.get('http://localhost:8080/api/departments');
       setDepartments(response.data);
     } catch (error) {
       console.error('Error fetching departments:', error);
@@ -456,13 +455,13 @@ const Employee = () => {
   return (
     <>
       <div className="container">
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center">
           <div className="content container-fluid">
             <div className="row">
               <div className="col-md-12">
                 <div className="page-header">
                   <div className="row">
-                    <div className="col-md-4">
+                    <div className="">
                       <h3>Staff Management</h3>
                     </div>
                   </div>
@@ -474,7 +473,7 @@ const Employee = () => {
               <div className="col-md-12">
                 <div className="card">
                   <div className="card-body">
-                    <div className="row mb-3">
+                    <div className="row">
                       <div className="col-md-4">
                         <input
                           type="text"

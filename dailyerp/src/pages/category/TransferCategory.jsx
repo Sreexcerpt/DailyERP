@@ -6,7 +6,9 @@ const TransferCategory = () => {
     categoryName: '',
     // prefix: '',
     rangeStart: '',
-    rangeEnd: ''
+    rangeEnd: '',
+    companyId: localStorage.getItem('selectedCompanyId'),
+    financialYear: localStorage.getItem('financialYear')
   });
 
   const [errors, setErrors] = useState({});
@@ -14,7 +16,8 @@ const TransferCategory = () => {
   const [editingId, setEditingId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showdropdown, setShowdropdown] = useState(false);
-
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const alphaRegex = /^[A-Za-z ]{0,100}$/;
   const alphaNumericRegex = /^[A-Za-z0-9]{0,8}$/;
   const numberRegex = /^\d{0,6}$/;
@@ -25,7 +28,7 @@ const TransferCategory = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/goodsTransferCategory');
+      const res = await axios.get('http://localhost:8080/api/goodsTransferCategory', { params: { companyId, financialYear } });
       setCategories(res.data);
     } catch (err) {
       console.error('Failed to fetch categories', err);
@@ -36,7 +39,7 @@ const TransferCategory = () => {
     switch (name) {
       case 'categoryName':
         if (!value) return 'Category name is required';
-        if (!alphaRegex.test(value)) return 'Only alphabets (max 100 characters)';
+        // if (!alphaRegex.test(value)) return 'Only alphabets (max 100 characters)';
         break;
       // case 'prefix':
       //   if (!value) return 'Prefix is required';
@@ -60,7 +63,7 @@ const TransferCategory = () => {
 
     switch (name) {
       case 'categoryName':
-        cleanedValue = value.replace(/[^A-Za-z ]/g, '');
+        cleanedValue = value;
         if (cleanedValue.length > 100) {
           cleanedValue = cleanedValue.slice(0, 100);
           limitMsg = 'Maximum 100 characters allowed';
@@ -125,6 +128,7 @@ const TransferCategory = () => {
       setFormData({ categoryName: '', rangeStart: '', rangeEnd: '' });
       setEditingId(null);
       handleCloseModal();
+      window.location.reload();
     } catch (err) {
       console.error(err);
       alert('Failed to save category.');
@@ -151,12 +155,12 @@ const TransferCategory = () => {
   return (
     <div className="">
       <div className="content">
-        <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3">
+        <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2">
           <div>
             <h6>Goods Transfer Category</h6>
           </div>
           <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-            <div className="dropdown">
+            {/* <div className="dropdown">
               <a href="#" onClick={handleOpendropdown} className="btn btn-outline-white d-inline-flex align-items-center">
                 <i className="isax isax-export-1 me-1"></i>Export
               </a>
@@ -164,42 +168,45 @@ const TransferCategory = () => {
                 <li><a className="dropdown-item" href="#" onClick={handleClosedropdown}>Download as PDF</a></li>
                 <li><a className="dropdown-item" href="#" onClick={handleClosedropdown}>Download as Excel</a></li>
               </ul>
-            </div>
+            </div> */}
             <div>
               <a onClick={handleOpenModal} className="btn btn-primary d-flex align-items-center">
-                <i className="isax isax-add-circle5 me-1"></i>Goods Transfer Category
+                <i className="ti ti-plus me-1"></i>Add Goods Transfer Category
               </a>
             </div>
           </div>
         </div>
-
-        <div className="table-responsive">
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>Name</th>
-                {/* <th>Prefix</th> */}
-                <th>Start</th>
-                <th>End</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categories.map((cat) => (
-                <tr key={cat._id}>
-                  <td>{cat.categoryName}</td>
-                  {/* <td>{cat.prefix}</td> */}
-                  <td>{cat.rangeStart}</td>
-                  <td>{cat.rangeEnd}</td>
-                  <td>
-                    <button className="btn btn-sm btn-warning" onClick={() => handleEdit(cat)}>
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="card">
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    {/* <th>Prefix</th> */}
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categories.map((cat) => (
+                    <tr key={cat._id}>
+                      <td>{cat.categoryName}</td>
+                      {/* <td>{cat.prefix}</td> */}
+                      <td>{cat.rangeStart}</td>
+                      <td>{cat.rangeEnd}</td>
+                      <td>
+                        <button className="btn btn-sm btn-primary" onClick={() => handleEdit(cat)}>
+                          <i className="fas fa-edit"></i> Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {showModal && (
@@ -213,24 +220,24 @@ const TransferCategory = () => {
                     <button type="button" className="btn-close" onClick={() => {
                       handleCloseModal();
                       setEditingId(null);
-                      setFormData({ categoryName: '',  rangeStart: '', rangeEnd: '' });
+                      setFormData({ categoryName: '', rangeStart: '', rangeEnd: '' });
                     }}></button>
                   </div>
                   <div className="modal-body">
                     <form onSubmit={handleSubmit}>
                       <div className="row">
-                        {['categoryName', 'prefix', 'rangeStart', 'rangeEnd'].map((field) => (
+                        {['categoryName', 'rangeStart', 'rangeEnd'].map((field) => (
                           <div className="mb-3 col-xl-3" key={field}>
                             <label className="form-label">
                               {field === 'categoryName' ? 'Category Name' :
-                                  field === 'rangeStart' ? 'Range Start' : 'Range End'}
+                                field === 'rangeStart' ? 'Range Start' : 'Range End'}
                             </label>
                             <input
-                              type={field.includes('range') ? 'number' : 'text'}
+                              type='text'
                               name={field}
                               value={formData[field]}
                               onChange={handleChange}
-                              className={`form-control ${errors[field] ? 'is-invalid' : ''}`}
+                              className={`form-control`}
                             />
                             {errors[field] && <div className="invalid-feedback">{errors[field]}</div>}
                           </div>

@@ -7,8 +7,8 @@ function SaleQuotationCategoryForm() {
     // prefix: '',
     rangeFrom: '',
     rangeTo: '',
-        companyId:  localStorage.getItem('selectedCompanyId'),
-       financialYear : localStorage.getItem('financialYear')
+    companyId: localStorage.getItem('selectedCompanyId'),
+    financialYear: localStorage.getItem('financialYear')
   });
 
   const [categories, setCategories] = useState([]);
@@ -56,17 +56,18 @@ function SaleQuotationCategoryForm() {
       }
       fetchCategories();
       resetForm();
+      window.location.reload();
     } catch (err) {
       alert('Error saving category');
     }
   };
 
   const fetchCategories = async () => {
-     const companyId = localStorage.getItem('selectedCompanyId');
-  const financialYear = localStorage.getItem('financialYear');
-     
+    const companyId = localStorage.getItem('selectedCompanyId');
+    const financialYear = localStorage.getItem('financialYear');
 
-    const res = await axios.get('http://localhost:8080/api/sale-quotation-categories',{ params: { companyId, financialYear }});
+
+    const res = await axios.get('http://localhost:8080/api/sale-quotation-categories', { params: { companyId, financialYear } });
     setCategories(res.data);
   };
 
@@ -99,12 +100,12 @@ function SaleQuotationCategoryForm() {
   const handleClosedropdown = () => setShowdropdown(false);
   return (
     <div className='content'>
-      <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3">
+      <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2">
         <div>
           <h6>Sales Quotation Category</h6>
         </div>
         <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-          <div className="dropdown">
+          {/* <div className="dropdown">
             <a href="#" onClick={handleOpendropdown} className="btn btn-outline-white d-inline-flex align-items-center" data-bs-toggle="dropdown">
               <i className="isax isax-export-1 me-1"></i>Export
             </a>
@@ -116,9 +117,9 @@ function SaleQuotationCategoryForm() {
                 <a className="dropdown-item" href="#" onClick={handleClosedropdown}>Download as Excel</a>
               </li>
             </ul>
-          </div>
+          </div> */}
           <div>
-            <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>New Quotation Category</a>
+            <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="ti ti-plus me-1"></i>New Quotation Category</a>
           </div>
         </div>
       </div>
@@ -159,9 +160,13 @@ function SaleQuotationCategoryForm() {
                     <div className='col-xl-3 mb-2'>
                       <input
                         name="rangeFrom"
-                        type="number"
+                        type="text"
                         value={formData.rangeFrom}
-                        onChange={handleChange}
+                        onChange={(e) => {e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                          handleChange(e);
+                          
+                        }}
+                        maxLength={6}
                         className='form-control'
                         placeholder="Range From (6 digits)"
                       />
@@ -171,10 +176,14 @@ function SaleQuotationCategoryForm() {
                     <div className='col-xl-3 mb-2'>
                       <input
                         name="rangeTo"
-                        type="number"
+                        type="text"
                         className='form-control'
                         value={formData.rangeTo}
-                        onChange={handleChange}
+                        onChange={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                          handleChange(e);
+                         
+                        }}
+                        maxLength={6}
                         placeholder="Range To (6 digits)"
                       />
                       <div style={{ color: 'red' }}>{errors.rangeTo}</div>
@@ -189,34 +198,37 @@ function SaleQuotationCategoryForm() {
         </div>
       </>
       )}
-
-      <div className="table-responsive">
-        <table className='table table-sm table-bordered'>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Category</th>
-              {/* <th>Prefix</th> */}
-              <th>RangeFrom</th>
-              <th>RangeTo</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((cat, index) => (
-              <tr key={cat._id}>
-                <td>{index + 1}</td>
-                <td>{cat.categoryName}</td>
-                {/* <td>{cat.prefix}</td> */}
-                <td>{cat.rangeFrom}</td>
-                <td>{cat.rangeTo}</td>
-                <td>
-                  <button className='btn btn-sm btn-primary' onClick={() => {handleEdit(cat),handleOpenModal()}}>Edit</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="card">
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className='table table-sm table-bordered'>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Category</th>
+                  {/* <th>Prefix</th> */}
+                  <th>RangeFrom</th>
+                  <th>RangeTo</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((cat, index) => (
+                  <tr key={cat._id}>
+                    <td>{index + 1}</td>
+                    <td>{cat.categoryName}</td>
+                    {/* <td>{cat.prefix}</td> */}
+                    <td>{cat.rangeFrom}</td>
+                    <td>{cat.rangeTo}</td>
+                    <td>
+                      <button className='btn btn-sm btn-primary' onClick={() => { handleEdit(cat), handleOpenModal() }}>Edit</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

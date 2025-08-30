@@ -25,6 +25,7 @@ function PaymentDisplay() {
         byType: [],
         byMethod: []
     });
+    
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
@@ -75,17 +76,24 @@ function PaymentDisplay() {
         }
     };
 
-    const fetchSummary = async () => {
+   const fetchSummary = async () => {
         try {
             console.log("Fetching summary for:", { companyId, financialYear });
+            
             const response = await axios.get("http://localhost:8080/api/payment-summary", {
                 params: {
                     companyId: companyId,
                     financialYear: financialYear
                 }
             });
+            
             console.log("Summary response:", response.data);
-            setSummary(response.data);
+            
+            setSummary({
+                byType: response.data.byType || [],
+                byMethod: response.data.byMethod || [],
+                today: response.data.today || { totalAmount: 0, count: 0 }
+            });
         } catch (error) {
             console.error("Error fetching summary:", error);
             setMessage({
@@ -93,7 +101,7 @@ function PaymentDisplay() {
                 text: "Failed to fetch payment summary."
             });
         }
-    };
+    };  
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -455,7 +463,7 @@ function PaymentDisplay() {
         a.click();
         window.URL.revokeObjectURL(url);
     };
-
+console.log("Payment summary state:", summary);
     return (
         <div className="content">
             {/* Message Alert */}
@@ -471,8 +479,8 @@ function PaymentDisplay() {
             )}
 
             {/* Header */}
-            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-                <div className="my-auto mb-2">
+            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+                <div className="my-auto">
                     <h2 className="mb-1">Payment Records</h2>
                     <nav>
                         <ol className="breadcrumb mb-0">

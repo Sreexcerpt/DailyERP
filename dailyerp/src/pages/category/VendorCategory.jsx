@@ -55,6 +55,7 @@ function VendorCategoryForm() {
       }
       // ✅ Reset form
       setFormData({ categoryName: '', rangeFrom: '', rangeTo: '' });
+      window.location.reload();
     } catch (error) {
       console.error(error);
       alert('Error adding/updating category');
@@ -98,12 +99,12 @@ function VendorCategoryForm() {
     <div className="">
 
       <div className="content">
-        <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3">
+        <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2">
           <div>
             <h6>Vendor Category</h6>
           </div>
           <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-            <div className="dropdown">
+            {/* <div className="dropdown">
               <a href="#" onClick={handleOpendropdown} className="btn btn-outline-white d-inline-flex align-items-center" data-bs-toggle="dropdown">
                 <i className="isax isax-export-1 me-1"></i>Export
               </a>
@@ -115,9 +116,9 @@ function VendorCategoryForm() {
                   <a className="dropdown-item" href="#" onClick={handleClosedropdown}>Download as Excel</a>
                 </li>
               </ul>
-            </div>
+            </div> */}
             <div>
-              <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>Vendor Category</a>
+              <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="ti ti-plus me-1"></i>Add Vendor Category</a>
             </div>
           </div>
         </div>
@@ -162,9 +163,9 @@ function VendorCategoryForm() {
                           <div className="col-xl-3 mb-2">
                             <label>Range From</label>
                             <input
-                              type="number"
+                              type="text"
                               name="rangeFrom"
-                              placeholder="e.g., 100"
+                              placeholder="e.g., 100000"
                               value={formData.rangeFrom}
                               onChange={handleChange}
                               required
@@ -173,16 +174,16 @@ function VendorCategoryForm() {
                           <div className="col-xl-3 mb-2">
                             <label>Range To</label>
                             <input
-                              type="number"
+                              type="text"
                               name="rangeTo"
-                              placeholder="e.g., 999"
+                              placeholder="e.g., 999999"
                               value={formData.rangeTo}
                               onChange={handleChange}
                               required
                               className='form-control'
                             /></div>
                         </div>
-                        <button type="submit" className='btn btn-success'>
+                        <button type="submit" className='btn btn-primary'>
                           {editingId ? 'Update Category' : 'Add Category'}
                         </button>
                       </form>
@@ -192,8 +193,9 @@ function VendorCategoryForm() {
               </div>
             </>
           )}
-          <div className='table-responsive'>
-            <table className='table table-bordered'>
+          <div className="card">
+            <div className="card-body"><div className='table-responsive'>
+            <table className='table table-sm table-bordered'>
               <thead>
                 <tr>
                   <th>Category Name</th>
@@ -223,6 +225,9 @@ function VendorCategoryForm() {
               </tbody>
             </table>
           </div>
+          </div>
+          </div>
+          
         </div>
       </div>
     </div>

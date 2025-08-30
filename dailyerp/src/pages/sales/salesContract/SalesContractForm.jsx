@@ -44,12 +44,12 @@ function SalesContractForm() {
 
     // Fetch contract categories (adjust API endpoint as needed)
     axios
-      .get("http://localhost:8080/api/sale-contract-categories")
+      .get("http://localhost:8080/api/sale-contract-categories", { params: { companyId, financialYear }, })
       .then((res) => setContractCategories(res.data))
       .catch(console.error);
 
     // Fetch locations
-    axios.get("http://localhost:8080/api/locations").then((res) => {
+    axios.get("http://localhost:8080/api/locations", { params: { companyId, financialYear }, }).then((res) => {
       console.log("Locations API response:", res.data);
       if (Array.isArray(res.data)) {
         setLocations(res.data);
@@ -203,111 +203,100 @@ function SalesContractForm() {
 
   const ContractNumberModal = () => {
     return (
-      <ModalWrapper onClose={() => setShowContractModal(false)}>
-        <div className="text-center mb-4">
-          <h5>Choose Contract Number Generation</h5>
-          <p className="text-muted">Select how you want to generate the contract number</p>
-        </div>
-
-        <div className="row justify-content-center">
-          <div className="col-md-8">
-            <div className="row">
-              <div className="col-md-6">
-                <div className="card h-100" style={{ cursor: 'pointer' }}>
-                  <div
-                    className={`card-body text-center p-4 ${contractNumberType === 'internal' ? 'bg-primary text-white' : ''}`}
-                    onClick={() => setContractNumberType('internal')}
-                  >
-                    <i className="fas fa-cog fa-3x mb-3"></i>
-                    <h6>Internal Generation</h6>
-                    <p className="small">
-                      System will automatically generate contract number based on category and range
-                    </p>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="contractType"
-                        value="internal"
-                        checked={contractNumberType === 'internal'}
-                        onChange={(e) => setContractNumberType(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
+      <>
+        <div className="modal-backdrop fade show"></div>
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-md">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">
+                  Contract Number Generation
+                </h4>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowContractModal(false)}
+                  aria-label="Close"
+                ></button>
               </div>
-
-              <div className="col-md-6">
-                <div className="card h-100">
-                  <div
-                    className={`card-body text-center p-4 ${contractNumberType === 'external' ? 'bg-primary text-white' : ''}`}
-                    onClick={() => setContractNumberType('external')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <i className="fas fa-keyboard fa-3x mb-3"></i>
-                    <h6>External Generation</h6>
-                    <p className="small">
-                      Enter your own custom contract number
-                    </p>
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="contractType"
-                        value="external"
-                        checked={contractNumberType === 'external'}
-                        onChange={(e) => setContractNumberType(e.target.value)}
-                      />
-                    </div>
+              <div className="modal-body">
+                <p className="mb-4">
+                  Choose how you want to create the Contract Number:
+                </p>
+                <div className="row">
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-primary btn-md"
+                      onClick={() => {
+                        setContractNumberType("internal");
+                        handleFinalSubmit();
+                      }}
+                    >
+                      <i className="ti ti-user me-2"></i>
+                      Internal (Auto-generate)
+                    </button>
+                  </div>
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-secondary btn-md"
+                      onClick={() => setContractNumberType("external")}
+                    >
+                      <i className="ti ti-edit me-2"></i>
+                      External (Manual Entry)
+                    </button>
                   </div>
                 </div>
+                {contractNumberType === "external" && (
+                  <div className="mt-4">
+                    <label className="form-label">Enter Contract Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter custom contract number (max 50 characters)"
+                      value={externalContractNumber}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 50) {
+                          setExternalContractNumber(e.target.value);
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && externalContractNumber.trim()) {
+                          handleFinalSubmit();
+                        }
+                      }}
+                      maxLength={50}
+                      autoFocus
+                    />
+                    <div className="form-text">{externalContractNumber.length}/50 characters</div>
+                    <div className="mt-3">
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleFinalSubmit}
+                        disabled={!externalContractNumber.trim()}
+                      >
+                        <i className="fas fa-save me-1"></i>Save Contract
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {/* {contractNumberType === "internal" && (
+                  <div className="mt-4">
+                    <div className="alert alert-info" role="alert">
+                      System will automatically generate contract number based on category and range.
+                    </div>
+                  </div>
+                )} */}
               </div>
             </div>
-
-            {contractNumberType === 'external' && (
-              <div className="mt-4">
-                <label className="form-label">Enter Contract Number</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter custom contract number (max 50 characters)"
-                  value={externalContractNumber}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 50) {
-                      setExternalContractNumber(e.target.value);
-                    }
-                  }}
-                  onFocus={(e) => e.stopPropagation()}
-                  onClick={(e) => e.stopPropagation()}
-                  maxLength="50"
-                  autoFocus
-                />
-                <div className="form-text">
-                  {externalContractNumber.length}/50 characters
-                </div>
-              </div>
-            )}
           </div>
         </div>
-
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setShowContractModal(false)}
-          >
-            <i className="fas fa-times me-1"></i>Cancel
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handleFinalSubmit}
-            disabled={contractNumberType === 'external' && !externalContractNumber.trim()}
-          >
-            <i className="fas fa-save me-1"></i>Save Contract
-          </button>
-        </div>
-      </ModalWrapper>
+      </>
     );
   };
 
@@ -343,217 +332,70 @@ function SalesContractForm() {
     </div>
   );
 
-  const MaterialModal = () => {
-    const [searchResults, setSearchResults] = useState([]);
-    const [searchType, setSearchType] = useState("materialId");
+const MaterialModal = () => {
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchType, setSearchType] = useState("materialId");
 
-    const handleSearchInputChange = (e) => {
-      const value = e.target.value;
-      setMaterialSearch(value);
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setMaterialSearch(value);
 
-      const filtered = materials.filter((mat) => {
-        const target =
-          searchType === "materialId" ? mat.materialId : mat.description;
-        return target?.toLowerCase().includes(value.toLowerCase());
-      });
+    const filtered = materials.filter((mat) => {
+      const target =
+        searchType === "materialId" ? mat.materialId : mat.description;
+      return target?.toLowerCase().includes(value.toLowerCase());
+    });
 
-      setSearchResults(filtered);
-    };
-
-    const handleViewAll = () => {
-      setSearchResults(materials);
-      setMaterialSearch("");
-    };
-
-    const handleClearResults = () => {
-      setSearchResults([]);
-      setMaterialSearch("");
-    };
-
-    return (
-      <ModalWrapper onClose={() => setShowMaterialModal(false)}>
-        {/* Search Controls */}
-        <div className="row mb-3">
-          <div className="col-md-3">
-            <label className="form-label">Search Type</label>
-            <select
-              className="form-select"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-            >
-              <option value="materialId">Material ID</option>
-              <option value="description">Description</option>
-            </select>
-          </div>
-          <div className="col-md-6">
-            <label className="form-label">Search Query</label>
-            <div className="input-group">
-              <span className="input-group-text">
-                <i className="fas fa-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder={
-                  searchType === "materialId"
-                    ? "Enter Material ID (e.g., MMNR-100001)"
-                    : "Search by Description..."
-                }
-                value={materialSearch}
-                onChange={handleSearchInputChange}
-              />
-            </div>
-          </div>
-          <div className="col-md-3">
-            <label className="form-label">&nbsp;</label>
-            <div className="d-flex gap-2">
-              <button className="btn btn-info" onClick={handleViewAll}>
-                <i className="fas fa-list me-1"></i>View All
-              </button>
-              {searchResults.length > 0 && (
-                <button
-                  className="btn btn-outline-secondary"
-                  onClick={handleClearResults}
-                >
-                  <i className="fas fa-times me-1"></i>Clear
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Search Results Table */}
-        <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-          {searchResults.length > 0 ? (
-            <table className="table table-hover">
-              <thead className="table-light sticky-top">
-                <tr>
-                  <th>Material ID</th>
-                  <th>Description</th>
-                  <th>Base Unit</th>
-                  <th>Unit</th>
-                  <th>Price</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {searchResults.map((material, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <span className="badge bg-secondary">
-                        {material.materialId}
-                      </span>
-                    </td>
-                    <td>{material.description}</td>
-                    <td>{material.baseUnit}</td>
-                    <td>{material.unit}</td>
-                    <td>{material.price}</td>
-                    <td>
-                      <button
-                        className="btn btn-success btn-sm"
-                        onClick={() => handleMaterialSelect(material)}
-                      >
-                        <i className="fas fa-check me-1"></i>Select
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-4">
-              <i className="fas fa-search fa-3x text-muted mb-3"></i>
-              <p className="text-muted">
-                {materials.length === 0
-                  ? "No materials loaded from API"
-                  : materialSearch
-                    ? `No materials found matching "${materialSearch}"`
-                    : 'Enter search term or click "View All"'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setShowMaterialModal(false)}
-          >
-            <i className="fas fa-times me-1"></i>Close
-          </button>
-        </div>
-      </ModalWrapper>
-    );
+    setSearchResults(filtered);
   };
 
-  const CustomerModal = () => {
-    const [searchType, setSearchType] = useState("name1");
-    const [searchResults, setSearchResults] = useState([]);
+  const handleViewAll = () => {
+    setSearchResults(materials);
+    setMaterialSearch("");
+  };
 
-    const handleSearchInputChange = (e) => {
-      const value = e.target.value;
-      setCustomerSearch(value);
+  const handleClearResults = () => {
+    setSearchResults([]);
+    setMaterialSearch("");
+  };
 
-      const filtered = customers.filter((c) => {
-        const target =
-          searchType === "name1"
-            ? c.name1
-            : searchType === "city"
-              ? c.city
-              : searchType === "region"
-                ? c.region
-                : `${c.name1} ${c.name2}`;
-        return target?.toLowerCase().includes(value.toLowerCase());
-      });
-
-      setSearchResults(filtered);
-    };
-
-    const handleViewAll = () => {
-      setSearchResults(customers);
-      setCustomerSearch("");
-    };
-
-    const handleClearResults = () => {
-      setSearchResults([]);
-      setCustomerSearch("");
-    };
-
-    return (
-      <ModalWrapper onClose={() => setShowCustomerModal(false)}>
-        {/* Search Controls */}
-        <div className="row mb-3">
-          <div className="col-md-3">
-            <label className="form-label">Search Type</label>
-            <select
-              className="form-select"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-            >
-              <option value="name1">Name</option>
-              <option value="city">City</option>
-              <option value="region">Region</option>
-            </select>
+  return (
+    <ModalWrapper onClose={() => setShowMaterialModal(false)}>
+      {/* Search Controls */}
+      <div className="row mb-3">
+        <div className="col-md-3">
+          <label className="form-label">Search Type</label>
+          <select
+            className="form-select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="materialId">Material ID</option>
+            <option value="description">Description</option>
+          </select>
+        </div>
+        <div className="col-md-6">
+          <label className="form-label">Search Query</label>
+          <div className="input-group">
+            <span className="input-group-text">
+              <i className="fas fa-search"></i>
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder={
+                searchType === "materialId"
+                  ? "Enter Material ID (e.g., MMNR-100001)"
+                  : "Search by Description..."
+              }
+              value={materialSearch}
+              onChange={handleSearchInputChange}
+            />
           </div>
-
-          <div className="col-md-6">
-            <label className="form-label">Search Query</label>
-            <div className="input-group">
-              <span className="input-group-text">
-                <i className="fas fa-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Type to search..."
-                value={customerSearch}
-                onChange={handleSearchInputChange}
-              />
-            </div>
-          </div>
-
-          <div className="col-md-3 d-flex align-items-end gap-2">
+        </div>
+        <div className="col-md-3">
+          <label className="form-label">&nbsp;</label>
+          <div className="d-flex gap-2">
             <button className="btn btn-info" onClick={handleViewAll}>
               <i className="fas fa-list me-1"></i>View All
             </button>
@@ -567,66 +409,213 @@ function SalesContractForm() {
             )}
           </div>
         </div>
+      </div>
 
-        {/* Results */}
-        <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-          {searchResults.length > 0 ? (
-            <table className="table table-hover">
-              <thead className="table-light sticky-top">
-                <tr>
-                  <th>Name</th>
-                  <th>City</th>
-                  <th>Region</th>
-                  <th>Contact</th>
-                  <th>Action</th>
+      {/* Search Results Table */}
+      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+        {searchResults.length > 0 ? (
+          <table className="table table-hover">
+            <thead className="table-light sticky-top">
+              <tr>
+                <th>Material ID</th>
+                <th>Description</th>
+                <th>Base Unit</th>
+                <th>Unit</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {searchResults.map((material, idx) => (
+                <tr key={idx}>
+                  <td>
+                    <span className="badge bg-secondary">
+                      {material.materialId}
+                    </span>
+                  </td>
+                  <td>{material.description}</td>
+                  <td>{material.baseUnit}</td>
+                  <td>{material.unit}</td>
+                  <td>{material.price}</td>
+                  <td>
+                    <button
+                      className="btn btn-success btn-sm"
+                      onClick={() => handleMaterialSelect(material)}
+                    >
+                      <i className="fas fa-check me-1"></i>Select
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {searchResults.map((c, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      {c.name1} {c.name2}
-                    </td>
-                    <td>{c.city}</td>
-                    <td>{c.region}</td>
-                    <td>{c.contactNo}</td>
-                    <td>
-                      <button
-                        className="btn btn-success btn-sm"
-                        onClick={() => handleCustomerSelect(c)}
-                      >
-                        <i className="fas fa-check me-1"></i>Select
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-4">
-              <i className="fas fa-search fa-3x text-muted mb-3"></i>
-              <p className="text-muted">
-                {customers.length === 0
-                  ? "No customers loaded"
-                  : customerSearch
-                    ? `No match found for "${customerSearch}"`
-                    : 'Enter a search term or click "View All"'}
-              </p>
-            </div>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center py-4">
+            <i className="fas fa-search fa-3x text-muted mb-3"></i>
+            <p className="text-muted">
+              {materials.length === 0
+                ? "No materials loaded from API"
+                : materialSearch
+                  ? `No materials found matching "${materialSearch}"`
+                  : 'Enter search term or click "View All"'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setShowMaterialModal(false)}
+        >
+          <i className="fas fa-times me-1"></i>Close
+        </button>
+      </div>
+    </ModalWrapper>
+  );
+};
+
+const CustomerModal = () => {
+  const [searchType, setSearchType] = useState("name1");
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setCustomerSearch(value);
+
+    // const filtered = customers.filter((c) => {
+    //   const target =
+    //     searchType === "name1"
+    //       ? c.name1
+    //       : searchType === "city"
+    //         ? c.city
+    //         : searchType === "region"
+    //           ? c.region
+    //           : `${c.name1} ${c.name2}`;
+    //   return target?.toLowerCase().includes(value.toLowerCase());
+    // });
+
+    setSearchResults(filtered);
+  };
+
+  const handleViewAll = () => {
+    setSearchResults(customers);
+    setCustomerSearch("");
+  };
+
+  const handleClearResults = () => {
+    setSearchResults([]);
+    setCustomerSearch("");
+  };
+
+  return (
+    <ModalWrapper onClose={() => setShowCustomerModal(false)}>
+      {/* Search Controls */}
+      <div className="row mb-3">
+        <div className="col-md-3">
+          <label className="form-label">Search Type</label>
+          <select
+            className="form-select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="name1">Name</option>
+            <option value="city">City</option>
+            <option value="region">Region</option>
+          </select>
+        </div>
+
+        <div className="col-md-6">
+          <label className="form-label">Search Query</label>
+          <div className="input-group">
+            <span className="input-group-text">
+              <i className="fas fa-search"></i>
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Type to search..."
+              value={customerSearch}
+              onChange={handleSearchInputChange} 
+            />
+          </div>
+        </div>
+
+        <div className="col-md-3 d-flex align-items-end gap-2">
+          <button className="btn btn-info" onClick={handleViewAll}>
+            <i className="fas fa-list me-1"></i>View All
+          </button>
+          {searchResults.length > 0 && (
+            <button
+              className="btn btn-outline-secondary"
+              onClick={handleClearResults}
+            >
+              <i className="fas fa-times me-1"></i>Clear
+            </button>
           )}
         </div>
+      </div>
 
-        <div className="modal-footer">
-          <button
-            className="btn btn-secondary"
-            onClick={() => setShowCustomerModal(false)}
-          >
-            <i className="fas fa-times me-1"></i>Close
-          </button>
-        </div>
-      </ModalWrapper>
-    );
-  };
+      {/* Results */}
+      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+        {searchResults.length > 0 ? (
+          <table className="table table-hover">
+            <thead className="table-light sticky-top">
+              <tr>
+                <th>Name</th>
+                <th>City</th>
+                <th>Region</th>
+                <th>Contact</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {searchResults.map((c, idx) => (
+                <tr key={idx}>
+                  <td>
+                    {c.name1} {c.name2}
+                  </td>
+                  <td>{c.city}</td>
+                  <td>{c.region}</td>
+                  <td>{c.contactNo}</td>
+                  <td>
+                    <button
+                      className="btn btn-success btn-sm"
+                      onClick={() => handleCustomerSelect(c)}
+                    >
+                      <i className="fas fa-check me-1"></i>Select
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center py-4">
+            <i className="fas fa-search fa-3x text-muted mb-3"></i>
+            <p className="text-muted">
+              {customers.length === 0
+                ? "No customers loaded"
+                : customerSearch
+                  ? `No match found for "${customerSearch}"`
+                  : 'Enter a search term or click "View All"'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="modal-footer">
+        <button
+          className="btn btn-secondary"
+          onClick={() => setShowCustomerModal(false)}
+        >
+          <i className="fas fa-times me-1"></i>Close
+        </button>
+      </div>
+    </ModalWrapper>
+  );
+};
 
   const RequestModal = () => {
     const [searchResults, setSearchResults] = useState([]);
@@ -767,8 +756,8 @@ function SalesContractForm() {
   return (
     <>
       <div className="content">
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+          <div className="my-auto">
             <h2 className="mb-1">Sales Contract</h2>
             <nav>
               <ol className="breadcrumb mb-0">

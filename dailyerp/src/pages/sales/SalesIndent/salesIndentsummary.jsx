@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const SalesIndentsummary = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
+    const [itemsPerPage] = useState(10);
     const [savedIndents, setSavedIndents] = useState([]);
     const [filteredIndents, setFilteredIndents] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -291,8 +291,8 @@ const SalesIndentsummary = () => {
 
     return (
         <div className="content">
-            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-                <div className="my-auto mb-2">
+            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+                <div className="my-auto">
                     <h2 className="mb-1">Sales Enquiry List</h2>
                     <nav>
                         <ol className="breadcrumb mb-0">
@@ -312,10 +312,7 @@ const SalesIndentsummary = () => {
                 <div className="col-12">
                     <div className="card border-0 shadow-sm">
                         <div className="card-header text-white d-flex justify-content-between align-items-center">
-                            <h6>
-                                <i className="fas fa-archive me-2"></i>
-                                Sales Indents Summary ({filteredIndents.length})
-                            </h6>
+                            <div></div>
                             <div className="d-flex gap-2">
                                 <button
                                     className="btn btn-light btn-sm"
@@ -352,7 +349,7 @@ const SalesIndentsummary = () => {
                                                     <th>Indent ID</th>
                                                     <th>Document Date</th>
                                                     <th>Location</th>
-                                                    <th>Buyer Group</th>
+                                                    <th>Sales Group</th>
                                                     <th>Category</th>
                                                     <th>Materials</th>
                                                     <th>Delete Status</th>
@@ -379,7 +376,7 @@ const SalesIndentsummary = () => {
                                                                 {indent.location}
                                                             </td>
                                                             <td>
-                                                                {indent.buyerGroup}
+                                                                {indent.salesGroup}
                                                             </td>
                                                             <td>
                                                                 {indent.categoryName}

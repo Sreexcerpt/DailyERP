@@ -7,8 +7,8 @@ const MaterialCategory = () => {
     // prefix: '',
     rangeStart: '',
     rangeEnd: '',
-    companyId:  localStorage.getItem('selectedCompanyId'),
-       financialYear : localStorage.getItem('financialYear')
+    companyId: localStorage.getItem('selectedCompanyId'),
+    financialYear: localStorage.getItem('financialYear')
   });
 
   const [errors, setErrors] = useState({});
@@ -25,10 +25,10 @@ const MaterialCategory = () => {
 
   const fetchCategories = async () => {
     try {
-       const companyId = localStorage.getItem('selectedCompanyId');
-  const financialYear = localStorage.getItem('financialYear');
-    
-      const res = await axios.get('http://localhost:8080/api/category',{  params: { companyId, financialYear }});
+      const companyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
+
+      const res = await axios.get('http://localhost:8080/api/category', { params: { companyId, financialYear } });
       setCategories(res.data);
     } catch (err) {
       console.error('Failed to fetch categories', err);
@@ -39,7 +39,6 @@ const MaterialCategory = () => {
     switch (name) {
       case 'categoryName':
         if (!value) return 'Category name is required';
-        if (!alphaRegex.test(value)) return 'Only alphabets (max 100 characters)';
         break;
       // case 'prefix':
       //   if (!value) return 'Prefix is required';
@@ -63,7 +62,7 @@ const MaterialCategory = () => {
 
     switch (name) {
       case 'categoryName':
-        cleanedValue = value.replace(/[^A-Za-z ]/g, '');
+        cleanedValue = value;
         if (cleanedValue.length > 100) {
           cleanedValue = cleanedValue.slice(0, 100);
           limitMsg = 'Maximum 100 characters allowed';
@@ -104,7 +103,7 @@ const MaterialCategory = () => {
     );
   };
   const [materialIds, setMaterialIds] = useState({});
- useEffect(() => {
+  useEffect(() => {
     const fetchMaterialIds = async () => {
       const ids = {};
       for (const cat of categories) {
@@ -154,9 +153,11 @@ const MaterialCategory = () => {
       }
 
       fetchCategories();
-      setFormData({ categoryName: '', prefix: '', rangeStart: '', rangeEnd: '' });
+      setFormData({ categoryName: '', rangeStart: '', rangeEnd: '' });
       setEditingId(null);
+
       handleCloseModal();
+      window.location.reload();
     } catch (err) {
       console.error(err);
       alert('Failed to save category.');
@@ -185,12 +186,12 @@ const MaterialCategory = () => {
         <div className="content">
           <div >
 
-            <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3">
+            <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2">
               <div>
                 <h6>Material Category</h6>
               </div>
               <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-                <div className="dropdown">
+                {/* <div className="dropdown">
                   <a href="#" onClick={handleOpendropdown} className="btn btn-outline-white d-inline-flex align-items-center" data-bs-toggle="dropdown">
                     <i className="isax isax-export-1 me-1"></i>Export
                   </a>
@@ -202,44 +203,47 @@ const MaterialCategory = () => {
                       <a className="dropdown-item" href="#" onClick={handleClosedropdown}>Download as Excel</a>
                     </li>
                   </ul>
-                </div>
+                </div> */}
                 <div>
-                  <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>Material Category</a>
+                  <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="ti ti-plus me-1"></i>Add Material Category</a>
                 </div>
               </div>
             </div>
-
-            <div className='table-responsive'>
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    {/* <th>Prefix</th> */}
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {categories.length>0&&
-                  categories?.map((cat) => (
-                    <tr key={cat._id}>
-                      <td>{cat.categoryName}</td>
-                      {/* <td>{cat.prefix}</td> */}
-                      <td>{cat.rangeStart}</td>
-                      <td>{cat.rangeEnd}</td>
-                      <td>{materialIds[cat._id] || 'Loading...'}</td>
-                      <td>
-                        <button className="btn btn-sm btn-warning" onClick={() => { handleEdit(cat), handleOpenModal() }}>
-                          Edit
-                        </button>
-                      </td>
+            <div className="card">
+              <div className="card-body"><div className='table-responsive'>
+                <table className="table table-sm table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      {/* <th>Prefix</th> */}
+                      <th>Start</th>
+                      <th>End</th>
+                      {/* <th>Status</th> */}
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {categories.length > 0 &&
+                      categories?.map((cat) => (
+                        <tr key={cat._id}>
+                          <td>{cat.categoryName}</td>
+                          {/* <td>{cat.prefix}</td> */}
+                          <td>{cat.rangeStart}</td>
+                          <td>{cat.rangeEnd}</td>
+                          {/* <td>{materialIds[cat._id] || 'Loading...'}</td> */}
+                          <td>
+                            <button className="btn btn-sm btn-warning" onClick={() => { handleEdit(cat), handleOpenModal() }}>
+                              Edit
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              </div>
             </div>
+
             {showModal && (<>
               <div className="modal-backdrop fade show"></div>
               <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" aria-labelledby="myLargeModalLabel" aria-modal="true" role="dialog">
@@ -259,18 +263,18 @@ const MaterialCategory = () => {
                                   ? 'Category Name'
                                   // : field === 'prefix'
                                   //   ? 'Prefix'
-                                    : field === 'rangeStart'
-                                      ? 'Range Start'
-                                      : 'Range End'}
+                                  : field === 'rangeStart'
+                                    ? 'Range Start'
+                                    : 'Range End'}
                               </label>
                               <input
-                                type={field.includes('range') ? 'number' : 'text'}
+                                type={'text'}
                                 name={field}
                                 value={formData[field]}
                                 onChange={handleChange}
-                                className={`form-control ${errors[field] ? 'is-invalid' : ''}`}
+                                className={`form-control`}
                               />
-                              {errors[field] && <div className="invalid-feedback">{errors[field]}</div>}
+                              {/* {errors[field] && <div className="invalid-feedback">{errors[field]}</div>} */}
                             </div>
                           ))}</div>
                         <button type="submit" className="btn btn-primary" disabled={!isFormValid()}>

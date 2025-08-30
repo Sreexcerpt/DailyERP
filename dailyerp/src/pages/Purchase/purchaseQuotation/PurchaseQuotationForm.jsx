@@ -35,7 +35,7 @@ function QuotationForm() {
   // const [vendorName, setVendorName] = useState('');
   const [modalVendorSearch, setModalVendorSearch] = useState("");
   const [selectedVendor, setSelectedVendor] = useState(null);
-
+  console.log("cat", categories);
   useEffect(() => {
     if (modalIndentSearch) {
       const filtered = indents.filter((indent) =>
@@ -77,10 +77,15 @@ function QuotationForm() {
         );
       });
 
-    axios.get("http://localhost:8080/api/rfq-categories").then((res) => {
+    axios.get("http://localhost:8080/api/rfq-categories", {
+      params: {
+        companyId: localStorage.getItem('selectedCompanyId'),
+        financialYear: localStorage.getItem('financialYear')
+      }
+    }).then((res) => {
       setCategories(
         res.data.map((cat) => ({
-          label: `${cat.categoryName} (${cat.prefix})`,
+          label: `${cat.categoryName}`,
           value: cat._id,
         }))
       );
@@ -151,11 +156,11 @@ function QuotationForm() {
     updatedItems[index][field] = value;
     setItems(updatedItems);
   };
-const openMaterialModal = (itemIndex) => {
-  console.log('Opening modal for item at index:', itemIndex); // Debug log
-  setSelectedItemIndex(itemIndex);
-  setShowModal(true);
-};
+  const openMaterialModal = (itemIndex) => {
+    console.log('Opening modal for item at index:', itemIndex); // Debug log
+    setSelectedItemIndex(itemIndex);
+    setShowModal(true);
+  };
   const addItem = () => {
     setItems([
       ...items,
@@ -265,111 +270,100 @@ const openMaterialModal = (itemIndex) => {
   // Add this new QuotationNumberModal component before your return statement
   const QuotationNumberModal = () => {
     return (
-      <div
-        className="modal show d-block"
-        tabIndex="-1"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-      >
-        <div className="modal-dialog modal-md">
-          <div className="modal-content">
-            <div className="modal-header bg-primary text-white">
-              <h5 className="modal-title">
-                <i className="fas fa-hashtag me-2"></i>Quotation Number Generation
-              </h5>
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                onClick={() => setShowQuotationModal(false)}
-              ></button>
-            </div>
-
-            <div className="modal-body">
-              <div className="mb-3">
-                <label className="form-label">Select Generation Type</label>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="quotationGenType"
-                    id="internal"
-                    value="internal"
-                    checked={quotationGenType === 'internal'}
-                    onChange={(e) => setQuotationGenType(e.target.value)}
-                  />
-                  <label className="form-check-label" htmlFor="internal">
-                    <strong>Internal Generation</strong>
-                    <br />
-                    <small className="text-muted">
-                      Auto-generate based on category and range count
-                    </small>
-                  </label>
-                </div>
-
-                <div className="form-check mt-2">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="quotationGenType"
-                    id="external"
-                    value="external"
-                    checked={quotationGenType === 'external'}
-                    onChange={(e) => setQuotationGenType(e.target.value)}
-                  />
-                  <label className="form-check-label" htmlFor="external">
-                    <strong>External Generation</strong>
-                    <br />
-                    <small className="text-muted">
-                      Manually enter quotation number
-                    </small>
-                  </label>
-                </div>
+      <>
+        <div className="modal-backdrop fade show"></div>
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-md">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">
+                  Quotation Number Generation
+                </h4>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowQuotationModal(false)}
+                  aria-label="Close"
+                ></button>
               </div>
-
-              {quotationGenType === 'external' && (
-                <div className="mt-4">
-                  <label className="form-label">Enter Quotation Number</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter custom quotation number (max 50 characters)"
-                    value={externalQuotationNumber}
-                    onChange={(e) => {
-                      if (e.target.value.length <= 50) {
-                        setExternalQuotationNumber(e.target.value);
-                      }
-                    }}
-                    onFocus={(e) => e.stopPropagation()}
-                    onClick={(e) => e.stopPropagation()}
-                    maxLength="50"
-                    autoFocus
-                  />
-                  <div className="form-text">
-                    {externalQuotationNumber.length}/50 characters
+              <div className="modal-body">
+                <p className="mb-4">
+                  Choose how you want to create the Quotation Number:
+                </p>
+                <div className="row">
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-primary btn-md"
+                      onClick={() => {
+                        setQuotationGenType("internal");
+                        handleFinalSubmit();
+                      }}
+                    >
+                      <i className="ti ti-user me-2"></i>
+                      Internal (Auto-generate)
+                    </button>
+                  </div>
+                  <div className="col-xl-6">
+                    <button
+                      className="btn btn-secondary btn-md"
+                      onClick={() => setQuotationGenType("external")}
+                    >
+                      <i className="ti ti-edit me-2"></i>
+                      External (Manual Entry)
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setShowQuotationModal(false)}
-              >
-                <i className="fas fa-times me-1"></i>Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleFinalSubmit}
-                disabled={quotationGenType === 'external' && !externalQuotationNumber.trim()}
-              >
-                <i className="fas fa-save me-1"></i>Create Quotation
-              </button>
+                {quotationGenType === "external" && (
+                  <div className="mt-4">
+                    <label className="form-label">Enter Quotation Number</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter custom quotation number (max 50 characters)"
+                      value={externalQuotationNumber}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 50) {
+                          setExternalQuotationNumber(e.target.value);
+                        }
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && externalQuotationNumber.trim()) {
+                          handleFinalSubmit();
+                        }
+                      }}
+                      maxLength={50}
+                      autoFocus
+                    />
+                    <div className="form-text">{externalQuotationNumber.length}/50 characters</div>
+                    <div className="mt-3">
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleFinalSubmit}
+                        disabled={!externalQuotationNumber.trim()}
+                      >
+                        <i className="fas fa-save me-1"></i>Create Quotation
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {quotationGenType === "internal" && (
+                  <div className="mt-4">
+                    <div className="alert alert-info" role="alert">
+                      Quotation number will be auto-generated based on category and range count.
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   };
   // const MaterialModal = () => {
@@ -432,7 +426,7 @@ const openMaterialModal = (itemIndex) => {
   //     };
   //     return updatedItems;
   //   });
-    
+
   //   setShowModal(false);
   //   setSelectedItemIndex(null);
   // };
@@ -569,192 +563,192 @@ const openMaterialModal = (itemIndex) => {
   //   );
   // };
 
-const MaterialModal = () => {
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchType, setSearchType] = useState("materialId");
-  const [materialSearch, setMaterialSearch] = useState("");
+  const MaterialModal = () => {
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchType, setSearchType] = useState("materialId");
+    const [materialSearch, setMaterialSearch] = useState("");
 
-  // Remove this line - don't change selectedItemIndex here
-  // const selectmaterial=(material,idx)=>{selectMaterialFromSearch(material),setSelectedItemIndex(idx)}
+    // Remove this line - don't change selectedItemIndex here
+    // const selectmaterial=(material,idx)=>{selectMaterialFromSearch(material),setSelectedItemIndex(idx)}
 
-  const handleSearchInputChange = (e) => {
-    const value = e.target.value;
-    setMaterialSearch(value);
+    const handleSearchInputChange = (e) => {
+      const value = e.target.value;
+      setMaterialSearch(value);
 
-    const filtered = materials.filter((mat) => {
-      const target =
-        searchType === "materialId" ? mat.materialId : mat.description;
-      return target?.toLowerCase().includes(value.toLowerCase());
-    });
+      const filtered = materials.filter((mat) => {
+        const target =
+          searchType === "materialId" ? mat.materialId : mat.description;
+        return target?.toLowerCase().includes(value.toLowerCase());
+      });
 
-    setSearchResults(filtered);
-  };
+      setSearchResults(filtered);
+    };
 
-  const handleViewAll = () => {
-    setSearchResults(materials);
-    setMaterialSearch("");
-  };
+    const handleViewAll = () => {
+      setSearchResults(materials);
+      setMaterialSearch("");
+    };
 
-  const handleClearResults = () => {
-    setSearchResults([]);
-    setMaterialSearch("");
-  };
+    const handleClearResults = () => {
+      setSearchResults([]);
+      setMaterialSearch("");
+    };
 
-  const selectMaterialFromSearch = (material) => {
-    console.log('selectedItemIndex when selecting:', selectedItemIndex); // Debug log
-    
-    if (selectedItemIndex === null || selectedItemIndex === undefined) {
-      console.error('No item selected for update');
-      return;
-    }
+    const selectMaterialFromSearch = (material) => {
+      console.log('selectedItemIndex when selecting:', selectedItemIndex); // Debug log
 
-    setItems(prevItems => {
-      console.log('Previous items:', prevItems); // Debug log
-      const updatedItems = [...prevItems];
-      updatedItems[selectedItemIndex] = {
-        ...updatedItems[selectedItemIndex],
-        materialId: material.materialId,
-        description: material.description,
-        materialGroup: material.materialgroup || "",
-        baseUnit: material.baseUnit,
-        orderUnit: material.orderUnit,
-      };
-      console.log('Updated items:', updatedItems); // Debug log
-      return updatedItems;
-    });
-    
-    setShowModal(false);
-    // Don't reset selectedItemIndex here if you need it elsewhere
-    // setSelectedItemIndex(null);
-  };
+      if (selectedItemIndex === null || selectedItemIndex === undefined) {
+        console.error('No item selected for update');
+        return;
+      }
 
-  return (
-    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-      <div className="modal-dialog modal-xl">
-        <div className="modal-content">
-          <div className="modal-header bg-primary text-white">
-            <h5 className="modal-title">
-              <i className="fas fa-search me-2"></i>Search Materials
-            </h5>
-            <button
-              type="button"
-              className="btn-close btn-close-white"
-              onClick={() => setShowModal(false)}
-            ></button>
-          </div>
+      setItems(prevItems => {
+        console.log('Previous items:', prevItems); // Debug log
+        const updatedItems = [...prevItems];
+        updatedItems[selectedItemIndex] = {
+          ...updatedItems[selectedItemIndex],
+          materialId: material.materialId,
+          description: material.description,
+          materialGroup: material.materialgroup || "",
+          baseUnit: material.baseUnit,
+          orderUnit: material.orderUnit,
+        };
+        console.log('Updated items:', updatedItems); // Debug log
+        return updatedItems;
+      });
 
-          <div className="modal-body">
-            {/* Search Controls - same as your code */}
-            <div className="row mb-3">
-              <div className="col-md-3">
-                <label className="form-label">Search Type</label>
-                <select
-                  className="form-select"
-                  value={searchType}
-                  onChange={(e) => setSearchType(e.target.value)}
-                >
-                  <option value="materialId">Material ID</option>
-                  <option value="description">Description</option>
-                </select>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Search Query</label>
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="fas fa-search"></i>
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder={
-                      searchType === "materialId"
-                        ? "Enter Material ID (e.g., MMNR-100001)"
-                        : "Search by Description..."
-                    }
-                    value={materialSearch}
-                    onChange={handleSearchInputChange}
-                  />
+      setShowModal(false);
+      // Don't reset selectedItemIndex here if you need it elsewhere
+      // setSelectedItemIndex(null);
+    };
+
+    return (
+      <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div className="modal-dialog modal-xl">
+          <div className="modal-content">
+            <div className="modal-header bg-primary text-white">
+              <h5 className="modal-title">
+                <i className="fas fa-search me-2"></i>Search Materials
+              </h5>
+              <button
+                type="button"
+                className="btn-close btn-close-white"
+                onClick={() => setShowModal(false)}
+              ></button>
+            </div>
+
+            <div className="modal-body">
+              {/* Search Controls - same as your code */}
+              <div className="row mb-3">
+                <div className="col-md-3">
+                  <label className="form-label">Search Type</label>
+                  <select
+                    className="form-select"
+                    value={searchType}
+                    onChange={(e) => setSearchType(e.target.value)}
+                  >
+                    <option value="materialId">Material ID</option>
+                    <option value="description">Description</option>
+                  </select>
                 </div>
-              </div>
-              <div className="col-md-3">
-                <label className="form-label">&nbsp;</label>
-                <div className="d-flex gap-2">
-                  <button className="btn btn-info" onClick={handleViewAll}>
-                    <i className="fas fa-list me-1"></i>View All
-                  </button>
-                  {searchResults.length > 0 && (
-                    <button
-                      className="btn btn-outline-secondary"
-                      onClick={handleClearResults}
-                    >
-                      <i className="fas fa-times me-1"></i>Clear
+                <div className="col-md-6">
+                  <label className="form-label">Search Query</label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="fas fa-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder={
+                        searchType === "materialId"
+                          ? "Enter Material ID (e.g., MMNR-100001)"
+                          : "Search by Description..."
+                      }
+                      value={materialSearch}
+                      onChange={handleSearchInputChange}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label">&nbsp;</label>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-info" onClick={handleViewAll}>
+                      <i className="fas fa-list me-1"></i>View All
                     </button>
-                  )}
+                    {searchResults.length > 0 && (
+                      <button
+                        className="btn btn-outline-secondary"
+                        onClick={handleClearResults}
+                      >
+                        <i className="fas fa-times me-1"></i>Clear
+                      </button>
+                    )}
+                  </div>
                 </div>
+              </div>
+
+              {/* Search Results */}
+              <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+                {searchResults.length > 0 ? (
+                  <table className="table table-hover">
+                    <thead className="table-light sticky-top">
+                      <tr>
+                        <th>Material ID</th>
+                        <th>Description</th>
+                        <th>Base Unit</th>
+                        <th>Order Unit</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {searchResults.map((material, idx) => (
+                        <tr key={idx}>
+                          <td>{material.materialId}</td>
+                          <td>{material.description}</td>
+                          <td>{material.baseUnit}</td>
+                          <td>{material.orderUnit}</td>
+                          <td>
+                            <button
+                              className="btn btn-success btn-sm"
+                              onClick={() => selectMaterialFromSearch(material)}
+                            >
+                              <i className="fas fa-check me-1"></i>Select
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center py-4">
+                    <i className="fas fa-search fa-3x text-muted mb-3"></i>
+                    <p className="text-muted">
+                      {materials.length === 0
+                        ? "No materials loaded from API"
+                        : materialSearch
+                          ? `No materials found matching "${materialSearch}"`
+                          : 'Enter search term or click "View All"'}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Search Results */}
-            <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-              {searchResults.length > 0 ? (
-                <table className="table table-hover">
-                  <thead className="table-light sticky-top">
-                    <tr>
-                      <th>Material ID</th>
-                      <th>Description</th>
-                      <th>Base Unit</th>
-                      <th>Order Unit</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {searchResults.map((material, idx) => (
-                      <tr key={idx}>
-                        <td>{material.materialId}</td>
-                        <td>{material.description}</td>
-                        <td>{material.baseUnit}</td>
-                        <td>{material.orderUnit}</td>
-                        <td>
-                          <button
-                            className="btn btn-success btn-sm"
-                            onClick={() => selectMaterialFromSearch(material)}
-                          >
-                            <i className="fas fa-check me-1"></i>Select
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="text-center py-4">
-                  <i className="fas fa-search fa-3x text-muted mb-3"></i>
-                  <p className="text-muted">
-                    {materials.length === 0
-                      ? "No materials loaded from API"
-                      : materialSearch
-                        ? `No materials found matching "${materialSearch}"`
-                        : 'Enter search term or click "View All"'}
-                  </p>
-                </div>
-              )}
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowModal(false)}
+              >
+                <i className="fas fa-times me-1"></i>Close
+              </button>
             </div>
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setShowModal(false)}
-            >
-              <i className="fas fa-times me-1"></i>Close
-            </button>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 
 
@@ -1059,8 +1053,8 @@ const MaterialModal = () => {
   return (
     <>
       <div className="content">
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+          <div className="my-auto">
             <h2 className="mb-1">Purchase Quotation</h2>
             <nav>
               <ol className="breadcrumb mb-0">
@@ -1138,12 +1132,12 @@ const MaterialModal = () => {
                           </div>
                         </div>
                         <div className="col-xl-3 row">
-                          <div className="col-xl-5">
+                          <div className="col-xl-7">
                             <label className="form-label">
-                              RFQ Category
+                              Quotation Category
                             </label>
                           </div>
-                          <div className="col-xl-7">
+                          <div className="col-xl-5">
                             <select
                               className="form-select form-control-sm"
                               value={selectedCategory?.value || ""}
@@ -1326,7 +1320,7 @@ const MaterialModal = () => {
                                   {/* <th>Unit</th> */}
                                   <th>Material Group</th>
                                   <th>Delivery Date</th>
-                                  <th>Vendor</th>
+                                  {/* <th>Vendor</th> */}
                                   <th>Price</th>
                                 </tr>
                               </thead>
@@ -1443,19 +1437,20 @@ const MaterialModal = () => {
                                         }
                                       />
                                     </td>
-                                    <td>{vendorName}</td>
+                                    {/* <td>{vendorName}</td> */}
                                     <td>
                                       <input
                                         className="form-control form-control-sm"
                                         type="number"
                                         value={item.price}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
+                                          e.target.value = e.target.value.replace(/[^0-9.]/g, '');
                                           handleItemChange(
                                             index,
                                             "price",
                                             e.target.value
                                           )
-                                        }
+                                        }}
                                       />
                                     </td>
                                   </tr>

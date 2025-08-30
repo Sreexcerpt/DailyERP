@@ -29,11 +29,11 @@ function GST() {
         // Get financial year from localStorage
 
 
-        axios.get("http://localhost:8080/api/locations")
+        axios.get("http://localhost:8080/api/locations" ,{params: { companyId, financialYear }})
             .then((res) => setLocations(res.data))
             .catch((err) => console.error("Error fetching locations", err));
 
-        axios.get("http://localhost:8080/api/billingform")
+        axios.get("http://localhost:8080/api/billingform", { params: { companyId, financialYear } })
             .then((res) => setCustomerInvoices(res.data))
             .catch((err) => console.error("Error fetching customer invoices", err));
 
@@ -216,10 +216,10 @@ function GST() {
     const taxStatus = taxBalance > 0 ? 'You need to pay GST' : taxBalance < 0 ? 'You will get a GST refund' : 'No GST to pay or refund';
 
     return (
-        <>
+       
             <div className="content">
-                <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-                    <div className="my-auto mb-2">
+                <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+                    <div className="my-auto">
                         <h2 className="mb-1">GST List</h2>
                         <nav>
                             <ol className="breadcrumb mb-0">
@@ -264,7 +264,7 @@ function GST() {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="col-xl-3 ms-auto mt-3">
+                                    <div className="col-xl-3 ms-auto ">
                                         {activeTab === 'input' && (
                                             <h5 style={{ color: 'blue' }}>
                                                 Total Input GST: ₹{totalInputTax.toFixed(2)}
@@ -284,7 +284,7 @@ function GST() {
                                 </div>
                             </div>
                             <div className="card-body">
-                                <ul className="nav nav-tabs mb-3 tab-style-6" id="myTab-3" role="tablist">
+                                <ul className="nav nav-tabs tab-style-6" id="myTab-3" role="tablist">
                                     <li className="nav-item" role="presentation">
                                         <button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} id="products-tab" data-bs-toggle="tab"
                                             data-bs-target="#products-tab-pane" type="button" role="tab"
@@ -404,7 +404,7 @@ function GST() {
                     </div>
                 </div>
             </div>
-        </>
+       
     );
 };
 

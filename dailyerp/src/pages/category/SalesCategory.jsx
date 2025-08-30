@@ -7,8 +7,8 @@ const SalesCategory = () => {
     // prefix: '',
     rangeStart: '',
     rangeEnd: '',
-        companyId:  localStorage.getItem('selectedCompanyId'),
-       financialYear : localStorage.getItem('financialYear')
+    companyId: localStorage.getItem('selectedCompanyId'),
+    financialYear: localStorage.getItem('financialYear')
   });
 
   const [errors, setErrors] = useState({});
@@ -25,11 +25,11 @@ const SalesCategory = () => {
 
   const fetchCategories = async () => {
     try {
-       const companyId = localStorage.getItem('selectedCompanyId');
-  const financialYear = localStorage.getItem('financialYear');
-     
+      const companyId = localStorage.getItem('selectedCompanyId');
+      const financialYear = localStorage.getItem('financialYear');
 
-      const res = await axios.get('http://localhost:8080/api/salecategory',{ params: { companyId, financialYear }});
+
+      const res = await axios.get('http://localhost:8080/api/salecategory', { params: { companyId, financialYear } });
       setCategories(res.data);
     } catch (err) {
       console.error('Failed to fetch categories', err);
@@ -64,7 +64,7 @@ const SalesCategory = () => {
 
     switch (name) {
       case 'categoryName':
-        cleanedValue = value.replace(/[^A-Za-z ]/g, '');
+        cleanedValue = value;
         if (cleanedValue.length > 100) {
           cleanedValue = cleanedValue.slice(0, 100);
           limitMsg = 'Maximum 100 characters allowed';
@@ -126,8 +126,9 @@ const SalesCategory = () => {
       }
 
       fetchCategories();
-      setFormData({ categoryName: '',  rangeStart: '', rangeEnd: '' });
+      setFormData({ categoryName: '', rangeStart: '', rangeEnd: '' });
       setEditingId(null);
+      window.location.reload();
     } catch (err) {
       console.error(err);
       alert('Failed to save category.');
@@ -153,12 +154,12 @@ const SalesCategory = () => {
   return (
     <div className="">
       <div className="content">
-        <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3">
+        <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-2">
           <div>
             <h6>Sales Indent Categories</h6>
           </div>
           <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-            <div className="dropdown">
+            {/* <div className="dropdown">
               <a href="#" onClick={handleOpendropdown} className="btn btn-outline-white d-inline-flex align-items-center" data-bs-toggle="dropdown">
                 <i className="isax isax-export-1 me-1"></i>Export
               </a>
@@ -170,9 +171,9 @@ const SalesCategory = () => {
                   <a className="dropdown-item" href="#" onClick={handleClosedropdown}>Download as Excel</a>
                 </li>
               </ul>
-            </div>
+            </div> */}
             <div>
-              <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="isax isax-add-circle5 me-1"></i>Material Category</a>
+              <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="ti ti-plus me-1"></i>Add Sales Enquiry Category</a>
             </div>
           </div>
         </div>
@@ -187,26 +188,27 @@ const SalesCategory = () => {
                 </div>
                 <div className="modal-body">
                   <form onSubmit={handleSubmit}>
-                    {['categoryName',  'rangeStart', 'rangeEnd'].map((field) => (
-                      <div className="mb-3" key={field}>
-                        <label className="form-label">
-                          {field === 'categoryName'
-                            ? 'Category Name'
-                           
-                              : field === 'rangeStart'
-                                ? 'Range Start'
-                                : 'Range End'}
+                    <div className="row">
+                      {['categoryName', 'rangeStart', 'rangeEnd'].map((field) => (
+                        <div className="mb-3 col-xl-3" key={field}>
+                          <label className="form-label">
+                            {field === 'categoryName'
+                              ? 'Category Name'
+
+                            : field === 'rangeStart'
+                              ? 'Range Start'
+                              : 'Range End'}
                         </label>
                         <input
-                          type={field.includes('range') ? 'number' : 'text'}
+                          type='text'
                           name={field}
                           value={formData[field]}
                           onChange={handleChange}
-                          className={`form-control ${errors[field] ? 'is-invalid' : ''}`}
+                          className={`form-control `}
                         />
-                        {errors[field] && <div className="invalid-feedback">{errors[field]}</div>}
+                        {/* {errors[field] && <div className="invalid-feedback">{errors[field]}</div>} */}
                       </div>
-                    ))}
+                    ))}</div>
                     <button type="submit" className="btn btn-primary" disabled={!isFormValid()}>
                       {editingId ? 'Update' : 'Save'}
                     </button>
@@ -216,34 +218,36 @@ const SalesCategory = () => {
             </div>
           </div></>
         )}
-
-        <table className="table table-sm table-bordered">
-          <thead>
-            <tr>
-              <th>Name</th>
-              {/* <th>Prefix</th> */}
-              <th>Start</th>
-              <th>End</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((cat) => (
-              <tr key={cat._id}>
-                <td>{cat.categoryName}</td>
-                {/* <td>{cat.prefix}</td> */}
-                <td>{cat.rangeStart}</td>
-                <td>{cat.rangeEnd}</td>
-                <td>
-                  <button className="btn btn-sm btn-primary" onClick={() => { handleEdit(cat), handleOpenModal() }}>
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
+        <div className="card">
+          <div className="card-body">
+            <table className="table table-sm table-bordered">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  {/* <th>Prefix</th> */}
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((cat) => (
+                  <tr key={cat._id}>
+                    <td>{cat.categoryName}</td>
+                    {/* <td>{cat.prefix}</td> */}
+                    <td>{cat.rangeStart}</td>
+                    <td>{cat.rangeEnd}</td>
+                    <td>
+                      <button className="btn btn-sm btn-primary" onClick={() => { handleEdit(cat), handleOpenModal() }}>
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

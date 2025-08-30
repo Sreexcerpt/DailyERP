@@ -64,10 +64,9 @@ function ContractListPage() {
               </tr>
             </thead>
             <tbody>
-              ${
-                contract.items.map((item, idx) => {
-                  const total = item.qty * parseFloat(item.price || 0);
-                  return `
+              ${contract.items.map((item, idx) => {
+      const total = item.qty * parseFloat(item.price || 0);
+      return `
                     <tr>
                       <td>${idx + 1}</td>
                       <td>${item.materialId || 'N/A'}</td>
@@ -81,13 +80,12 @@ function ContractListPage() {
                       <td>${total.toFixed(2)}</td>
                     </tr>
                   `;
-                }).join('')
-              }
+    }).join('')
+      }
               <tr>
                 <td colspan="9" style="text-align:right;"><strong>Grand Total</strong></td>
-                <td><strong>${
-                  contract.items.reduce((acc, item) => acc + (item.qty * parseFloat(item.price || 0)), 0).toFixed(2)
-                }</strong></td>
+                <td><strong>${contract.items.reduce((acc, item) => acc + (item.qty * parseFloat(item.price || 0)), 0).toFixed(2)
+      }</strong></td>
               </tr>
             </tbody>
           </table>
@@ -133,8 +131,8 @@ function ContractListPage() {
 
   return (
     <div className="content">
-      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-        <div className="my-auto mb-2">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
           <h2 className="mb-1">Sales Contracts</h2>
           <nav>
             <ol className="breadcrumb mb-0">
@@ -150,15 +148,11 @@ function ContractListPage() {
 
       <div className="card">
         <div className="card-header">
-          <h5 className="card-title mb-0">
-            <i className="fas fa-file-contract me-2"></i>
-            Saved Sales Contracts
-          </h5>
-        </div>
-        <div className="card-body">
           {/* Search and Filter Section */}
-          <div className="row mb-3">
-            <div className="col-md-12">
+          <div className="row">
+            <div className="col-md-6"></div>
+            <div className="col-md-2">
+              <label className="form-label">Search</label>
               <div className="input-group">
                 <span className="input-group-text">
                   <i className="fas fa-search"></i>
@@ -175,11 +169,8 @@ function ContractListPage() {
                 />
               </div>
             </div>
-          </div>
 
-          {/* Date Range Filter */}
-          <div className="row mb-3">
-            <div className="col-md-4">
+            <div className="col-md-2">
               <label className="form-label">From Date</label>
               <input
                 type="date"
@@ -191,7 +182,7 @@ function ContractListPage() {
                 }}
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-md-2">
               <label className="form-label">To Date</label>
               <input
                 type="date"
@@ -204,43 +195,24 @@ function ContractListPage() {
                 }}
               />
             </div>
-            <div className="col-md-4 d-flex align-items-end">
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => {
-                  setSearchTerm('');
-                  setFromDate('');
-                  setToDate('');
-                  setCurrentPage(1);
-                }}
-              >
-                <i className="fas fa-refresh me-1"></i>Reset Filters
-              </button>
-            </div>
           </div>
-
-          {/* Results Summary */}
-          <div className="alert alert-info">
-            <i className="fas fa-info-circle me-2"></i>
-            Showing {currentContracts.length} of {filteredContracts.length} contracts
-            {(searchTerm || fromDate || toDate) && ` (filtered from ${contracts.length} total)`}
-          </div>
-
+        </div>
+        <div className="card-body">
           {/* Contracts Table */}
           {currentContracts.length === 0 ? (
             <div className="text-center py-4">
               <i className="fas fa-file-contract fa-3x text-muted mb-3"></i>
               <p className="text-muted">
-                {contracts.length === 0 
-                  ? "No contracts found. Create your first contract!" 
+                {contracts.length === 0
+                  ? "No contracts found. Create your first contract!"
                   : "No contracts match your search criteria."}
               </p>
             </div>
           ) : (
             <>
               <div className="table-responsive">
-                <table className="table table-hover table-bordered">
-                  <thead className="table-dark">
+                <table className="table table-sm table-bordered">
+                  <thead>
                     <tr>
                       <th>Contract No</th>
                       <th>Indent ID</th>
@@ -255,44 +227,40 @@ function ContractListPage() {
                   <tbody>
                     {currentContracts.map((contract, index) => (
                       <tr key={index}>
-                        <td>
-                          <span className="badge bg-primary">
-                            {contract.contractNumber}
-                          </span>
-                        </td>
+                        <td>{contract.contractNumber}</td>
                         <td>{contract.indentId}</td>
                         <td>{contract.customerName}</td>
                         <td>{contract.location || 'N/A'}</td>
                         <td>
-                          {contract.validityFromDate 
-                            ? new Date(contract.validityFromDate).toLocaleDateString() 
+                          {contract.validityFromDate
+                            ? new Date(contract.validityFromDate).toLocaleDateString()
                             : 'N/A'}
                         </td>
                         <td>
-                          {contract.validityToDate 
-                            ? new Date(contract.validityToDate).toLocaleDateString() 
+                          {contract.validityToDate
+                            ? new Date(contract.validityToDate).toLocaleDateString()
                             : 'N/A'}
                         </td>
                         <td>
-                          {contract.createdAt 
-                            ? new Date(contract.createdAt).toLocaleDateString() 
+                          {contract.createdAt
+                            ? new Date(contract.createdAt).toLocaleDateString()
                             : 'N/A'}
                         </td>
                         <td>
                           <div className="d-flex gap-1">
-                            <button 
-                              className="btn btn-sm btn-outline-primary" 
+                            <button
+                              className="btn btn-sm btn-outline-primary"
                               onClick={() => handlePrint(contract)}
                               title="Print Contract"
                             >
                               <i className="fas fa-print me-1"></i>Print
                             </button>
-                            <button 
+                            {/* <button 
                               className="btn btn-sm btn-outline-info"
                               title="View Details"
                             >
-                              <i className="fas fa-eye me-1"></i>View
-                            </button>
+                              <i className="fas fa-eye me-1"></i>
+                            </button> */}
                           </div>
                         </td>
                       </tr>
@@ -302,43 +270,90 @@ function ContractListPage() {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
-                <nav className="mt-3">
-                  <ul className="pagination justify-content-center">
-                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                      <button 
-                        onClick={() => currentPage > 1 && paginate(currentPage - 1)} 
-                        className="page-link"
-                        disabled={currentPage === 1}
-                      >
-                        <i className="fas fa-chevron-left"></i>
-                      </button>
-                    </li>
-                    
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <li key={i + 1} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                        <button onClick={() => paginate(i + 1)} className="page-link">
-                          {i + 1}
-                        </button>
-                      </li>
-                    ))}
-                    
-                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                      <button 
-                        onClick={() => currentPage < totalPages && paginate(currentPage + 1)} 
-                        className="page-link"
-                        disabled={currentPage === totalPages}
-                      >
-                        <i className="fas fa-chevron-right"></i>
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-              )}
+
             </>
           )}
         </div>
+
       </div>
+      {totalPages >= 1 && (
+        <nav className="mt-1">
+          <ul className="pagination justify-content-end">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <button
+                onClick={() => currentPage > 1 && paginate(currentPage - 1)}
+                className="page-link"
+                disabled={currentPage === 1}
+              >
+                <i className="fas fa-chevron-left"></i>
+              </button>
+            </li>
+
+            {(() => {
+              const delta = 2; // Number of pages to show on each side of current page
+              const range = [];
+              const rangeWithDots = [];
+
+              // Always show first page
+              range.push(1);
+
+              // Add pages around current page
+              for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+                range.push(i);
+              }
+
+              // Always show last page if there are more than 1 page
+              if (totalPages > 1) {
+                range.push(totalPages);
+              }
+
+              // Remove duplicates and sort
+              const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+              let prev;
+              for (let i of uniqueRange) {
+                if (prev) {
+                  if (i - prev === 2) {
+                    rangeWithDots.push(prev + 1);
+                  } else if (i - prev !== 1) {
+                    rangeWithDots.push('...');
+                  }
+                }
+                rangeWithDots.push(i);
+                prev = i;
+              }
+
+              return rangeWithDots.map((number, index) => {
+                if (number === '...') {
+                  return (
+                    <li key={`ellipsis-${index}`} className="page-item disabled">
+                      <span className="page-link">...</span>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li key={number} className={`page-item ${currentPage === number ? 'active' : ''}`}>
+                    <button onClick={() => paginate(number)} className="page-link">
+                      {number}
+                    </button>
+                  </li>
+                );
+              });
+            })()}
+
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <button
+                onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
+                className="page-link"
+                disabled={currentPage === totalPages}
+              >
+                <i className="fas fa-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      )}
     </div>
   );
 }

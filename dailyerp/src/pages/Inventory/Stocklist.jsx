@@ -8,13 +8,38 @@ function StockListERP() {
   const [stock, setStock] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
-
-  const filtered = stock
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
+  const [Categories, setCategories] = useState([]);
+  const filtered = stock.filter(item => {
+    const matchesSearch = item.description.toLowerCase().includes(search.toLowerCase()) || item.materialId.toLowerCase().includes(search.toLowerCase());
+    console.log("matchesSearch", category);
+    const matchesCategory = category ? item.categoryId?._id === category : true;
+    return matchesSearch && matchesCategory;
+  });
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/category', {
+          params: { companyId }
+        });
+        setCategories(response.data);
+        console.log("Categories fetched:", response.data);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+
+    fetchCategories();
+
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/stock");
+        console.log("Fetching stock for companyId:", companyId, "and financialYear:", financialYear);
+        const response = await axios.get("http://localhost:8080/api/stock/data", {
+          params: { companyId, financialYear }
+        });
+        console.log("Stock data fetched:", response.data);
         setStock(response.data);
         console.log("Stock data fetched:", response.data);
       } catch (error) {
@@ -47,9 +72,11 @@ function StockListERP() {
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">All Categories</option>
-            <option value="Raw Material">Raw Material</option>
-            <option value="Consumable">Consumable</option>
-            <option value="Hardware">Hardware</option>
+            {Categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.categoryName}
+              </option>
+            ))} 
           </select>
         </div>
       </div>
@@ -68,21 +95,21 @@ function StockListERP() {
               <th>Status</th>
               <th>Location</th>
               <th>Lot Number</th>
-              <th>Created At</th>
+              <th>Updated At</th>
             </tr>
           </thead>
           <tbody>
-            {stock.length === 0 ? (
+            {filtered.length === 0 ? (
               <tr>
                 <td colSpan="10" className="text-center">No stock found.</td>
               </tr>
             ) : (
-              stock.map((item, i) => (
+              filtered.map((item, i) => (
                 <tr key={i}>
                   <td className="text-center">{i + 1}</td>
                   <td>{item.materialId || item.matno}</td>
                   <td>{item.description || item.matdesc}</td>
-                  <td>{item.category}</td>
+                  <td>{item.categoryId?.categoryName}</td>
                   <td className="text-center">{item.baseUnit || item.uom}</td>
                   <td className="text-end">{item.quantityAvailable ?? item.quantity}</td>
                   <td className="text-center">
@@ -113,8 +140,8 @@ function StockListERP() {
                   <td>{item.location || "-"}</td>
                   <td>{item.lotNumber || "-"}</td>
                   <td>
-                    {item.createdAt
-                      ? new Date(item.createdAt).toLocaleString()
+                    {item.updatedAt
+                      ? new Date(item.updatedAt).toLocaleString()
                       : "-"}
                   </td>
                 </tr>

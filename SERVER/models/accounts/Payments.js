@@ -4,7 +4,6 @@ const paymentSchema = new mongoose.Schema({
   // Reference to the record being paid
   recordType: {
     type: String,
-    enum: ['vendor', 'customer'],
     required: true
   },
   recordId: {

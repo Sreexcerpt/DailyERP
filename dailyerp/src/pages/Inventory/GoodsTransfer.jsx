@@ -55,7 +55,9 @@ function GoodsTransfer() {
       .then(res => setMaterials(res.data))
       .catch(err => console.error("Error fetching materials:", err));
 
-    axios.get("http://localhost:8080/api/locations")
+    axios.get("http://localhost:8080/api/locations", {
+      params: { companyId, financialYear }
+    })
       .then((res) => setLocations(res.data));
     axios.get("http://localhost:8080/api/goodsTransferCategory", {
       params: { companyId, financialYear },
@@ -204,6 +206,8 @@ function GoodsTransfer() {
 
     const doc = {
       ...formData,
+      companyId,
+      financialYear,
       items,
       date: today, // system-generated date
     };

@@ -55,7 +55,7 @@ function SalesOrderForm() {
   const financialYear = localStorage.getItem("financialYear");
   const selectedCompanyId = localStorage.getItem('selectedCompanyId');
   useEffect(() => {
-    axios.get('http://localhost:8080/api/sales-order-categories').then(res => setCategories(res.data));
+    axios.get('http://localhost:8080/api/sales-order-categories', { params: { companyId, financialYear } }).then(res => setCategories(res.data));
     axios.get('http://localhost:8080/api/salesquotations', { params: { companyId, financialYear }, }).then(res => {
       setQuotations(res.data);
 
@@ -100,37 +100,44 @@ function SalesOrderForm() {
     setQuotationSearchResults(quotations);
   };
 
-  // const selectQuotationFromSearch = (quotation) => {
-  //   setSelectedQuotationNumber(quotation.quotationNumber);
-  //   handleQuotationChange(quotation.quotationNumber);
-  //   setShowQuotationModal(false);
-  //   setQuotationSearchQuery('');
-  //   setQuotationSearchResults([]);
-  // };
 
   const selectQuotationFromSearch = (selectedItem) => {
+    console.log("Selected Quotation/Contract/Enquiry:", selectedItem);
+
+    // Function to map qty to quantity in items array
+    const mapItemsWithQuantity = (items) => {
+      return items?.map(item => ({
+        ...item,
+        quantity: item.qty || item.quantity || 0 // Map qty to quantity, fallback to existing quantity or 0
+      })) || [];
+    };
+
     // Detect the type by checking which unique field is present
     if (selectedItem.contractNumber) {
       // Contract selected
       setSelectedQuotationNumber(selectedItem.contractNumber);
       setCustomer(selectedItem.customerName || '');
       setDeliveryLocation(selectedItem.location || '');
-      setItems(selectedItem.items || []);
+      setItems(mapItemsWithQuantity(selectedItem.items));
       // Set any other relevant fields for contract
       // Example:
-      // setSalesGroup(selectedItem.salesGroup || '');
+      setsalesGroup(selectedItem.salesGroup || '');
       // setValidityDate(selectedItem.validityFromDate || '');
     } else if (selectedItem.quotationNumber) {
       // Quotation selected
       setSelectedQuotationNumber(selectedItem.quotationNumber);
       setCustomer(selectedItem.customerName || '');
-      setDeliveryLocation(selectedItem.items?.[0]?.location || '');
-      setItems(selectedItem.items || []);
+      setDeliveryLocation(selectedItem.location || '');
+      setItems(mapItemsWithQuantity(selectedItem.items));
+      setsalesGroup(selectedItem.salesGroup || '');
       // Set any other relevant fields for quotation
-    } else if (selectedItem.enquiryNumber) {
+    } else if (selectedItem.indentId) {
       // Enquiry selected
-      setSelectedQuotationNumber(selectedItem.enquiryNumber);
-      setCustomer(selectedItem.customerName || selectedItem.name1 || '');
+      setSelectedQuotationNumber(selectedItem.indentId);
+      // setCustomer(selectedItem.customerName || selectedItem.name1 || '');
+      setDeliveryLocation(selectedItem.location || '');
+      setItems(mapItemsWithQuantity(selectedItem.items));
+      setsalesGroup(selectedItem.salesGroup || '');
       // Set any other relevant fields for enquiry
     }
 
@@ -366,7 +373,7 @@ function SalesOrderForm() {
       categoryId: selectedCategory._id,
       category: selectedCategory.categoryName,
       date,
-      customer,
+      customerName: customer,
       contactPerson,
       salesGroup,
       payTerms,
@@ -426,96 +433,91 @@ function SalesOrderForm() {
   // 5. ADD THIS NEW MODAL COMPONENT (add after your existing modal components)
   // Fixed SONumberModal component - replace your existing one
   const SONumberModal = () => (
-    <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content">
-          <div className="modal-header bg-primary text-white">
-            <h5 className="modal-title">
-              <i className="fas fa-hashtag me-2"></i>Generate SO Number
-            </h5>
-            <button
-              type="button"
-              className="btn-close btn-close-white"
-              onClick={() => {
-                setShowSONumberModal(false);
-                setSONumberType('internal');
-                setExternalSONumber('');
-              }}
-            ></button>
-          </div>
-          <div className="modal-body">
-            <div className="row">
-              <div className="col-12 mb-4">
-                <label className="form-label fw-bold">Choose SO Number Generation Type:</label>
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="card border-primary" style={{
-                      backgroundColor: soNumberType === 'internal' ? '#e3f2fd' : 'white',
-                      cursor: 'pointer'
-                    }}>
-                      <div className="card-body text-center" onClick={() => setSONumberType('internal')}>
-                        <input
-                          type="radio"
-                          name="soNumberType"
-                          value="internal"
-                          checked={soNumberType === 'internal'}
-                          onChange={(e) => setSONumberType(e.target.value)}
-                          className="form-check-input me-2"
-                        />
-                        <i className="fas fa-cog fa-2x text-primary mb-2"></i>
-                        <h6 className="card-title">Internal Generation</h6>
-                        <p className="card-text small text-muted">
-                          Auto-generate based on category range
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-md-6">
-                    <div className="card border-success" style={{
-                      backgroundColor: soNumberType === 'external' ? '#e8f5e8' : 'white'
-                    }}>
-                      <div className="card-body text-center" onClick={() => setSONumberType('external')}>
-                        <input
-                          type="radio"
-                          name="soNumberType"
-                          value="external"
-                          checked={soNumberType === 'external'}
-                          onChange={(e) => setSONumberType(e.target.value)}
-                          className="form-check-input me-2"
-                        />
-                        <i className="fas fa-keyboard fa-2x text-success mb-2"></i>
-                        <h6 className="card-title">External Input</h6>
-                        <p className="card-text small text-muted">
-                          Enter custom SO number manually
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+    <>
+      <div className="modal-backdrop fade show"></div>
+      <div
+        className="modal fade show"
+        style={{ display: "block" }}
+        tabIndex="-1"
+        aria-modal="true"
+        role="dialog"
+      >
+        <div className="modal-dialog modal-md">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h4 className="modal-title">
+                Generate Sales Order Number
+              </h4>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => {
+                  setShowSONumberModal(false);
+                  setSONumberType('internal');
+                  setExternalSONumber('');
+                }}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <p className="mb-4">
+                Choose how you want to create the SO Number:
+              </p>
+              <div className="row">
+                <div className="col-xl-6">
+                  <button
+                    className="btn btn-primary btn-md"
+                    onClick={() => {
+                      setSONumberType("internal");
+                      submitSalesOrder(null);
+                    }}
+                  >
+                    <i className="ti ti-user me-2"></i>
+                    Internal (Auto-generate)
+                  </button>
+                </div>
+                <div className="col-xl-6">
+                  <button
+                    className="btn btn-secondary btn-md"
+                    onClick={() => setSONumberType("external")}
+                  >
+                    <i className="ti ti-edit me-2"></i>
+                    External (Manual Entry)
+                  </button>
                 </div>
               </div>
-
-              {soNumberType === 'external' && (
-                <div className="col-12 mb-3">
-                  <label className="form-label">Enter Custom SO Number:</label>
+              {soNumberType === "external" && (
+                <div className="mt-4">
+                  <label className="form-label">Enter Custom SO Number</label>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="Enter SO number (max 50 characters)"
                     value={externalSONumber}
                     onChange={(e) => setExternalSONumber(e.target.value)}
-                    maxLength="50"
-                    autoFocus={soNumberType === 'external'}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && externalSONumber.trim()) {
+                        submitSalesOrder(externalSONumber);
+                      }
+                    }}
+                    maxLength={50}
+                    autoFocus
                   />
-                  <div className="form-text">
-                    {externalSONumber.length}/50 characters
+                  <div className="form-text">{externalSONumber.length}/50 characters</div>
+                  <div className="mt-3">
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => submitSalesOrder(externalSONumber)}
+                      disabled={!externalSONumber.trim()}
+                    >
+                      <i className="fas fa-save me-1"></i>Generate & Save SO
+                    </button>
                   </div>
                 </div>
               )}
-
-              {soNumberType === 'internal' && (
-                <div className="col-12 mb-3">
-                  <div className="alert alert-info">
+              {soNumberType === "internal" && (
+                <div className="mt-4">
+                  <div className="alert alert-info" role="alert">
                     <i className="fas fa-info-circle me-2"></i>
                     SO number will be auto-generated based on category: <strong>{selectedCategory?.categoryName}</strong>
                     <br />
@@ -525,30 +527,9 @@ function SalesOrderForm() {
               )}
             </div>
           </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => {
-                setShowSONumberModal(false);
-                setSONumberType('internal');
-                setExternalSONumber('');
-              }}
-            >
-              <i className="fas fa-times me-1"></i>Cancel
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => submitSalesOrder(soNumberType === 'external' ? externalSONumber : null)}
-              disabled={soNumberType === 'external' && !externalSONumber.trim()}
-            >
-              <i className="fas fa-save me-1"></i>Generate & Save SO
-            </button>
-          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 
 
@@ -626,108 +607,11 @@ function SalesOrderForm() {
     );
   };
 
-  // const QuotationSearchModal = () => (
-  //   <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-  //     <div className="modal-dialog modal-xl">
-  //       <div className="modal-content">
-  //         <div className="modal-header bg-primary text-white">
-  //           <h5 className="modal-title">
-  //             <i className="fas fa-search me-2"></i>Search Quotations
-  //           </h5>
-  //           <button
-  //             type="button"
-  //             className="btn-close btn-close-white"
-  //             onClick={closeQuotationModal}
-  //           ></button>
-  //         </div>
-  //         <div className="modal-body">
-  //           <div className="row mb-3">
-  //             <div className="col-md-6">
-  //               <label className="form-label">Search Quotation Number</label>
-  //               <div className="input-group">
-  //                 <span className="input-group-text">
-  //                   <i className="fas fa-search"></i>
-  //                 </span>
-  //                 <input
-  //                   type="text"
-  //                   className="form-control"
-  //                   placeholder="Enter quotation number..."
-  //                   value={quotationSearchQuery}
-  //                   onChange={(e) => handleQuotationSearch(e.target.value)}
-  //                 />
-  //               </div>
-  //             </div>
-  //             <div className="col-md-3">
-  //               <label className="form-label">&nbsp;</label>
-  //               <div className="d-flex gap-2">
-  //                 <button className="btn btn-info" onClick={handleViewAllQuotations}>
-  //                   <i className="fas fa-list me-1"></i>View All
-  //                 </button>
-  //               </div>
-  //             </div>
-  //           </div>
-
-  //           <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-  //             {quotationSearchResults.length > 0 ? (
-  //               <table className="table table-hover">
-  //                 <thead className="table-light sticky-top">
-  //                   <tr>
-  //                     <th>Quotation Number</th>
-  //                     <th>Customer Name</th>
-  //                     <th>Date</th>
-  //                     <th>Total</th>
-  //                     <th>Action</th>
-  //                   </tr>
-  //                 </thead>
-  //                 <tbody>
-  //                   {quotationSearchResults.map((quotation, idx) => (
-  //                     <tr key={idx}>
-  //                       <td><span className="badge bg-info">{quotation.quotationNumber}</span></td>
-  //                       <td>{quotation.
-  //                         customerName}</td>
-  //                       <td>{quotation.date}</td>
-  //                       <td>₹{quotation.total}</td>
-  //                       <td>
-  //                         <button
-  //                           className="btn btn-success btn-sm"
-  //                           onClick={() => selectQuotationFromSearch(quotation)}
-  //                         >
-  //                           <i className="fas fa-check me-1"></i>Select
-  //                         </button>
-  //                       </td>
-  //                     </tr>
-  //                   ))}
-  //                 </tbody>
-  //               </table>
-  //             ) : (
-  //               <div className="text-center py-4">
-  //                 <i className="fas fa-search fa-3x text-muted mb-3"></i>
-  //                 <p className="text-muted">
-  //                   {quotationSearchQuery
-  //                     ? `No quotations found matching "${quotationSearchQuery}"`
-  //                     : 'Enter search term or click "View All"'
-  //                   }
-  //                 </p>
-  //               </div>
-  //             )}
-  //           </div>
-  //         </div>
-  //         <div className="modal-footer">
-  //           <button type="button" className="btn btn-secondary" onClick={closeQuotationModal}>
-  //             <i className="fas fa-times me-1"></i>Close
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
-
   function QuotationSearchModal({
     show,
     onClose,
     onSelect,
-    selectedTab = 'quotation'
+    selectedTab = 'enquiry'
   }) {
     const [activeTab, setActiveTab] = useState(selectedTab);
     const [searchQuery, setSearchQuery] = useState('');
@@ -978,8 +862,8 @@ function SalesOrderForm() {
   return (
     <>
       <div className="content">
-        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-          <div className="my-auto mb-2">
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+          <div className="my-auto">
             <h2 className="mb-1">Sales Order</h2>
             <nav>
               <ol className="breadcrumb mb-0">
@@ -1024,13 +908,13 @@ function SalesOrderForm() {
                       <div className="row gap-2">
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>Quotation Number:</label></div>
+                            <label>Reference Number:</label></div>
                           <div className="col-xl-6">
                             <div className="input-group">
                               <input
                                 type="text"
                                 className='form-control form-control-sm'
-                                placeholder="Enter quotation number"
+                                placeholder="Enter reference number"
                                 value={selectedQuotationNumber}
                                 onChange={(e) => {
                                   setSelectedQuotationNumber(e.target.value);
@@ -1431,8 +1315,6 @@ function SalesOrderForm() {
                             </div>
                           </div>
                         </div>
-
-
                         <button type="submit" className='btn btn-success mb-6 mt-2'>Submit SO</button>
                       </form>
                     </div>

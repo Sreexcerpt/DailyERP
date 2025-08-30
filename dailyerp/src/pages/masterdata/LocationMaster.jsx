@@ -21,16 +21,71 @@ const LocationMaster = () => {
     const [editId, setEditId] = useState(null);
     const [showDataImportModal, setShowDataImportModal] = useState(false);
 
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    // Search state
+    const [searchTerm, setSearchTerm] = useState('');
+
     const handleImportSuccess = (result) => {
         alert(`Import completed: ${result.results.imported} records imported`);
         setShowDataImportModal(false);
         fetchLocations(); // Refresh the list after import
     };
 
+    // Filter locations based on search term
+    const filteredLocations = locations.filter(location => {
+        if (!searchTerm) return true;
+
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            location.name?.toLowerCase().includes(searchLower) ||
+            location.address?.toLowerCase().includes(searchLower) ||
+            location.city?.toLowerCase().includes(searchLower) ||
+            location.state?.toLowerCase().includes(searchLower) ||
+            location.country?.toLowerCase().includes(searchLower) ||
+            location.postalCode?.toLowerCase().includes(searchLower) ||
+            location.contactPerson?.toLowerCase().includes(searchLower) ||
+            location.contactNumber?.toLowerCase().includes(searchLower)
+        );
+    });
+
+    // Pagination calculations (based on filtered data)
+    const totalPages = Math.ceil(filteredLocations.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentLocations = filteredLocations.slice(startIndex, endIndex);
+
+    // Search handler
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); // Reset to first page when searching
+    };
+
+    // Clear search
+    const clearSearch = () => {
+        setSearchTerm('');
+        setCurrentPage(1);
+    };
+
+    // Pagination handlers
+    const handlePageClick = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page
+    };
+
     // Export to Excel Function
     const exportToExcel = () => {
+        // Use filtered data for export if search is active
+        const dataToExport = searchTerm ? filteredLocations : locations;
+
         // Prepare data for Excel
-        const excelData = locations.map((location, index) => ({
+        const excelData = dataToExport.map((location, index) => ({
             'S.No': index + 1,
             'Location Name': location.name || '',
             'Address': location.address || '',
@@ -75,13 +130,15 @@ const LocationMaster = () => {
         const now = new Date();
         const currentDate = now.toLocaleDateString('en-GB').replace(/\//g, '-'); // DD-MM-YYYY format
         const currentTime = now.toLocaleTimeString('en-GB', { hour12: false }).replace(/:/g, '-'); // HH-MM-SS format
-        const filename = `Location-Master-${currentDate}-${currentTime}.xlsx`;
+        const searchSuffix = searchTerm ? `-Filtered-${searchTerm.replace(/[^a-zA-Z0-9]/g, '_')}` : '';
+        const filename = `Location-Master${searchSuffix}-${currentDate}-${currentTime}.xlsx`;
 
         // Save the file
         XLSX.writeFile(wb, filename);
-        
+
         // Show success message
-        alert(`Excel file exported successfully as: ${filename}`);
+        const recordCount = searchTerm ? filteredLocations.length : locations.length;
+        alert(`Excel file exported successfully: ${recordCount} records exported as ${filename}`);
     };
 
     const fetchLocations = async () => {
@@ -89,10 +146,11 @@ const LocationMaster = () => {
             const companyId = localStorage.getItem('selectedCompanyId');
             const financialYear = localStorage.getItem('financialYear');
 
-            const res = await axios.get("http://localhost:8080/api/locations", { 
-                params: { companyId, financialYear } 
+            const res = await axios.get("http://localhost:8080/api/locations", {
+                params: { companyId, financialYear }
             });
             setLocations(res.data);
+            setCurrentPage(1); // Reset to first page when data is fetched
         } catch (error) {
             console.error('Error fetching locations:', error);
             alert('Error loading locations');
@@ -165,8 +223,6 @@ const LocationMaster = () => {
         setEditId(null);
     };
 
-
-
     // Helper function to format field labels
     const formatFieldLabel = (key) => {
         const labelMap = {
@@ -185,8 +241,8 @@ const LocationMaster = () => {
     return (
         <div className="content">
             {/* Header Section */}
-            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
-                <div className="my-auto mb-2">
+            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+                <div className="my-auto">
                     <h2 className="mb-1">Location Master</h2>
                     <nav>
                         <ol className="breadcrumb mb-0">
@@ -205,27 +261,44 @@ const LocationMaster = () => {
             <div className="card">
                 <div className="card-header">
                     <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3">
-                        <div></div>
-                        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-                            <button 
-                                onClick={() => setShowDataImportModal(true)} 
+                        {/* Search Box */}
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="input-group" style={{ width: '300px' }}>
+
+                                <span className="input-group-text">
+                                    <i className="ti ti-search"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Search locations..."
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                />
+
+                            </div>
+                        </div>
+
+                        <div className="d-flex my-xl-auto ms-auto right-content align-items-center flex-wrap gap-2">
+                            <button
+                                onClick={() => setShowDataImportModal(true)}
                                 className="btn btn-outline-primary btn-sm"
                             >
                                 <i className="ti ti-file-import me-1"></i>Import
                             </button>
-                            
-                            {/* Updated Export Button - Direct Excel Export */}
+
                             <button
                                 className="btn btn-outline-success btn-sm"
                                 onClick={exportToExcel}
-                                title="Export to Excel"
+                                title={searchTerm ? "Export filtered results to Excel" : "Export all data to Excel"}
                             >
                                 <i className="ti ti-file-export me-1"></i>Export Excel
+                                {searchTerm && <span className="badge bg-primary ms-1">{filteredLocations.length}</span>}
                             </button>
 
                             <div>
-                                <button 
-                                    onClick={handleAdd} 
+                                <button
+                                    onClick={handleAdd}
                                     className="btn btn-primary btn-sm"
                                 >
                                     <i className="ti ti-circle-plus me-1"></i>Add Location
@@ -253,16 +326,16 @@ const LocationMaster = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {locations.length === 0 ? (
+                                {currentLocations.length === 0 ? (
                                     <tr>
                                         <td colSpan="10" className="text-center">
-                                            No locations found
+                                            {searchTerm ? 'No locations found matching your search criteria' : 'No locations found'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    locations.map((loc, index) => (
+                                    currentLocations.map((loc, index) => (
                                         <tr key={loc._id}>
-                                            <td>{index + 1}</td>
+                                            <td>{startIndex + index + 1}</td>
                                             <td><strong>{loc.name}</strong></td>
                                             <td>{loc.address}</td>
                                             <td>{loc.city}</td>
@@ -272,8 +345,8 @@ const LocationMaster = () => {
                                             <td>{loc.contactPerson}</td>
                                             <td>{loc.contactNumber}</td>
                                             <td>
-                                                <button 
-                                                    className="btn btn-sm btn-primary" 
+                                                <button
+                                                    className="btn btn-sm btn-primary"
                                                     onClick={() => handleEdit(loc)}
                                                 >
                                                     Edit
@@ -288,6 +361,71 @@ const LocationMaster = () => {
                 </div>
             </div>
 
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="d-md-flex d-block align-items-center justify-content-between mt-3">
+                    <div className="text-muted">
+                       
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul className="pagination mb-0">
+                            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                <a
+                                    className="page-link"
+                                    href="javascript:void(0);"
+                                    aria-label="Previous"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (currentPage > 1) {
+                                            handlePageClick(currentPage - 1);
+                                        }
+                                    }}
+                                >
+                                    <span aria-hidden="true">
+                                        <i className="fas fa-angle-left"></i>
+                                    </span>
+                                </a>
+                            </li>
+
+                            {Array.from({ length: totalPages }, (_, i) => (
+                                <li
+                                    key={i}
+                                    className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                                >
+                                    <a
+                                        className="page-link"
+                                        href="javascript:void(0);"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handlePageClick(i + 1);
+                                        }}
+                                    >
+                                        {i + 1}
+                                    </a>
+                                </li>
+                            ))}
+
+                            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                                <a
+                                    className="page-link"
+                                    href="javascript:void(0);"
+                                    aria-label="Next"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (currentPage < totalPages) {
+                                            handlePageClick(currentPage + 1);
+                                        }
+                                    }}
+                                >
+                                    <span aria-hidden="true">
+                                        <i className="fas fa-angle-right"></i>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            )}
             <DataImportModal
                 show={showDataImportModal}
                 onClose={() => setShowDataImportModal(false)}
@@ -311,9 +449,9 @@ const LocationMaster = () => {
                                     <h5 className="modal-title">
                                         {editId ? "Edit Location" : "Add New Location"}
                                     </h5>
-                                    <button 
-                                        type="button" 
-                                        className="btn-close" 
+                                    <button
+                                        type="button"
+                                        className="btn-close"
                                         onClick={handleCloseModal}
                                     ></button>
                                 </div>
@@ -348,9 +486,9 @@ const LocationMaster = () => {
                                     </div>
 
                                     <div className="modal-footer d-flex justify-content-between">
-                                        <button 
-                                            type="button" 
-                                            className="btn btn-outline-secondary" 
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
                                             onClick={handleCloseModal}
                                         >
                                             Cancel

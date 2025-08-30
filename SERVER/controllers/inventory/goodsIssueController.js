@@ -40,19 +40,19 @@ const createGoodsIssue = async (req, res) => {
     console.log("data:", data);
     if (Array.isArray(data.items)) {
       for (const item of data.items) {
-      const filter = { 
-        materialId: item.materialId, 
-        location: data.location, 
-        lotNumber: item.lotNo || undefined
-      };
-      let stockItem = await StockItem.findOne(filter);
+        const filter = {
+          materialId: item.materialId,
+          location: data.location,
+          lotNumber: item.lotNo || undefined
+        };
+        let stockItem = await StockItem.findOne(filter);
 
-      if (stockItem) {
-        // If material is present in that location, subtract the quantity
-        stockItem.quantityAvailable = Number(stockItem.quantityAvailable) - Number(item.quantity);
-        stockItem.updatedAt = new Date();
-        await stockItem.save();
-      } 
+        if (stockItem) {
+          // If material is present in that location, subtract the quantity
+          stockItem.quantityAvailable = Number(stockItem.quantityAvailable) - Number(item.quantity);
+          stockItem.updatedAt = new Date();
+          await stockItem.save();
+        }
       }
     }
 

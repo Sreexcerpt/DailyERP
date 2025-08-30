@@ -87,14 +87,17 @@ const AddDesignation = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h4 className="mb-4 text-primary">Material Master</h4>
+    <div className="container mt-3">
+      <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+          <h4 className="mb-4 text-primary">Material Master</h4>
 
       <div className="mb-3">
         <button className="btn btn-primary" onClick={openModal}>
           Add Designation
         </button>
       </div>
+      </div>
+      
 
       <div className="card p-4">
         <h5 className="card-title mb-3">All Designations</h5>

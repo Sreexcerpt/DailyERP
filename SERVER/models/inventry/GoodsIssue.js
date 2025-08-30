@@ -11,6 +11,8 @@ const GoodsIssueSchema = new mongoose.Schema({
   location: { type: String },
   issueDate: { type: String },
   salesOrderId: { type: mongoose.Schema.Types.ObjectId, ref: 'SalesOrder' },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  financialYear: { type: String },
   items: [
     {
       materialId: String,

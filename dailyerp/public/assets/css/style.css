@@ -10820,7 +10820,7 @@ caption {
 }
 
 .table.table-sm> :not(caption)>*>* {
-    padding: 0.3rem;
+    padding: 0.1rem;
 }
 
 .table.table-dark {
@@ -12332,7 +12332,7 @@ table.table-bordered thead tr th p {
 /****** Utils ******/
 
 .card {
-    margin-bottom: 1.5rem;
+    margin-bottom: .3rem;
     background-color: #FFF;
     transition: all 0.5s ease-in-out;
     position: relative;
@@ -12343,7 +12343,7 @@ table.table-bordered thead tr th p {
 }
 
 .card .card-body {
-    padding: 1.25rem;
+    padding: 1rem;
 }
 
 @media (max-width: 767.98px) {
@@ -12369,12 +12369,12 @@ table.table-bordered thead tr th p {
     border-color: #E5E7EB;
     position: relative;
     background: transparent;
-    padding: 1rem 1.25rem 1rem;
+    padding: .51rem 1.25rem .51rem;
 }
 
 @media (max-width: 767.98px) {
     .card .card-header {
-        padding: 15px;
+        padding: 5px;
     }
 }
 
@@ -15939,7 +15939,7 @@ button.swal2-cancel {
 }
 
 .page-wrapper .content {
-    padding: 24px;
+    padding: 14px;
     padding-bottom: 0;
     min-height: calc(100vh - 105px);
 }
@@ -17320,9 +17320,9 @@ button.swal2-cancel {
     padding: 0 16px;
 }
 
-.sidebar .sidebar-menu>ul>li {
+/* .sidebar .sidebar-menu>ul>li {
     margin-bottom: 24px;
-}
+} */
 
 .sidebar .sidebar-menu>ul>li>ul>li>a:hover {
     background: #E8E9EA;
@@ -17427,7 +17427,7 @@ button.swal2-cancel {
 
 .sidebar .sidebar-menu>ul>li ul {
     display: block;
-    margin-bottom: 19px;
+    /* margin-bottom: 19px; */
 }
 
 .sidebar .sidebar-menu>ul>li ul li {

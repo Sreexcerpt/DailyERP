@@ -3,6 +3,6 @@ const getAllItems = require('../../controllers/inventory/stockController').getAl
 const router = express.Router();
 
 // Example GET route for fetching stock data
-router.get('/stock', getAllItems);
+router.get('/data', getAllItems);
 
 module.exports = router;

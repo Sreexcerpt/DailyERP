@@ -6,13 +6,16 @@ function SaleContractCategoryForm() {
     categoryName: '',
     // prefix: '',
     rangeFrom: '',
-    rangeTo: ''
+    rangeTo: '',
+    companyId: localStorage.getItem('selectedCompanyId'),
+    financialYear: localStorage.getItem('financialYear')
   });
 
   const [categories, setCategories] = useState([]);
   const [editId, setEditId] = useState(null);
   const [errors, setErrors] = useState({});
-
+const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const validate = () => {
     let temp = {};
     const sixDigitRegex = /^\d{6}$/;
@@ -54,19 +57,21 @@ function SaleContractCategoryForm() {
       }
       fetchCategories();
       resetForm();
+      handleCloseModal();
+      window.location.reload();
     } catch (err) {
-      console.error('Error saving contract category:', err);
+      // console.error('Error saving contract category:', err);
       alert('Error saving contract category. Please try again.');
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/sale-contract-categories');
+      const res = await axios.get('http://localhost:8080/api/sale-contract-categories', { params: { companyId } });
       setCategories(res.data);
     } catch (err) {
       console.error('Error fetching contract categories:', err);
-      alert('Error loading contract categories');
+      // alert('Error loading contract categories');
     }
   };
 
@@ -127,55 +132,18 @@ function SaleContractCategoryForm() {
   return (
     <div className='content'>
       {/* Page Header */}
-      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-3">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb mb-2">
         <div className="my-auto mb-2">
           <h2 className="mb-1">Sales Contract Categories</h2>
-          <nav>
-            <ol className="breadcrumb mb-0">
-              <li className="breadcrumb-item">
-                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
-              </li>
-              <li className="breadcrumb-item">Sales</li>
-              <li className="breadcrumb-item active" aria-current="page">Contract Categories</li>
-            </ol>
-          </nav>
+         
         </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="d-flex d-block align-items-center justify-content-between flex-wrap gap-3 mb-3">
         <div>
-          <h6>
-            <i className="fas fa-file-contract me-2"></i>
-            Sales Contract Category Management
-          </h6>
-          <p className="text-muted mb-0">Create and manage contract categories with number ranges</p>
-        </div>
-        <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-          <div className="dropdown">
-            <a href="#" onClick={handleOpendropdown} className="btn btn-outline-primary d-inline-flex align-items-center" data-bs-toggle="dropdown">
-              <i className="fas fa-download me-1"></i>Export
-            </a>
-            <ul className={showdropdown ? `dropdown-menu show` : "dropdown-menu"}>
-              <li>
-                <a className="dropdown-item" href="#" onClick={exportToPDF}>
-                  <i className="fas fa-file-pdf me-2"></i>Download as PDF
-                </a>
-              </li>
-              <li>
-                <a className="dropdown-item" href="#" onClick={exportToExcel}>
-                  <i className="fas fa-file-excel me-2"></i>Download as Excel
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
             <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center">
               <i className="fas fa-plus me-1"></i>New Contract Category
             </a>
           </div>
-        </div>
       </div>
+
 
       {/* Modal */}
       {showModal && (
@@ -194,16 +162,16 @@ function SaleContractCategoryForm() {
                 <div className="modal-body">
                   <form onSubmit={handleSubmit}>
                     <div className="row">
-                      <div className='col-xl-6 mb-3'>
+                      <div className='col-xl-3 mb-3'>
                         <label className="form-label">Category Name <span className="text-danger">*</span></label>
                         <input
                           name="categoryName"
                           value={formData.categoryName}
                           onChange={handleChange}
-                          className={`form-control ${errors.categoryName ? 'is-invalid' : ''}`}
+                          className={`form-control`}
                           placeholder="Enter category name (e.g., Standard Contracts)"
                         />
-                        {errors.categoryName && <div className="invalid-feedback">{errors.categoryName}</div>}
+                        {/* {errors.categoryName && <div className="invalid-feedback">{errors.categoryName}</div>} */}
                       </div>
 
                       {/* <div className='col-xl-6 mb-3'>
@@ -219,49 +187,56 @@ function SaleContractCategoryForm() {
                         {errors.prefix && <div className="invalid-feedback">{errors.prefix}</div>}
                       </div> */}
 
-                      <div className='col-xl-6 mb-3'>
+                      <div className='col-xl-3 mb-3'>
                         <label className="form-label">Range From <span className="text-danger">*</span></label>
                         <input
                           name="rangeFrom"
-                          type="number"
+                          type="text"
                           value={formData.rangeFrom}
-                          onChange={handleChange}
-                          className={`form-control ${errors.rangeFrom ? 'is-invalid' : ''}`}
+                          onChange={(e)=>{
+                            e.target.value = e.target.value.replace(/\D/g, '');
+                            handleChange(e)}}
+                          className={`form-control`}
+                          maxLength={6}
                           placeholder="Enter start range (6 digits)"
                           min="100000"
                           max="999999"
                         />
-                        {errors.rangeFrom && <div className="invalid-feedback">{errors.rangeFrom}</div>}
-                        <div className="form-text">Example: 100000</div>
+                        {/* {errors.rangeFrom && <div className="invalid-feedback">{errors.rangeFrom}</div>}
+                        <div className="form-text">Example: 100000</div> */}
                       </div>
 
-                      <div className='col-xl-6 mb-3'>
+                      <div className='col-xl-3 mb-3'>
                         <label className="form-label">Range To <span className="text-danger">*</span></label>
                         <input
                           name="rangeTo"
-                          type="number"
-                          className={`form-control ${errors.rangeTo ? 'is-invalid' : ''}`}
+                          type="text"
+                          className={`form-control `}
                           value={formData.rangeTo}
-                          onChange={handleChange}
+                          onChange={(e)=>{
+                            e.target.value = e.target.value.replace(/\D/g, '');
+                            handleChange(e)}}
                           placeholder="Enter end range (6 digits)"
                           min="100000"
+                          maxLength={6}
                           max="999999"
                         />
-                        {errors.rangeTo && <div className="invalid-feedback">{errors.rangeTo}</div>}
-                        <div className="form-text">Example: 199999</div>
+                        {/* {errors.rangeTo && <div className="invalid-feedback">{errors.rangeTo}</div>}
+                        <div className="form-text">Example: 199999</div> */}
                       </div>
                     </div>
 
-                    <div className="d-flex gap-2 justify-content-end">
+                    <div className="d-flex gap-2 justify-content-start">
+                      
+                      <button type="submit" className='btn btn-primary btn-sm'>
+                        {/* <i className={`fas ${editId ? 'fa-save' : 'fa-plus'} me-1`}></i> */}
+                        {editId ? 'Update' : 'Create'} Category
+                      </button>
                       {editId && (
-                        <button type="button" className='btn btn-outline-secondary' onClick={resetForm}>
+                        <button type="button" className='btn btn-secondary btn-sm' onClick={resetForm}>
                           <i className="fas fa-times me-1"></i>Cancel
                         </button>
                       )}
-                      <button type="submit" className='btn btn-primary'>
-                        <i className={`fas ${editId ? 'fa-save' : 'fa-plus'} me-1`}></i>
-                        {editId ? 'Update' : 'Create'} Category
-                      </button>
                     </div>
                   </form>
                 </div>
@@ -273,33 +248,20 @@ function SaleContractCategoryForm() {
 
       {/* Categories Table */}
       <div className="card">
-        <div className="card-header">
-          <h5 className="card-title mb-0">
-            <i className="fas fa-list me-2"></i>
-            Contract Categories ({categories.length})
-          </h5>
-        </div>
+        
         <div className="card-body">
-          {categories.length === 0 ? (
-            <div className="text-center py-4">
-              <i className="fas fa-file-contract fa-3x text-muted mb-3"></i>
-              <p className="text-muted">No contract categories found. Create your first category!</p>
-              <button onClick={handleOpenModal} className="btn btn-primary">
-                <i className="fas fa-plus me-1"></i>Create First Category
-              </button>
-            </div>
-          ) : (
+         
             <div className="table-responsive">
-              <table className='table table-hover table-bordered'>
+              <table className='table table-sm table-bordered'>
                 <thead className="table-dark">
                   <tr>
-                    <th width="5%">#</th>
-                    <th width="25%">Category Name</th>
-                    {/* <th width="15%">Prefix</th> */}
-                    <th width="15%">Range From</th>
-                    <th width="15%">Range To</th>
-                    <th width="10%">Available Numbers</th>
-                    <th width="15%">Actions</th>
+                    <th>#</th>
+                    <th>Category Name</th>
+                    {/* <th>Prefix</th> */}
+                    <th>Range From</th>
+                    <th>Range To</th>
+                    {/* <th>Available Numbers</th> */}
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -308,7 +270,7 @@ function SaleContractCategoryForm() {
                       <td>{index + 1}</td>
                       <td>
                         <div className="d-flex align-items-center">
-                          <i className="fas fa-file-contract text-primary me-2"></i>
+                          
                           <span className="fw-medium">{cat.categoryName}</span>
                         </div>
                       </td>
@@ -317,27 +279,27 @@ function SaleContractCategoryForm() {
                       </td> */}
                       <td>{cat.rangeFrom?.toLocaleString()}</td>
                       <td>{cat.rangeTo?.toLocaleString()}</td>
-                      <td>
+                      {/* <td>
                         <span className="text-success fw-medium">
                           {((cat.rangeTo - cat.rangeFrom) + 1).toLocaleString()}
                         </span>
-                      </td>
+                      </td> */}
                       <td>
                         <div className="d-flex gap-1">
                           <button 
-                            className='btn btn-sm btn-outline-primary' 
+                            className='btn btn-sm btn-primary' 
                             onClick={() => { handleEdit(cat); handleOpenModal(); }}
                             title="Edit Category"
                           >
-                            <i className="fas fa-edit"></i>
+                            <i className="fas fa-edit"></i>Edit
                           </button>
-                          <button 
+                          {/* <button 
                             className='btn btn-sm btn-outline-danger' 
                             onClick={() => handleDelete(cat._id)}
                             title="Delete Category"
                           >
                             <i className="fas fa-trash"></i>
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
@@ -345,7 +307,7 @@ function SaleContractCategoryForm() {
                 </tbody>
               </table>
             </div>
-          )}
+         
         </div>
       </div>
     </div>
