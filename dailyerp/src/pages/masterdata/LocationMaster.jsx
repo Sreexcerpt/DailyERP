@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import DataImportModal from "../../components/DataImportModal";
 
 const initialForm = {
+    code: "",
     name: "",
     address: "",
     city: "",
@@ -40,6 +41,7 @@ const LocationMaster = () => {
 
         const searchLower = searchTerm.toLowerCase();
         return (
+            location.code?.toLowerCase().includes(searchLower) ||
             location.name?.toLowerCase().includes(searchLower) ||
             location.address?.toLowerCase().includes(searchLower) ||
             location.city?.toLowerCase().includes(searchLower) ||
@@ -226,6 +228,7 @@ const LocationMaster = () => {
     // Helper function to format field labels
     const formatFieldLabel = (key) => {
         const labelMap = {
+            code: "Location Code",
             name: "Location Name",
             address: "Address",
             city: "City",
@@ -460,15 +463,15 @@ const LocationMaster = () => {
                                     <div className="modal-body">
                                         <div className="row">
                                             {Object.keys(initialForm).map((key) => (
-                                                <div className="col-md-4 mb-3" key={key}>
+                                                <div className={`${key ==="code" || key==="city" || key==="postalCode" ? 'col-md-3' : 'col-md-4'} mb-3`} key={key}>
                                                     <div className="row">
-                                                        <div className="col-4">
+                                                        <div className={`${key ==="code" || key==="city" || key==="postalCode" ? 'col-5' : 'col-4'}`}>
                                                             <label className="form-label">
                                                                 {formatFieldLabel(key)}
-                                                                {key === "name" && <span className="text-danger"> *</span>}
+                                                                {/* {key === "name" && <span className="text-danger"> *</span>} */}
                                                             </label>
                                                         </div>
-                                                        <div className="col-8">
+                                                        <div className={`${key ==="code" || key==="city" || key==="postalCode" ? 'col-7' : 'col-8'} `}>
                                                             <input
                                                                 type={key === "contactNumber" ? "tel" : "text"}
                                                                 name={key}

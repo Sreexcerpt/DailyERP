@@ -13,7 +13,8 @@ function VendorCategoryForm() {
 
   const [vendorCategories, setVendorCategories] = useState([]);
   const [editingId, setEditingId] = useState(null); // 🆕 ID of the category being edited
-
+const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -183,7 +184,7 @@ function VendorCategoryForm() {
                               className='form-control'
                             /></div>
                         </div>
-                        <button type="submit" className='btn btn-primary'>
+                        <button type="submit" className='btn btn-sm btn-primary'>
                           {editingId ? 'Update Category' : 'Add Category'}
                         </button>
                       </form>

@@ -687,7 +687,7 @@ function VendorForm() {
                       {/* Address 1 */}
                       <div className="col-md-4 mb-2">
                         <div className="row">
-                          <div className="col-4"><label>Address1:</label></div>
+                          <div className="col-4"><label className="form-label">Address1:</label></div>
                           <div className="col-8">
                             <input
                               type="text"
@@ -704,7 +704,7 @@ function VendorForm() {
                       {/* Address 2 */}
                       <div className="col-md-4 mb-2">
                         <div className="row">
-                          <div className="col-4"><label>Address2:</label></div>
+                          <div className="col-4"><label className="form-label">Address2:</label></div>
                           <div className="col-6">
                             <input
                               type="text"
@@ -728,7 +728,7 @@ function VendorForm() {
                         <div key={index} className="col-md-4 mb-2 position-relative">
                           <div className="row">
                             <div className="col-4">
-                              <label>{`Address${index + 3}`}:</label>
+                              <label className="form-label">{`Address${index + 3}`}:</label>
                             </div>
                             <div className="col-8 d-flex align-items-center">
                               <input

@@ -14,7 +14,8 @@ const MaterialCategory = () => {
   const [errors, setErrors] = useState({});
   const [categories, setCategories] = useState([]);
   const [editingId, setEditingId] = useState(null);
-
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const alphaRegex = /^[A-Za-z ]{0,100}$/;
   const alphaNumericRegex = /^[A-Za-z0-9]{0,8}$/;
   const numberRegex = /^\d{0,6}$/;
@@ -232,7 +233,7 @@ const MaterialCategory = () => {
                           <td>{cat.rangeEnd}</td>
                           {/* <td>{materialIds[cat._id] || 'Loading...'}</td> */}
                           <td>
-                            <button className="btn btn-sm btn-warning" onClick={() => { handleEdit(cat), handleOpenModal() }}>
+                            <button className="btn btn-sm btn-primary" onClick={() => { handleEdit(cat), handleOpenModal() }}>
                               Edit
                             </button>
                           </td>
@@ -277,8 +278,8 @@ const MaterialCategory = () => {
                               {/* {errors[field] && <div className="invalid-feedback">{errors[field]}</div>} */}
                             </div>
                           ))}</div>
-                        <button type="submit" className="btn btn-primary" disabled={!isFormValid()}>
-                          {editingId ? 'Update' : 'Save'}
+                        <button type="submit" className="btn btn-sm btn-primary" disabled={!isFormValid()}>
+                          {editingId ? 'Update Category' : 'Add Category'}
                         </button>
                       </form>
                     </div>

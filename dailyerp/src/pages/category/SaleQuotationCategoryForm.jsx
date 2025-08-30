@@ -190,8 +190,8 @@ function SaleQuotationCategoryForm() {
                     </div>
                   </div>
 
-                  <button type="submit" className='btn btn-sm btn-success'>{editId ? 'Update' : 'Add'} Category</button>
-                  {editId && <button type="button" className='btn btn-sm btn-danger' onClick={resetForm} style={{ marginLeft: '10px' }}>Cancel</button>}
+                  <button type="submit" className='btn btn-sm btn-primary'>{editId ? 'Update Category' : 'Add Category'}</button>
+                  {/* {editId && <button type="button" className='btn btn-sm btn-danger' onClick={resetForm} style={{ marginLeft: '10px' }}>Cancel</button>} */}
                 </form></div>
             </div>
           </div>

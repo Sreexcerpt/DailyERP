@@ -287,9 +287,9 @@ function ProcessList() {
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
-                
+
               </div>
-              
+
             </div>
 
             <div className="d-flex gap-2">
@@ -366,8 +366,8 @@ function ProcessList() {
                       </td>
                       <td>
                         <span className={`badge ${(!proc.isDeleted && !proc.isBlocked) ? 'bg-success' :
-                            (proc.isDeleted && proc.isBlocked) ? 'bg-danger' :
-                              proc.isDeleted ? 'bg-warning' : 'bg-secondary'
+                          (proc.isDeleted && proc.isBlocked) ? 'bg-danger' :
+                            proc.isDeleted ? 'bg-warning' : 'bg-secondary'
                           }`}>
                           {(!proc.isDeleted && !proc.isBlocked) ? 'Active' :
                             (proc.isDeleted && proc.isBlocked) ? 'Deleted & Blocked' :
@@ -465,77 +465,115 @@ function ProcessList() {
           </nav>
         </div>
       )}
-      <Modal show={showModal} onHide={handleCloseModal} size="lg">
+      {/* <Modal show={showModal} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>{editingData ? 'Edit' : 'Add'} Process</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="mb-3">
-            <label className="form-label">Process ID <span className="text-danger">*</span></label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Enter Process ID"
-              value={formData.processId}
-              onChange={(e) => setFormData({ ...formData, processId: e.target.value })}
-              required
-            />
-          </div>
 
-          <div className="mb-3">
-            <label className="form-label">Process Description <span className="text-danger">*</span></label>
-            <textarea
-              className="form-control"
-              rows="4"
-              placeholder="Enter Process Description"
-              value={formData.processDescription}
-              onChange={(e) => setFormData({ ...formData, processDescription: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="row">
-            <div className="col-md-6">
-              <div className="form-check mb-2">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="isDeleted"
-                  checked={formData.isDeleted}
-                  onChange={(e) => setFormData({ ...formData, isDeleted: e.target.checked })}
-                />
-                <label className="form-check-label" htmlFor="isDeleted">
-                  Is Deleted
-                </label>
-              </div>
-            </div>
-
-            <div className="col-md-6">
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="isBlocked"
-                  checked={formData.isBlocked}
-                  onChange={(e) => setFormData({ ...formData, isBlocked: e.target.checked })}
-                />
-                <label className="form-check-label" htmlFor="isBlocked">
-                  Is Blocked
-                </label>
-              </div>
-            </div>
-          </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal} className="me-3">
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            {editingData ? 'Update' : 'Save'} Process
-          </Button>
+         
         </Modal.Footer>
-      </Modal>
+      </Modal> */}
+      {showModal && (
+        <>
+          <div className="modal-backdrop fade show"></div>
 
+          <div
+            className="modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: "block" }}
+            aria-modal="true"
+          >
+            <div className="modal-dialog modal-xl modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h4 className="modal-title" id="myLargeModalLabel">
+                    {editingData ? "Edit Process" : "Add New Process"}
+                  </h4>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseModal}
+                    aria-label="Close"
+                  ></button>
+                </div>
+
+                <div className="modal-body">
+                  <div className="d-flex  align-items-center">
+                    <div className=" col-md-2 row me-4">
+                      <label className="form-label col-xl-7">Process_ID</label>
+                      <input
+                        type="text"
+                        className=" col-xl-5  form-control-sm"
+                        placeholder="Enter Process ID"
+                        value={formData.processId}
+                        onChange={(e) => setFormData({ ...formData, processId: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="col-md-10 row">
+                      <label className="form-label col-xl-2 mt-4">Process Description</label>
+                      <textarea
+                        type="text"
+                        className="form-control-sm col-xl-10"
+                        rows="4"
+                        placeholder="Enter Process Description"
+                        value={formData.processDescription}
+                        onChange={(e) => setFormData({ ...formData, processDescription: e.target.value })}
+                        required
+                      />
+
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div className="form-check mb-2">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="isDeleted"
+                          checked={formData.isDeleted}
+                          onChange={(e) => setFormData({ ...formData, isDeleted: e.target.checked })}
+                        />
+                        <label className="form-check-label" htmlFor="isDeleted">
+                          Is Deleted
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="isBlocked"
+                          checked={formData.isBlocked}
+                          onChange={(e) => setFormData({ ...formData, isBlocked: e.target.checked })}
+                        />
+                        <label className="form-check-label" htmlFor="isBlocked">
+                          Is Blocked
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-secondary me-3" onClick={handleCloseModal} >
+                    Cancel
+                  </button>
+                  <button className='btn btn-primary' onClick={handleSave}>
+                    {editingData ? 'Update' : 'Save'} Process
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>)}
       <DataImportModal
         show={showDataImportModal}
         onClose={() => setShowDataImportModal(false)}

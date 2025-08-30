@@ -17,7 +17,9 @@ const GoodsTransferCategorySchema = new mongoose.Schema({
   rangeEnd: {
     type: Number,
     required: true
-  }
+  },
+   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+    financialYear: String,
 });
 
 module.exports = mongoose.model('GoodsTransferCategory', GoodsTransferCategorySchema);

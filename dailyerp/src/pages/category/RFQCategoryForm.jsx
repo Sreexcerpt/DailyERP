@@ -6,12 +6,15 @@ function RFQCategoryForm() {
     categoryName: '',
     // prefix: '',
     rangeFrom: '',
-    rangeTo: ''
+    rangeTo: '',
+    companyId: localStorage.getItem('selectedCompanyId'),
+    financialYear: localStorage.getItem('financialYear')
   });
 
   const [categories, setCategories] = useState([]);
   const [editingId, setEditingId] = useState(null);
-
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -29,6 +32,7 @@ function RFQCategoryForm() {
       setEditingId(null);
       fetchCategories();
       handleClosedropdown();
+      window.location.reload()
     } catch (err) {
       console.error('Error submitting category:', err);
     }
@@ -156,14 +160,14 @@ function RFQCategoryForm() {
                       </div>
                     </div>
                     <div>
-                      <button type="submit" className='btn btn-sm btn-success'>
+                      <button type="submit" className='btn btn-sm btn-primary'>
                         {editingId ? 'Update Category' : 'Add Category'}
                       </button>
-                      {editingId && (
+                      {/* {editingId && (
                         <button type="button" className='btn btn-sm btn-secondary ms-3' onClick={handleCancelEdit}>
                           Cancel
                         </button>
-                      )}
+                      )} */}
                     </div>
                   </form>
                 </div>
@@ -175,7 +179,7 @@ function RFQCategoryForm() {
       <div className="card">
         <div className="card-body">
           <div className="table-responsive">
-            <table className='table table-bordered'>
+            <table className='table table-sm table-bordered'>
               <thead>
                 <tr>
                   <th>#</th>

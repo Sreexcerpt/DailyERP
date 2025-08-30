@@ -14,7 +14,8 @@ function POCategoryForm() {
   const [categories, setCategories] = useState([]);
   const [editId, setEditId] = useState(null);
   const [errors, setErrors] = useState({});
-
+const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const validate = () => {
     let temp = {};
     const sixDigitRegex = /^\d{6}$/;
@@ -200,12 +201,12 @@ function POCategoryForm() {
                       <div style={{ color: 'red' }}>{errors.rangeTo}</div>
                     </div>
                   </div>
-                  <button type="submit" className='btn btn-sm btn-primary'>{editId ? 'Update' : 'Add'} PO Category</button>
-                  {editId && (
+                  <button type="submit" className='btn btn-sm btn-primary'>{editId ? 'Update Category' : 'Add Category'}</button>
+                  {/* {editId && (
                     <button type="button" onClick={resetForm} style={{ marginLeft: '10px' }}>
                       Cancel
                     </button>
-                  )}
+                  )} */}
                 </form>
               </div>
             </div>
@@ -216,7 +217,7 @@ function POCategoryForm() {
       <div className="card">
         <div className="card-body">
           <div className="table-responsive">
-            <table className='table table-bordered'>
+            <table className='table table-sm table-bordered'>
               <thead>
                 <tr>
                   <th>#</th>
@@ -236,7 +237,7 @@ function POCategoryForm() {
                     <td>{cat.rangeFrom}</td>
                     <td>{cat.rangeTo}</td>
                     <td>
-                      <button className='btn btn-primary' onClick={() => { handleEdit(cat), handleOpenModal() }}>Edit</button>
+                      <button className='btn btn-sm btn-primary' onClick={() => { handleEdit(cat), handleOpenModal() }}>Edit</button>
                     </td>
                   </tr>
                 ))}

@@ -3,11 +3,10 @@ const CustomerCategory = require('../../models/categories/CustomerCategory');
 // Create
 exports.createCustomerCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeFrom, rangeTo,companyId } = req.body;
+    const { categoryName,  rangeFrom, rangeTo,companyId } = req.body;
 
     const newCategory = new CustomerCategory({
       categoryName,
-      prefix,
       rangeFrom,
       rangeTo,
       companyId

@@ -35,7 +35,9 @@ const purchaseContractCategorySchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
-  }
+  },
+   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+    financialYear: String,
 });
 
 // Validate that rangeTo is greater than or equal to rangeFrom

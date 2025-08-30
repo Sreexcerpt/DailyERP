@@ -190,12 +190,12 @@ function SalesOrderCategoryForm() {
                       {/* <div style={{ color: 'red' }}>{errors.rangeTo}</div> */}
                     </div>
                   </div>
-                  <button className='btn btn-sm btn-success mt-2 mb-2' type="submit">{editId ? 'Update' : 'Add'} Category</button>
-                  {editId && (
+                  <button className='btn btn-sm btn-primary mt-2 mb-2' type="submit">{editId ? 'Update Category' : 'Add Category'}</button>
+                  {/* {editId && (
                     <button className='btn btn-danger' type="button" onClick={resetForm} style={{ marginLeft: '10px' }}>
                       Cancel
                     </button>
-                  )}
+                  )} */}
                 </form>
               </div>
             </div>
@@ -207,7 +207,7 @@ function SalesOrderCategoryForm() {
       <div className="card">
         <div className="card-body">
           <div className="table-responsive">
-            <table className='table table-bordered'>
+            <table className='table table-sm table-bordered'>
               <thead>
                 <tr>
                   <th>#</th>

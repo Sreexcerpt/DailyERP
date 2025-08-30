@@ -11,14 +11,14 @@ function GeneralCondition() {
   const companyId = localStorage.getItem('selectedCompanyId');
   const financialYear = localStorage.getItem('financialYear');
   const [showDataImportModal, setShowDataImportModal] = useState(false);
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  
+
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -37,12 +37,12 @@ function GeneralCondition() {
   // Filter conditions based on search term
   const filteredConditions = conditions.filter(condition => {
     if (!searchTerm) return true;
-    
+
     const searchLower = searchTerm.toLowerCase();
-    const status = (!condition.isDeleted && !condition.isBlocked) ? 'Active' : 
-                  (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
-                  condition.isDeleted ? 'Deleted' : 'Blocked';
-    
+    const status = (!condition.isDeleted && !condition.isBlocked) ? 'Active' :
+      (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
+        condition.isDeleted ? 'Deleted' : 'Blocked';
+
     return (
       condition.name?.toLowerCase().includes(searchLower) ||
       condition.description?.toLowerCase().includes(searchLower) ||
@@ -84,7 +84,7 @@ function GeneralCondition() {
   const exportToExcel = () => {
     // Use filtered data for export if search is active
     const dataToExport = searchTerm ? filteredConditions : conditions;
-    
+
     // Prepare data for Excel
     const excelData = dataToExport.map((condition, index) => ({
       'S.No': index + 1,
@@ -92,9 +92,9 @@ function GeneralCondition() {
       'Description': condition.description || '',
       'Is Deleted': condition.isDeleted ? 'Yes' : 'No',
       'Is Blocked': condition.isBlocked ? 'Yes' : 'No',
-      'Status': (!condition.isDeleted && !condition.isBlocked) ? 'Active' : 
-                (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
-                condition.isDeleted ? 'Deleted' : 'Blocked',
+      'Status': (!condition.isDeleted && !condition.isBlocked) ? 'Active' :
+        (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
+          condition.isDeleted ? 'Deleted' : 'Blocked',
       'Created Date': condition.createdAt ? new Date(condition.createdAt).toLocaleDateString() : '',
       'Updated Date': condition.updatedAt ? new Date(condition.updatedAt).toLocaleDateString() : ''
     }));
@@ -128,7 +128,7 @@ function GeneralCondition() {
 
     // Save the file
     XLSX.writeFile(wb, filename);
-    
+
     // Show success message
     const recordCount = searchTerm ? filteredConditions.length : conditions.length;
     alert(`Excel file exported successfully: ${recordCount} records exported as ${filename}`);
@@ -199,7 +199,7 @@ function GeneralCondition() {
         await axios.post('http://localhost:8080/api/general-conditions', submissionData);
         alert('General condition added successfully!');
       }
-      
+
       fetchData();
       setShowModal(false);
       setEditingData(null);
@@ -217,7 +217,7 @@ function GeneralCondition() {
         companyId: companyId,
         financialYear: financialYear
       };
-      
+
       await axios.put(`http://localhost:8080/api/general-conditions/${id}`, updateData);
       alert(`General condition ${field === 'isDeleted' ? 'delete status' : 'block status'} updated successfully!`);
       fetchData();
@@ -271,22 +271,22 @@ function GeneralCondition() {
                 <span className="input-group-text">
                   <i className="ti ti-search"></i>
                 </span>
-                 <input
+                <input
                   type="text"
                   className="form-control"
                   placeholder="Search by name, description, or status..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
-               
-               
+
+
               </div>
-              
+
             </div>
 
             <div className="d-flex gap-2">
-              <button 
-                className="btn btn-outline-primary btn-sm" 
+              <button
+                className="btn btn-outline-primary btn-sm"
                 onClick={() => setShowDataImportModal(true)}
               >
                 <i className="ti ti-file-import me-1"></i>Import
@@ -301,8 +301,8 @@ function GeneralCondition() {
                 {searchTerm && <span className="badge bg-primary ms-1">{filteredConditions.length}</span>}
               </button>
 
-              <button 
-                className="btn btn-primary btn-sm" 
+              <button
+                className="btn btn-primary btn-sm"
                 onClick={() => handleOpenModal()}
               >
                 <i className="ti ti-circle-plus me-1"></i>Add General Condition
@@ -312,7 +312,7 @@ function GeneralCondition() {
         </div>
 
         <div className="card-body">
-        <div className="table-responsive">
+          <div className="table-responsive">
             <table className="table table-sm table-bordered">
               <thead>
                 <tr>
@@ -357,19 +357,18 @@ function GeneralCondition() {
                         />
                       </td>
                       <td>
-                        <span className={`badge ${
-                          (!condition.isDeleted && !condition.isBlocked) ? 'bg-success' : 
+                        <span className={`badge ${(!condition.isDeleted && !condition.isBlocked) ? 'bg-success' :
                           (condition.isDeleted && condition.isBlocked) ? 'bg-danger' :
-                          condition.isDeleted ? 'bg-warning' : 'bg-secondary'
-                        }`}>
-                          {(!condition.isDeleted && !condition.isBlocked) ? 'Active' : 
-                           (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
-                           condition.isDeleted ? 'Deleted' : 'Blocked'}
+                            condition.isDeleted ? 'bg-warning' : 'bg-secondary'
+                          }`}>
+                          {(!condition.isDeleted && !condition.isBlocked) ? 'Active' :
+                            (condition.isDeleted && condition.isBlocked) ? 'Deleted & Blocked' :
+                              condition.isDeleted ? 'Deleted' : 'Blocked'}
                         </span>
                       </td>
                       <td>
-                        <button 
-                          className="btn btn-sm btn-primary me-2" 
+                        <button
+                          className="btn btn-sm btn-primary me-2"
                           onClick={() => handleOpenModal(condition)}
                         >
                           Edit
@@ -390,141 +389,169 @@ function GeneralCondition() {
             </table>
           </div>
 
-         
+
         </div>
       </div>
- {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="d-md-flex d-block align-items-center justify-content-between mt-3">
-              <nav aria-label="Page navigation">
-                <ul className="pagination mb-0">
-                  <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                    <a
-                      className="page-link"
-                      href="javascript:void(0);"
-                      aria-label="Previous"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage > 1) {
-                          handlePageClick(currentPage - 1);
-                        }
-                      }}
-                    >
-                      <span aria-hidden="true">
-                        <i className="fas fa-angle-left"></i>
-                      </span>
-                    </a>
-                  </li>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="d-md-flex d-block align-items-center justify-content-between mt-3">
+          <nav aria-label="Page navigation">
+            <ul className="pagination mb-0">
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  href="javascript:void(0);"
+                  aria-label="Previous"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                      handlePageClick(currentPage - 1);
+                    }
+                  }}
+                >
+                  <span aria-hidden="true">
+                    <i className="fas fa-angle-left"></i>
+                  </span>
+                </a>
+              </li>
 
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <li
-                      key={i}
-                      className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
-                    >
-                      <a
-                        className="page-link"
-                        href="javascript:void(0);"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageClick(i + 1);
-                        }}
-                      >
-                        {i + 1}
-                      </a>
-                    </li>
-                  ))}
+              {Array.from({ length: totalPages }, (_, i) => (
+                <li
+                  key={i}
+                  className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                >
+                  <a
+                    className="page-link"
+                    href="javascript:void(0);"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageClick(i + 1);
+                    }}
+                  >
+                    {i + 1}
+                  </a>
+                </li>
+              ))}
 
-                  <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                    <a
-                      className="page-link"
-                      href="javascript:void(0);"
-                      aria-label="Next"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages) {
-                          handlePageClick(currentPage + 1);
-                        }
-                      }}
-                    >
-                      <span aria-hidden="true">
-                        <i className="fas fa-angle-right"></i>
-                      </span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-          )}
-      <Modal show={showModal} onHide={handleCloseModal} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{editingData ? 'Edit' : 'Add'} General Condition</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="mb-3">
-            <label className="form-label">Condition Name <span className="text-danger">*</span></label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Enter General Condition Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
-          </div>
-          
-          <div className="mb-3">
-            <label className="form-label">Description <span className="text-danger">*</span></label>
-            <textarea
-              className="form-control"
-              rows="4"
-              placeholder="Enter Description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
-            />
-          </div>
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <a
+                  className="page-link"
+                  href="javascript:void(0);"
+                  aria-label="Next"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                      handlePageClick(currentPage + 1);
+                    }
+                  }}
+                >
+                  <span aria-hidden="true">
+                    <i className="fas fa-angle-right"></i>
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      )}
+      {showModal && (
+        <>
+          <div className="modal-backdrop fade show"></div>
 
-          <div className="row ">
-            <div className="col-md-6">
-              <div className="form-check mb-2">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="isDeleted"
-                  checked={formData.isDeleted}
-                  onChange={(e) => setFormData({ ...formData, isDeleted: e.target.checked })}
-                />
-                <label className="form-check-label" htmlFor="isDeleted">
-                  Is Deleted
-                </label>
+          <div
+            className="modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: "block" }}
+            aria-modal="true"
+          >
+            <div className="modal-dialog modal-xl modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h4 className="modal-title" id="myLargeModalLabel">
+                    {editingData ? 'Edit' : 'Add'} General Condition
+                  </h4>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseModal}
+                    aria-label="Close"
+                  ></button>
+                </div>
+
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-md-3">
+                  <div className=" row input-group">
+                    <label className=" form-label col-xl-6">Condition Name</label>
+                    <input
+                      type="text"
+                      className="form-control col-xl-6"
+                      placeholder="Enter General Condition Name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                    />
+                  </div></div>
+
+                  <div className="col-md-9">
+                    <div className=" row input-group">
+                    <label className="form-label col-xl-2">Description</label>
+                    <textarea
+                      className="form-control"
+                      rows="4"
+                      placeholder="Enter Description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      required
+                    />
+                  </div></div>
+</div>
+                  <div className="row ">
+                    <div className="col-md-6">
+                      <div className="form-check mb-2">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="isDeleted"
+                          checked={formData.isDeleted}
+                          onChange={(e) => setFormData({ ...formData, isDeleted: e.target.checked })}
+                        />
+                        <label className="form-check-label" htmlFor="isDeleted">
+                          Is Deleted
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="isBlocked"
+                          checked={formData.isBlocked}
+                          onChange={(e) => setFormData({ ...formData, isBlocked: e.target.checked })}
+                        />
+                        <label className="form-check-label" htmlFor="isBlocked">
+                          Is Blocked
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className='modal-footer'>
+                  <button className='me-3 btn btn-secondary' onClick={handleCloseModal}>
+                    Cancel
+                  </button>
+                  <button className='btn btn-primary' onClick={handleSave}>
+                    {editingData ? 'Update' : 'Save'} Condition
+                  </button>
+                </div>
               </div>
             </div>
-            
-            <div className="col-md-6">
-              <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="isBlocked"
-                  checked={formData.isBlocked}
-                  onChange={(e) => setFormData({ ...formData, isBlocked: e.target.checked })}
-                />
-                <label className="form-check-label" htmlFor="isBlocked">
-                  Is Blocked
-                </label>
-              </div>
-            </div>
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" className='me-3' onClick={handleCloseModal}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            {editingData ? 'Update' : 'Save'} Condition
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        </>)}
+
 
       <DataImportModal
         show={showDataImportModal}

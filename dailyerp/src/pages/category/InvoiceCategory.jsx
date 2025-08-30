@@ -17,7 +17,7 @@ const InvoiceCategory = () => {
   const [editingId, setEditingId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showdropdown, setShowdropdown] = useState(false);
-  
+
   const alphaRegex = /^[A-Za-z ]{0,100}$/;
   const alphaNumericRegex = /^[A-Za-z0-9]{0,8}$/;
   const numberRegex = /^\d{0,6}$/;
@@ -178,7 +178,7 @@ const InvoiceCategory = () => {
         <div className="card">
           <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-bordered">
+              <table className="table table-bordered table-sm">
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -196,7 +196,7 @@ const InvoiceCategory = () => {
                       <td>{cat.rangeStart}</td>
                       <td>{cat.rangeEnd}</td>
                       <td>
-                        <button className="btn btn-sm btn-warning" onClick={() => handleEdit(cat)}>
+                        <button className="btn btn-sm btn-primary" onClick={() => handleEdit(cat)}>
                           Edit
                         </button>
                       </td>
@@ -205,7 +205,8 @@ const InvoiceCategory = () => {
                 </tbody>
               </table>
             </div>
-          </div></div>
+          </div>
+        </div>
         {showModal && (
           <>
             <div className="modal-backdrop fade show"></div>
@@ -240,8 +241,8 @@ const InvoiceCategory = () => {
                           </div>
                         ))}
                       </div>
-                      <button type="submit" className="btn btn-primary" disabled={!isFormValid()}>
-                        {editingId ? 'Update' : 'Save'}
+                      <button type="submit" className="btn btn-sm btn-primary" disabled={!isFormValid()}>
+                        {editingId ? 'Update Category' : 'Add Category'}
                       </button>
                     </form>
                   </div>

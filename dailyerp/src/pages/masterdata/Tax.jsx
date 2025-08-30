@@ -454,7 +454,7 @@ const TaxForm = () => {
               <div className="modal-content">
                 <div className="modal-header">
                   <h4 className="modal-title" id="myLargeModalLabel">
-                    {editId ? 'Edit' : 'Add'} Tax
+                    {editId ? 'Edit' : 'Add'} Tax Code
                   </h4>
                   <button
                     type="button"
@@ -467,17 +467,17 @@ const TaxForm = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="modal-body">
                     <div className="row">
-                      {['taxCode', 'taxName', 'cgst', 'sgst', 'igst'].map((field) => (
-                        <div className="col-md-4 mb-3" key={field}>
+                      {['taxCode', 'taxName', 'cgst', 'sgst/ugst', 'igst'].map((field) => (
+                        <div className={` ${field==='taxName' ? 'col-md-4' : 'col-md-2'} mb-3`} key={field}>
                           <div className="row">
-                            <div className="col-4">
-                              <label className="form-label text-uppercase">
+                            <div className={`${field==='taxName' ? 'col-3' : 'col-6'}`}>
+                              <label className="form-label ">
                                 {field === "taxCode" ? "Tax Code" :
                                   field === "taxName" ? "Tax Name" :
-                                    `${field.toUpperCase()} %`}
+                                    `${field.toUpperCase()}%`}
                               </label>
                             </div>
-                            <div className="col-8">
+                            <div className={`${field==='taxName' ? 'col-9' : 'col-6'}`}>
                               <input
                                 type="text"
                                 name={field}

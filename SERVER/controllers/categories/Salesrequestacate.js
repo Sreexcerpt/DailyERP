@@ -5,13 +5,13 @@ const Salecategory=require('../../models/categories/SalesReuestcat')
 // @access  Public
 const createCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeStart, rangeEnd, companyId } = req.body;
+    const { categoryName, rangeStart, rangeEnd, companyId } = req.body;
 
     if (!categoryName  || rangeStart === undefined || rangeEnd === undefined) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const category = new Salecategory({ categoryName, prefix, rangeStart, rangeEnd, companyId });
+    const category = new Salecategory({ categoryName, rangeStart, rangeEnd, companyId });
     await category.save();
 
     res.status(201).json({ message: 'Category created successfully', category });

@@ -209,8 +209,8 @@ const SalesCategory = () => {
                         {/* {errors[field] && <div className="invalid-feedback">{errors[field]}</div>} */}
                       </div>
                     ))}</div>
-                    <button type="submit" className="btn btn-primary" disabled={!isFormValid()}>
-                      {editingId ? 'Update' : 'Save'}
+                    <button type="submit" className="btn btn-sm btn-primary" disabled={!isFormValid()}>
+                      {editingId ? 'Update Category' : 'Add Category'}
                     </button>
                   </form>
                 </div>

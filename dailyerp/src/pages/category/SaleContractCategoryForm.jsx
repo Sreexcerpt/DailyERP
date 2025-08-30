@@ -230,13 +230,13 @@ const companyId = localStorage.getItem('selectedCompanyId');
                       
                       <button type="submit" className='btn btn-primary btn-sm'>
                         {/* <i className={`fas ${editId ? 'fa-save' : 'fa-plus'} me-1`}></i> */}
-                        {editId ? 'Update' : 'Create'} Category
+                        {editId ? 'Update Category' : 'Add Category'}
                       </button>
-                      {editId && (
+                      {/* {editId && (
                         <button type="button" className='btn btn-secondary btn-sm' onClick={resetForm}>
                           <i className="fas fa-times me-1"></i>Cancel
                         </button>
-                      )}
+                      )} */}
                     </div>
                   </form>
                 </div>
@@ -291,7 +291,7 @@ const companyId = localStorage.getItem('selectedCompanyId');
                             onClick={() => { handleEdit(cat); handleOpenModal(); }}
                             title="Edit Category"
                           >
-                            <i className="fas fa-edit"></i>Edit
+                            Edit
                           </button>
                           {/* <button 
                             className='btn btn-sm btn-outline-danger' 

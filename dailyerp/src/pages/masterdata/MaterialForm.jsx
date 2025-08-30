@@ -760,7 +760,7 @@ const MaterialPage = () => {
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>Category</label>
+                              <label className="form-label text-primary">Category</label>
                             </div>
                             <div className="col-8">
                               <select
@@ -785,7 +785,7 @@ const MaterialPage = () => {
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>Description</label>
+                              <label className="form-label text-primary">Description</label>
                             </div>
                             <div className="col-8">
                               <input
@@ -800,11 +800,25 @@ const MaterialPage = () => {
                             </div>
                           </div>
                         </div>
-
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>Base Unit</label>
+                              <label className="form-label text-primary">HSN</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                name="hsn"
+                                value={formData.hsn}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
+                              <label className="form-label text-primary">Base Unit</label>
                             </div>
                             <div className="col-8">
                               <select
@@ -828,7 +842,7 @@ const MaterialPage = () => {
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>Order Unit</label>
+                              <label className="form-label text-primary">Order Unit</label>
                             </div>
                             <div className="col-8">
                               <select
@@ -854,13 +868,14 @@ const MaterialPage = () => {
                           formData.baseUnit !== formData.orderUnit && (
                             <div className="col-md-4 mb-3">
                               <div className="row">
-                                <div className="col-4">
-                                  <label>
-                                    1 {formData.orderUnit} = how many{" "}
-                                    {formData.baseUnit}?
+                                <div className="col-5">
+                                  <label className="form-label text-primary">
+                                    {/* 1 {formData.orderUnit} = how many{" "}
+                                    {formData.baseUnit}? */}
+                                    Unit Conversion
                                   </label>
                                 </div>
-                                <div className="col-8">
+                                <div className="col-7">
                                   <input
                                     name="conversionValue"
                                     value={formData.conversionValue}
@@ -873,58 +888,14 @@ const MaterialPage = () => {
                             </div>
                           )}
 
-                        <div className="col-md-4 mb-3">
-                          <div className="row">
-                            <div className="col-4">
-                              <label>Dimension</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                name="dimension"
-                                value={formData.dimension}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-                        </div>
+                      
+
+
 
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>MPN</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                name="mpn"
-                                value={formData.mpn}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-4 mb-3">
-                          <div className="row">
-                            <div className="col-4">
-                              <label>HSN</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                name="hsn"
-                                value={formData.hsn}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-md-4 mb-3">
-                          <div className="row">
-                            <div className="col-4">
-                              <label>MIN Stock</label>
+                              <label className="form-label text-primary">Min Stock</label>
                             </div>
                             <div className="col-8">
                               <input
@@ -943,7 +914,7 @@ const MaterialPage = () => {
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>safety Stock</label>
+                              <label className="form-label text-primary">Safety Stock</label>
                             </div>
                             <div className="col-8">
                               <input
@@ -959,7 +930,7 @@ const MaterialPage = () => {
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>Max Stock</label>
+                              <label className="form-label text-primary">Max Stock</label>
                             </div>
                             <div className="col-8">
                               <input
@@ -975,15 +946,61 @@ const MaterialPage = () => {
                             </div>
                           </div>
                         </div>
+                         
+ <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
+                              <label className="form-label text-primary">Material Group</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                name="materialgroup"
+                                value={formData.materialgroup}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>Plan Delivery Time</label>
+                              <label className="form-label text-primary">MPN</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                name="mpn"
+                                value={formData.mpn}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                         <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
+                              <label className="form-label text-primary">Packing</label>
+                            </div>
+                            <div className="col-8">
+                              <input
+                                name="dimension"
+                                value={formData.dimension}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                          <div className="row">
+                            <div className="col-4">
+                              <label className="form-label text-primary">Shipping Note</label>
                             </div>
                             <div className="col-8">
                               <input
                                 name="pdt"
-                                type="number"
+                                type="text"
                                 value={formData.pdt}
                                 onChange={handleChange}
                                 className="form-control"
@@ -994,7 +1011,7 @@ const MaterialPage = () => {
                         <div className="col-md-4 mb-3">
                           <div className="row">
                             <div className="col-4">
-                              <label>Location</label>
+                              <label className="form-label text-primary">Location</label>
                             </div>
                             <div className="col-8">
                               <select
@@ -1013,21 +1030,7 @@ const MaterialPage = () => {
                           </div>
                         </div>
 
-                        <div className="col-md-4 mb-3">
-                          <div className="row">
-                            <div className="col-4">
-                              <label>Material Group</label>
-                            </div>
-                            <div className="col-8">
-                              <input
-                                name="materialgroup"
-                                value={formData.materialgroup}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-                        </div>
+                       
                       </div>
                     </div>
 
@@ -1037,7 +1040,7 @@ const MaterialPage = () => {
                         className="btn btn-secondary"
                         onClick={cancelEdit}
                       >
-                        clear
+                        Clear
                       </button>
                       <button type="submit" className="btn btn-primary">
                         {editingMaterial ? "Update Material" : "Save Material"}

@@ -13,7 +13,8 @@ function CustomerCategoryForm() {
 
   const [customerCategories, setCustomerCategories] = useState([]);
   const [editingId, setEditingId] = useState(null); // 🆕
-
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -108,7 +109,7 @@ function CustomerCategoryForm() {
               <h6>Customer Category</h6>
             </div>
             <div className="d-flex my-xl-auto right-content align-items-center flex-wrap gap-2">
-             
+
               <div>
                 <a onClick={() => { handleOpenModal() }} className="btn btn-primary d-flex align-items-center"><i className="ti ti-plus me-1"></i>Add Customer Category</a>
               </div>

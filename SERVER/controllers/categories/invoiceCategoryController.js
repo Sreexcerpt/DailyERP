@@ -5,7 +5,7 @@ const InvoiceCategory = require('../../models/categories/InvoiceCategory');
 // @access  Public
 const createInvoiceCategory = async (req, res) => {
   try {
-    const { categoryName, rangeStart, rangeEnd } = req.body;
+    const { categoryName, companyId,rangeStart, rangeEnd } = req.body;
 
     if (!categoryName || rangeStart === undefined || rangeEnd === undefined) {
       return res.status(400).json({ error: 'All fields are required' });

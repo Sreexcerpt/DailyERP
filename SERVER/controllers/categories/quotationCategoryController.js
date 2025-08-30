@@ -2,11 +2,13 @@ const QuotationCategory = require('../../models/categories/QuotationCategory');
 
 exports.createCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeFrom, rangeTo } = req.body;
-    const newCategory = new QuotationCategory({ categoryName, prefix, rangeFrom, rangeTo });
+    const { categoryName, companyId, rangeFrom, rangeTo } = req.body;
+    console.log(req.body)
+    const newCategory = new QuotationCategory(req.body);
     await newCategory.save();
     res.status(201).json(newCategory);
   } catch (err) {
+    console.log(err)
     res.status(500).json({ error: 'Failed to create RFQ category' });
   }
 };

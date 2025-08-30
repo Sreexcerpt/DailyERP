@@ -198,7 +198,7 @@ const TransferCategory = () => {
                       <td>{cat.rangeEnd}</td>
                       <td>
                         <button className="btn btn-sm btn-primary" onClick={() => handleEdit(cat)}>
-                          <i className="fas fa-edit"></i> Edit
+                           Edit
                         </button>
                       </td>
                     </tr>
@@ -243,8 +243,8 @@ const TransferCategory = () => {
                           </div>
                         ))}
                       </div>
-                      <button type="submit" className="btn btn-primary" disabled={!isFormValid()}>
-                        {editingId ? 'Update' : 'Save'}
+                      <button type="submit" className="btn btn-sm btn-primary" disabled={!isFormValid()}>
+                        {editingId ? 'Update Category' : 'Add Category'}
                       </button>
                     </form>
                   </div>

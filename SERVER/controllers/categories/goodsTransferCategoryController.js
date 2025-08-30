@@ -3,17 +3,17 @@ const GoodsTransferCategory = require('../../models/categories/GoodsTransferCate
 // Create new category
 const createGoodsTransferCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeStart, rangeEnd } = req.body;
+    const { categoryName,companyId,  rangeStart, rangeEnd } = req.body;
 
-    if (!categoryName || !prefix || rangeStart == null || rangeEnd == null) {
+    if (!categoryName || rangeStart == null || rangeEnd == null) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
     const newCategory = new GoodsTransferCategory({
       categoryName,
-      prefix,
       rangeStart,
-      rangeEnd
+      rangeEnd,
+      companyId
     });
 
     await newCategory.save();

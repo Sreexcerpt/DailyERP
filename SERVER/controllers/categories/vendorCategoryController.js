@@ -3,11 +3,11 @@ const VendorCategory = require('../../models/categories/VendorCategory');
 // Create
 exports.createVendorCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeFrom, rangeTo, companyId } = req.body;
+    const { categoryName,  rangeFrom, rangeTo, companyId } = req.body;
 
     const newCategory = new VendorCategory({
       categoryName,
-      prefix,
+      
       rangeFrom,
       rangeTo,
       companyId

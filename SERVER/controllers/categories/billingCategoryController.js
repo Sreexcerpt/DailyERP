@@ -3,8 +3,8 @@ const BillingCategory = require('../../models/categories/BillingCategory');
 // @desc    Create new billing category
 const createBillingCategory = async (req, res) => {
   try {
-    const { categoryName, prefix, rangeStart, rangeEnd } = req.body;
-    if (!categoryName || !prefix || rangeStart === undefined || rangeEnd === undefined) {
+    const { categoryName,  rangeStart, rangeEnd } = req.body;
+    if (!categoryName ||  rangeStart === undefined || rangeEnd === undefined) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
