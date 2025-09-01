@@ -216,9 +216,30 @@ const BillingDisplay = () => {
   if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div className="container mt-4">
-      <div className="d-flex justify-content-between mb-3">
-        <h5>Billing Records</h5>
+    <div className="content mt-4">
+       <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Customer Invoice List</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Invoice
+              </li>
+              <li className="breadcrumb-item">
+                Customer Invoice
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Customer Invoice List</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-header">
+      <div className="d-flex justify-content-between">
+        <h5></h5>
         <input
           type="text"
           value={searchTerm}
@@ -227,9 +248,10 @@ const BillingDisplay = () => {
           className="form-control w-25"
         />
       </div>
-
+</div>
+<div className="card-body">
       <div className="table-responsive">
-        <table className="table table-bordered table-hover">
+        <table className="table table-bordered table-sm">
           <thead className="table-light">
             <tr>
               <th>Item No</th>
@@ -262,9 +284,9 @@ const BillingDisplay = () => {
           </tbody>
         </table>
       </div>
-
+</div></div>
       {/* Pagination Controls */}
-      <nav className="d-flex justify-content-center">
+      <nav className="d-flex justify-content-end">
         <ul className="pagination pagination-sm">
           <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
             <button className="page-link" onClick={() => goToPage(currentPage - 1)}>«</button>

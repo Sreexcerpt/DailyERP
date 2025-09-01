@@ -154,7 +154,6 @@ const TaxForm = () => {
         if (value.length > 25) return 'Max 25 characters';
         break;
       case 'cgst':
-      case 'sgst':
       case 'igst':
         if (!value) return 'Required';
         if (value.length > 2) return 'Max 2 digits';
@@ -467,13 +466,14 @@ const TaxForm = () => {
                 <form onSubmit={handleSubmit}>
                   <div className="modal-body">
                     <div className="row">
-                      {['taxCode', 'taxName', 'cgst', 'sgst/ugst', 'igst'].map((field) => (
+                      {['taxCode', 'taxName', 'cgst', 'sgst', 'igst'].map((field) => (
                         <div className={` ${field==='taxName' ? 'col-md-4' : 'col-md-2'} mb-3`} key={field}>
                           <div className="row">
                             <div className={`${field==='taxName' ? 'col-3' : 'col-6'}`}>
                               <label className="form-label ">
                                 {field === "taxCode" ? "Tax Code" :
                                   field === "taxName" ? "Tax Name" :
+                                    field==="sgst"?"SGST/UGST%":
                                     `${field.toUpperCase()}%`}
                               </label>
                             </div>

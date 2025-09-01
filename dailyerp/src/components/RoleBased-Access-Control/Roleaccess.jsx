@@ -76,7 +76,10 @@ const AccessControl = () => {
             "Employee",
             "LeaveRequests",
             "LeaveRequestManagement",
-            "Payroll"
+            "Payroll",
+            "AttendanceRegister",
+            "AttendanceReports",
+            "AttendanceTaking"
 
         ]
     };

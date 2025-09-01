@@ -996,7 +996,10 @@ const Sidebar = () => {
                                                         "/employee",
                                                         "/leaverequest",
                                                         "/leavemanagement",
-                                                        "/payroll"
+                                                        "/payroll",
+                                                                   "/attendancereg",
+                                                        "/attendancetaking",
+                                                        "/attendancereport"                     
                                                     ].some(path => isActive(path)) || openSubmenus.hrms
                                                         ? "active subdrop"
                                                         : ""
@@ -1027,6 +1030,15 @@ const Sidebar = () => {
                                                 )}
                                                 {hasSubPermission("HRMS", "Payroll") && (
                                                     <li><a href="/payroll" className={isActive("/payroll") ? "active" : ""}>Payroll</a></li>
+                                                )}
+                                                {hasSubPermission("HRMS", "AttendanceRegister") && (
+                                                    <li><a href="/attendancereg" className={isActive("/attendancereg") ? "active" : ""}>Attendance Register</a></li>
+                                                )}
+                                                 {hasSubPermission("HRMS", "AttendanceTaking") && (
+                                                    <li><a href="/attendancetaking" className={isActive("/attendancetaking") ? "active" : ""}>Attendance Taking</a></li>
+                                                )}
+                                                 {hasSubPermission("HRMS", "AttendanceReports") && (
+                                                    <li><a href="/attendancereport" className={isActive("/attendancereport") ? "active" : ""}>Attendance Reports</a></li>
                                                 )}
                                             </ul>
                                         </li>

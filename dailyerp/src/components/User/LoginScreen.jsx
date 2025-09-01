@@ -1,95 +1,7 @@
-// import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-// const LoginScreen = ({ onOpen }) => {
-//   const [companies, setCompanies] = useState([]);
-//   const [selectedCompany, setSelectedCompany] = useState('');
-//   const [loginDate, setLoginDate] = useState('');
-//   const [financialYears, setFinancialYears] = useState([]);
-//   const [selectedYear, setSelectedYear] = useState('');
-// const navigate = useNavigate();
-//   // ✅ Get userId from localStorage
-// const userId = JSON.parse(localStorage.getItem('user'))?.id;
-//     console.log('Fetching companies for user ID:', userId);
-
-//   useEffect(() => {
-//     if (!userId) return;
-
-
-//     axios.get(`http://localhost:8080/api/users/${userId}/companies`)
-//       .then(res => {
-//         setCompanies(res.data);
-//         if (res.data.length > 0) setSelectedCompany(res.data[0]._id);
-//       });
-
-//     const years = [];
-//     const now = new Date();
-//     const current = now.getFullYear();
-//     for (let y = 2017; y <= current + 1; y++) {
-//       years.push(`01/04/${y} - 31/03/${y + 1}`);
-//     }
-//     setFinancialYears(years.reverse());
-//   }, [userId]);
-
-//   const handleSubmit = () => {
-//     if (!selectedCompany || !loginDate || !selectedYear) {
-//       return alert('Please select all fields');
-//     }
-//     onOpen?.({ companyId: selectedCompany, loginDate, financialYear: selectedYear });
-//     navigate('/Dashboard'); // Redirect to Dashboard after opening transaction
-//   };
-
-//   return (
-//     <div className="border p-4 rounded max-w-lg mx-auto mt-10 bg-white shadow">
-//       <h2 className="text-xl font-bold mb-4">Open Transaction</h2>
-
-//       <label className="block mb-2">Login Date</label>
-//       <input
-//         type="date"
-//         className="border p-2 w-full mb-4"
-//         value={loginDate}
-//         onChange={(e) => setLoginDate(e.target.value)}
-//       />
-
-//       <label className="block mb-2">Company</label>
-//       <select
-//         className="border p-2 w-full mb-4"
-//         value={selectedCompany}
-//         onChange={(e) => setSelectedCompany(e.target.value)}
-//       >
-//         {companies.map((c) => (
-//           <option key={c._id} value={c._id}>
-//             {c.name}
-//           </option>
-//         ))}
-//       </select>
-
-//       <label className="block mb-2">Transaction Period</label>
-//       <select
-//         className="border p-2 w-full mb-4"
-//         value={selectedYear}
-//         onChange={(e) => setSelectedYear(e.target.value)}
-//       >
-//         <option value="">Select</option>
-//         {financialYears.map((fy, idx) => (
-//           <option key={idx} value={fy}>
-//             {fy}
-//           </option>
-//         ))}
-//       </select>
-
-//       <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded">
-//         Open
-//       </button>
-//     </div>
-//   );
-// };
-
-// export default LoginScreen;
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import { Link } from 'react-router-dom';
 const LoginScreen = ({ onOpen }) => {
   const [companies, setCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState('');
@@ -157,9 +69,9 @@ const LoginScreen = ({ onOpen }) => {
         <div className="row w-100">
           <div className="col-12 col-md-6 col-lg-4 mx-auto">
             <div className="card shadow-lg border-0">
-              <div className="card-header bg-primary text-white text-center py-4">
-                <h3 className="mb-0">
-
+              <div className="card-header bg-primary  py-4">
+                <h3 className="mb-0 text-white text-center ">
+                  Jyothi Cloud ERP
                 </h3>
               </div>
 
@@ -235,6 +147,17 @@ const LoginScreen = ({ onOpen }) => {
                   <i className="bi bi-shield-check me-1"></i>
                   Secure transaction portal
                 </small>
+                 <p className="text-muted small mb-0">
+                 Designed and Developed By{' '}
+                <Link 
+                  to="https://excerptech.com/" 
+                  className="text-primary text-decoration-none fw-semibold"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Excerpt Technologies Pvt Ltd
+                </Link> @ 2025
+              </p>
               </div>
             </div>
           </div>

@@ -3,13 +3,13 @@ const VendorPriceList = require('../../models/masterdata/VendorPriceList');
 // Create Vendor Price List
 exports.createVendorPrice = async (req, res) => {
   try {
-    const { categoryId, vendorId, materialId, unit, bum, orderUnit,taxId,buyer,companyId, financialYear } = req.body;
+    const { categoryId, vendorId, materialId, unit, bum,price, orderUnit,taxId,buyer,companyId, financialYear } = req.body;
 
     if (!categoryId || !vendorId || !materialId || !unit || !bum || !orderUnit) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const newEntry = new VendorPriceList({ categoryId, vendorId, materialId, unit, bum, orderUnit,taxId,buyer, companyId,financialYear});
+    const newEntry = new VendorPriceList({ categoryId, vendorId, materialId, unit,price, bum, orderUnit,taxId,buyer, companyId,financialYear});
     await newEntry.save();
     res.status(201).json(newEntry);
   } catch (error) {

@@ -23,6 +23,26 @@ const employeeSchema = new mongoose.Schema({
   subjects: [{ subjectCode: String, subjectName: String }],
   password: String,
   profilePhoto: String,
+   descriptor: { 
+    type: [Number], 
+    required: false,
+    // validate: {
+    //   validator: function(arr) {
+    //     return Array.isArray(arr) && arr.length === 128;
+    //   },
+    //   message: 'Descriptor must be an array of 128 numbers'
+    // }
+  },
+  image: { 
+    type: String 
+  },
+  inTime: Date,        // Today's IN time
+  outTime: Date,       // Today's OUT time  
+  workingHours: Number, // Total hours worked today
+  isActive: {
+    type: Boolean,
+    default: true
+  },
   resetCode: String,
   resetCodeExpiry: Date,
      companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },

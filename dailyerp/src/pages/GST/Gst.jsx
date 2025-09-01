@@ -226,6 +226,7 @@ function GST() {
                                 <li className="breadcrumb-item">
                                     <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
                                 </li>
+                                <li className="breadcrumb-item">Accounts</li>
                                 <li className="breadcrumb-item active" aria-current="page">GST List</li>
                             </ol>
                         </nav>

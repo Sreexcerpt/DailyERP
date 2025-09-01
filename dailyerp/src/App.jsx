@@ -54,7 +54,9 @@ import MRP from './pages/masterdata/MRP';
 import Payments from './pages/Payments/Payments';
 import PurchaseContractCategoryForm from './pages/category/PurchaseContractCategory';
 
-
+import AttedanceRegister from './pages/EmployeeandHRMS/AttendanceSystem/AttedanceRegister';
+import AttendanceTaking from './pages/EmployeeandHRMS/AttendanceSystem/AttendanceTaking';
+import AttandanceReport from './pages/EmployeeandHRMS/AttendanceSystem/AttandanceReport';
 
 import BillingCategory from './pages/category/BillingCategory';
 import CustomerCategoryForm from './pages/category/CustomerCategoryForm';
@@ -648,6 +650,9 @@ function App() {
           <Route path='/payroll' element={<ProtectedLayout><Payroll /></ProtectedLayout>} />
           <Route path='/departments' element={<ProtectedLayout><DepartmentForm /></ProtectedLayout>} />
           <Route path='/designation' element={<ProtectedLayout><Designation /></ProtectedLayout>} />
+          <Route path='/attendancereg' element={<ProtectedLayout><AttedanceRegister /></ProtectedLayout>} />
+          <Route path='/attendancetaking' element={<ProtectedLayout><AttendanceTaking /></ProtectedLayout>} />
+          <Route path='/attendancereport' element={<ProtectedLayout><AttandanceReport /></ProtectedLayout>} />
         </Routes>
       </Router>
     </>

@@ -298,7 +298,7 @@ const handleSubmit = async (e) => {
                         filteredRecords.map((record) => {
                           const entityName = paymentData.type === "vendor"
                             ? record.vendor
-                            : record.salesOrderId?.customer;
+                            : record?.customer;
                           const isSelected = paymentData.recordId === (record._id || record.id);
 
                           return (
@@ -338,7 +338,8 @@ const handleSubmit = async (e) => {
                           <strong>
                             {paymentData.type === "vendor"
                               ? paymentData.selectedRecord.vendor
-                              : paymentData.selectedRecord.salesOrderId?.customer}
+                              : paymentData.selectedRecord.customer}
+                              {console.log(paymentData.selectedRecord.customer)}
                           </strong>
                         </p>
                         <p className="mb-1">Document: {paymentData.selectedRecord.docnumber}</p>

@@ -65,7 +65,7 @@ const designationRoutes = require('./routes/hrms/designation')
 
 const salaryRoutes = require("./routes/hrms/salary"); const leaveRoutes = require('./routes/hrms/Leave');
 
-
+const attendanceRoutes = require('./routes/hrms/attendanceRoutes');
 const app = express();
 app.use(cors());
 
@@ -197,6 +197,10 @@ app.use("/api/salary-records", salaryRoutes);
 
 
 const masterDataImportRoutes = require('./routes/master-data-import');
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/attendance', employeeRoutes);
+
+
 
 // API Routes
 app.use('/api/master-data', masterDataImportRoutes);

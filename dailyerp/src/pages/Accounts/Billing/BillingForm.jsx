@@ -240,83 +240,30 @@ function BillingForm() {
 
 
   return (
-    <div className="content p-3">
-      <h6>Billing Form </h6>
+    <div className="content">
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Customer Invoice Creation</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Invoice
+              </li>
+              <li className="breadcrumb-item">
+                Customer Invoice
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Customer Invoice Creation</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="card-header">
-            {/* <div className="row mb-2">
-              <div className="col-md-6">
-              <div className="col-md-3">
-                <label>Category</label>
-                <select className="form-select" value={formData.category} onChange={handleCategoryChange}>
-                  <option value="">Select</option>
-                  {categories.map(cat => (
-                    <option key={cat._id} value={cat.categoryName}>{cat.categoryName}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="col-xl-3">
-                <label>Sales Order</label>
-                <div className="input-group">
-                  <input type="text" name="so" value={selectedSO?.soNumber || ""} className="form-control" readOnly />
-                  <button type="button" className="btn btn-outline-primary" onClick={() => setShowModal(true)}>Search</button>
-                </div>
-              </div>
-              <div className="col-xl-3">
-                <label>Customer</label>
-                <div className="input-group">
-                  <input type="text" className="form-control" value={formData.customer} readOnly />
-                  <button type="button" className="btn btn-outline-primary" onClick={() => setShowCustomerModal(true)}>Search</button>
-                </div>
-              </div>
-              <div className="col-md-2">
-                <label>Tax Code</label>
-                <select className="form-select" value={selectedTax.taxCode || ""} onChange={(e) => {
-                  const t = taxes.find(t => t.taxCode === e.target.value);
-                  setSelectedTax(t || {});
-                }}>
-                  <option value="">Select</option>
-                  {taxes.map(t => (
-                    <option key={t._id} value={t.taxCode}>{t.taxCode} - {t.taxName}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-2">
-                <label>Tax Name</label>
-                <input type="text" className="form-control" value={selectedTax.taxName || ""} onChange={(e) => setSelectedTax(prev => ({ ...prev, taxName: e.target.value }))} />
-              </div>
-              </div>
-
-              <div className="col-md-6">
-                       <div className="col-md-2">
-                <label>Document Date</label>
-                <input type="date" className="form-control" value={formData.documentDate} onChange={(e) => setFormData(prev => ({ ...prev, documentDate: e.target.value }))} />
-              </div>
-              <div className="col-md-2">
-                <label>Posting Date</label>
-                <input type="date" className="form-control" value={formData.postingDate} onChange={(e) => setFormData(prev => ({ ...prev, postingDate: e.target.value }))} />
-              </div>
-              <div className="col-md-3">
-                <label>Reference</label>
-                <input type="text" className="form-control" value={formData.reference} onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))} />
-              </div>
-
-              <div className="col-md-2">
-                <label>Location</label>
-                <input type="text" className="form-control" value={formData.location} readOnly />
-              </div>
-              <div className="col-md-2">
-                <label>Billing Ref</label>
-                <input type="text" className="form-control" value={formData.BillingRef} onChange={(e) => setFormData(prev => ({ ...prev, BillingRef: e.target.value }))} />
-              </div>
-
-              </div>
-
-            </div> */}
-
             <div className="row mb-3">
               {/* LEFT GRID */}
               <div className="col-md-6">

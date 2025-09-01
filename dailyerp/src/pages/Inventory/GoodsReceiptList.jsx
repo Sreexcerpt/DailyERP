@@ -1,181 +1,7 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-
-// const GoodsReceiptList = () => {
-//   const [goodsReceipts, setGoodsReceipts] = useState([]);
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [selectedDocNumber, setSelectedDocNumber] = useState("");
-//   const [filteredReceipt, setFilteredReceipt] = useState(null);
-
-//   useEffect(() => {
-//     fetchGoodsReceipts();
-//   }, []);
-
-//   const fetchGoodsReceipts = async () => {
-//     try {
-//       const response = await axios.get('http://localhost:8080/api/goodsreceipt');
-//       setGoodsReceipts(response.data);
-//       if (response.data.length > 0) {
-//         setFilteredReceipt(response.data[0]); // Set first receipt as default
-//       }
-//     } catch (error) {
-//       console.error('Error fetching Goods Receipts:', error);
-//     }
-//   };
-
-//   // Get unique document numbers for dropdown
-//   const uniqueDocNumbers = [...new Set(goodsReceipts.map(receipt => receipt.docnumber))];
-
-//   // Filter receipt based on selected document number
-//   useEffect(() => {
-//     if (selectedDocNumber) {
-//       const receipt = goodsReceipts.find(r => r.docnumber === selectedDocNumber);
-//       setFilteredReceipt(receipt);
-//     } else if (goodsReceipts.length > 0) {
-//       setFilteredReceipt(goodsReceipts[0]);
-//     }
-//   }, [selectedDocNumber, goodsReceipts]);
-
-//   // Filter items based on search term
-//   const getFilteredItems = () => {
-//     if (!filteredReceipt) return [];
-    
-//     if (!searchTerm) return filteredReceipt.items || [];
-    
-//     return filteredReceipt.items.filter(item => 
-//       item.materialId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       item.lotNo?.toLowerCase().includes(searchTerm.toLowerCase())
-//     );
-//   };
-
-//   const handlePrint = () => {
-//     const printElement = document.getElementById('print-section');
-//     const printContents = printElement.innerHTML;
-//     const printWindow = window.open('', '', 'height=600,width=900');
-//     printWindow.document.write('<html><head><title>Print Goods Receipt</title>');
-//     printWindow.document.write('<style>table, th, td { border: 1px solid black; border-collapse: collapse; padding: 6px; }</style>');
-//     printWindow.document.write('</head><body>');
-//     printWindow.document.write(printContents);
-//     printWindow.document.write('</body></html>');
-//     printWindow.document.close();
-//     printWindow.focus();
-//     printWindow.print();
-//     printWindow.close();
-//   };
-
-//   return (
-//     <>
-//       <div className="content">
-//         <div className="row">
-//           <div className="col-sm-12">
-//             <div>
-//               <div className="d-flex align-items-center justify-content-between flex-wrap row-gap-3 mb-3">
-//                 <h5 className="d-flex align-items-center">Goods Receipt List</h5>
-//                 <div className="d-flex align-items-center flex-wrap row-gap-3 table-header">
-//                   <div className="input-icon position-relative me-2">
-//                     <label className="form-label">Search Items:</label>
-//                     <input
-//                       type="text"
-//                       className="form-control datetimepicker py-1 h-auto"
-//                       placeholder="Search..."
-//                       value={searchTerm}
-//                       onChange={(e) => setSearchTerm(e.target.value)}
-//                     />
-//                   </div>
-//                   <div className="dropdown">
-//                     <label className="form-label">
-//                       Filter by Document Number:
-//                     </label>
-//                     <select
-//                       className="form-select"
-//                       value={selectedDocNumber}
-//                       onChange={(e) => setSelectedDocNumber(e.target.value)}
-//                     >
-//                       <option value="">Select Document Number</option>
-//                       {uniqueDocNumbers.map((docNumber, index) => (
-//                         <option key={index} value={docNumber}>
-//                           {docNumber}
-//                         </option>
-//                       ))}
-//                     </select>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {filteredReceipt ? (
-//                 <div className="card-body p-0" id="print-section">
-//                   <div className="d-flex align-items-center justify-content-between flex-wrap">
-//                     <h5 className="mt-3 mb-2">
-//                       Document No: {filteredReceipt.docnumber}
-//                     </h5>
-//                     <button className="btn btn-primary" onClick={handlePrint}>
-//                       Print Receipt
-//                     </button>
-//                   </div>
-//                   <div className="table-responsive table-nowrap">
-//                     <table className="table mb-0 border">
-//                       <thead className="table-light">
-//                         <tr>
-//                           <th>#</th>
-//                           <th className="fw-medium fs-14">Material ID</th>
-//                           <th className="fw-medium fs-14">Description</th>
-//                           <th className="fw-medium fs-14">Quantity</th>
-//                           <th className="fw-medium fs-14">Base Unit</th>
-//                           <th className="fw-medium fs-14">Delivery Date</th>
-//                           <th className="fw-medium fs-14">Lot No</th>
-//                           <th className="fw-medium fs-14">Price</th>
-//                           <th className="fw-medium fs-14">Total</th>
-//                         </tr>
-//                       </thead>
-//                       <tbody>
-//                         {getFilteredItems().length === 0 ? (
-//                           <tr>
-//                             <td colSpan="9" className="text-center">
-//                               No items found
-//                             </td>
-//                           </tr>
-//                         ) : (
-//                           getFilteredItems().map((item, idx) => {
-//                             const total = item.quantity * item.price;
-//                             return (
-//                               <tr key={idx}>
-//                                 <td>{idx + 1}</td>
-//                                 <td>{item.materialId}</td>
-//                                 <td>{item.description}</td>
-//                                 <td>{item.quantity}</td>
-//                                 <td>{item.baseUnit}</td>
-//                                 <td>{item.deliveryDate}</td>
-//                                 <td>{item.lotNo}</td>
-//                                 <td>{item.price}</td>
-//                                 <td>{total.toFixed(2)}</td>
-//                               </tr>
-//                             );
-//                           })
-//                         )}
-//                       </tbody>
-//                     </table>
-//                   </div>
-//                 </div>
-//               ) : (
-//                 <div className="card-body p-0">
-//                   <p className="text-center mt-4">No goods receipt records found.</p>
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
-
-// export default GoodsReceiptList;
-
-
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+
+const PAGE_SIZE = 10;
 
 const GoodsReceiptList = () => {
   const [goodsReceipts, setGoodsReceipts] = useState([]);
@@ -183,6 +9,10 @@ const GoodsReceiptList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [postingDateFrom, setPostingDateFrom] = useState("");
   const [postingDateTo, setPostingDateTo] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const companyId = localStorage.getItem('selectedCompanyId');
+  const financialYear = localStorage.getItem('financialYear');
 
   useEffect(() => {
     fetchGoodsReceipts();
@@ -298,107 +128,246 @@ const GoodsReceiptList = () => {
 
   const filteredReceipts = filterReceipts();
 
+  // Pagination
+  const totalPages = Math.ceil(filteredReceipts.length / PAGE_SIZE) || 1;
+
+  const handlePageChange = (pageNum) => {
+    if (pageNum < 1 || pageNum > totalPages) return;
+    setCurrentPage(pageNum);
+  };
+
   // Reset filter and search
   const handleReset = () => {
     setSearchTerm("");
     setPostingDateFrom("");
     setPostingDateTo("");
+    setCurrentPage(1);
   };
+
+  // Receipts to show for current page
+  const paginatedReceipts = filteredReceipts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  useEffect(() => {
+    // If current page exceeds total pages after filtering, reset to last page
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+    // eslint-disable-next-line
+  }, [filteredReceipts, totalPages]);
 
   return (
     <>
       <div className="content">
-        <div className="row ">
-          <div className="col-md-3 mb-2">
-            <label className="form-label">Search</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search (Doc No, Reference, Vendor, Location)..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="col-md-3 mb-2">
-            <label className="form-label">Posting Date From</label>
-            <input
-              type="date"
-              className="form-control"
-              value={postingDateFrom}
-              onChange={e => setPostingDateFrom(e.target.value)}
-            />
-          </div>
-          <div className="col-md-3 mb-2">
-            <label className="form-label">Posting Date To</label>
-            <input
-              type="date"
-              className="form-control"
-              value={postingDateTo}
-              onChange={e => setPostingDateTo(e.target.value)}
-            />
-          </div>
-          <div className="col-md-3 mb-2 d-flex align-items-end">
-            <button className="btn btn-outline-secondary w-100" onClick={handleReset}>
-              Reset
-            </button>
+        <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+          <div className="my-auto">
+            <h2 className="mb-1">Goods Receipt List</h2>
+            <nav>
+              <ol className="breadcrumb mb-0">
+                <li className="breadcrumb-item">
+                  <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+                </li>
+                <li className="breadcrumb-item">
+                  Inventory
+                </li>
+                <li className="breadcrumb-item">
+                  Inventory Report
+                </li>
+                <li className="breadcrumb-item active" aria-current="page">Goods Receipt List</li>
+              </ol>
+            </nav>
           </div>
         </div>
         <div className="row">
           <div className="col-sm-12">
-            <h5 className="mb-3">Goods Receipt List</h5>
-            <div className="table-responsive table-nowrap">
-              <table className="table mb-0 border">
-                <thead className="table-light">
-                  <tr>
-                    <th>#</th>
-                    <th>Document No</th>
-                    <th>Document Date</th>
-                    <th>Posting Date</th>
-                    <th>Reference</th>
-                    <th>Vendor</th>
-                    <th>Location</th>
-                    <th>Receipt Date</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredReceipts.length === 0 ? (
-                    <tr>
-                      <td colSpan="9" className="text-center">
-                        No goods receipt records found.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredReceipts.map((receipt, idx) => (
-                      <tr key={receipt._id?.$oid || idx}>
-                        <td>{idx + 1}</td>
-                        <td>{receipt.docnumber}</td>
-                        <td>{receipt.documentDate}</td>
-                        <td>{receipt.postingDate}</td>
-                        <td>{receipt.reference}</td>
-                        <td>{receipt.vendor}</td>
-                        <td>{receipt.location}</td>
-                        <td>{receipt.receiptDate}</td>
-                        <td>
-                          <button
-                            className="btn btn-primary btn-sm me-2"
-                            onClick={() => handlePrint(receipt)}
-                          >
-                            Print
-                          </button>
-                          <button
-                            className="btn btn-info btn-sm"
-                            onClick={() => handlePreview(receipt)}
-                          >
-                            Preview
-                          </button>
-                        </td>
+            <div className="card">
+              <div className="card-header">
+                <div className="row ">
+                  <div className="col-md-3 mb-2">
+                    <label className="form-label">Search</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search (Doc No, Reference, Vendor, Location)..."
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-3 mb-2">
+                    <label className="form-label">Posting Date From</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={postingDateFrom}
+                      onChange={e => setPostingDateFrom(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-3 mb-2">
+                    <label className="form-label">Posting Date To</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={postingDateTo}
+                      onChange={e => setPostingDateTo(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-3 mb-2 d-flex align-items-end">
+                    <button className="btn btn-outline-secondary w-100" onClick={handleReset}>
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="card-body">
+                <div className="table-responsive table-nowrap">
+                  <table className="table table-sm mb-0 border">
+                    <thead className="table-light">
+                      <tr>
+                        <th>#</th>
+                        <th>Document No</th>
+                        <th>Document Date</th>
+                        <th>Posting Date</th>
+                        <th>Reference</th>
+                        <th>Vendor</th>
+                        <th>Location</th>
+                        <th>Receipt Date</th>
+                        <th>Action</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {paginatedReceipts.length === 0 ? (
+                        <tr>
+                          <td colSpan="9" className="text-center">
+                            No goods receipt records found.
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedReceipts.map((receipt, idx) => (
+                          <tr key={receipt._id?.$oid || ((currentPage - 1) * PAGE_SIZE + idx)}>
+                            <td>{(currentPage - 1) * PAGE_SIZE + idx + 1}</td>
+                            <td>{receipt.docnumber}</td>
+                            <td>{receipt.documentDate}</td>
+                            <td>{receipt.postingDate}</td>
+                            <td>{receipt.reference}</td>
+                            <td>{receipt.vendor}</td>
+                            <td>{receipt.location}</td>
+                            <td>{receipt.receiptDate}</td>
+                            <td>
+                              <button
+                                className="btn btn-primary btn-sm me-2"
+                                onClick={() => handlePrint(receipt)}
+                              >
+                                Print
+                              </button>
+                              <button
+                                className="btn btn-info btn-sm"
+                                onClick={() => handlePreview(receipt)}
+                              >
+                                Preview
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
+            {totalPages > 1 && (
+              <div className="row mb-3">
+                <div className="col-md-12">
+                  <nav aria-label="Page navigation">
+                    <ul className="pagination justify-content-end">
+                      <li
+                        className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+                      >
+                        <button
+                          className="page-link btn-sm"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                        >
+                          <span aria-hidden="true"><i className="fas fa-angle-left"></i></span>
+                        </button>
+                      </li>
+
+                      {(() => {
+                        const delta = 2; // Number of pages to show on each side of current page
+                        const range = [];
+                        const rangeWithDots = [];
+
+                        // Always show first page
+                        range.push(1);
+
+                        // Add pages around current page
+                        for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+                          range.push(i);
+                        }
+
+                        // Always show last page if there are more than 1 page
+                        if (totalPages > 1) {
+                          range.push(totalPages);
+                        }
+
+                        // Remove duplicates and sort
+                        const uniqueRange = [...new Set(range)].sort((a, b) => a - b);
+
+                        let prev;
+                        for (let i of uniqueRange) {
+                          if (prev) {
+                            if (i - prev === 2) {
+                              rangeWithDots.push(prev + 1);
+                            } else if (i - prev !== 1) {
+                              rangeWithDots.push('...');
+                            }
+                          }
+                          rangeWithDots.push(i);
+                          prev = i;
+                        }
+
+                        return rangeWithDots.map((number, index) => {
+                          if (number === '...') {
+                            return (
+                              <li key={`ellipsis-${index}`} className="page-item disabled">
+                                <span className="page-link">...</span>
+                              </li>
+                            );
+                          }
+
+                          return (
+                            <li
+                              key={number}
+                              className={`page-item ${currentPage === number ? "active" : ""}`}
+                            >
+                              <button
+                                className="page-link"
+                                onClick={() => handlePageChange(number)}
+                              >
+                                {number}
+                              </button>
+                            </li>
+                          );
+                        });
+                      })()}
+
+                      <li
+                        className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                      >
+                        <button
+                          className="page-link btn-sm"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                        >
+                          <span aria-hidden="true"><i className="fas fa-angle-right"></i></span>
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
