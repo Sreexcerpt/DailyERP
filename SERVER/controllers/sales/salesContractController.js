@@ -7,12 +7,12 @@ async function generateContractNumber(categoryId) {
   if (!category) throw new Error('Contract category not found');
 
 
-  const lastContract = await SalesContract.find({ categoryId })
+  const lastContract = await SalesContract.find({ categoryId, contractNumberType: 'internal' })
     .sort({ contractNumber: -1 })
     .limit(1);
 
   let nextNumber = category.rangeFrom;
-
+  console.log('lastContract:', lastContract);
   if (lastContract.length > 0) {
     const lastNumber = parseInt(lastContract[0].contractNumber);
     nextNumber = lastNumber + 1;

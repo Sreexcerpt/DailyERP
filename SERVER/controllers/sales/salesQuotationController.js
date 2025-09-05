@@ -11,7 +11,7 @@ async function generateQuotationNumber(categoryId) {
 
     // Find ALL quotations for this category to determine the highest number
     const existingQuotations = await SalesQuotation.find({ 
-      categoryId 
+      categoryId, quotationNumberType: 'internal'
     }).select('quotationNumber');
 
     let nextNumber = category.rangeFrom;

@@ -3126,7 +3126,7 @@ function PurchaseOrderForm() {
                       </div>
                       <div className="d-flex align-items-center">
                         <span><i className="fas fa-clipboard-list me-2"></i></span>
-                        <h5 className="fw-semibold">Purchase Quotation Header</h5>
+                        <h5 className="fw-semibold">Purchase Order Header</h5>
                       </div>
                     </div>
                   </div>
@@ -3139,11 +3139,11 @@ function PurchaseOrderForm() {
                   <div className="card-body">
                     <div className="row gap-2">
                       <div className="col-lg-3 row">
-                        <div className="col-xl-6">
-                          <label className="form-label">Reference_Document:
+                        <div className="col-xl-4">
+                          <label className="form-label">Ref_Document:
                           </label>
                         </div>
-                        <div className="col-xl-6">
+                        <div className="col-xl-7">
                           <div className="input-group">
                             <input
                               type="text"
@@ -3170,8 +3170,8 @@ function PurchaseOrderForm() {
                         </div>
                       </div>
                       <div className="col-lg-3 row">
-                        <div className="col-xl-5">
-                          <label className="form-label">PO Category:</label>
+                        <div className="col-xl-4">
+                          <label className="form-label">PO_Category:</label>
                         </div>
                         <div className="col-xl-7">
                           <select
@@ -3193,81 +3193,6 @@ function PurchaseOrderForm() {
                           </select>
                         </div>
                       </div>
-                     <div className="col-lg-3  row">
-                        <div className="col-xl-4">
-                          <label className="form-label">Header Note:</label></div>
-                        <div className="col-xl-8">
-                          <textarea
-                            className="form-control form-control-sm"
-                            value={payTerms}
-                            onChange={(e) => setPayTerms(e.target.value)}
-                            maxLength="250"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="col-lg-3 row">
-                        <div className="col-xl-4">
-                          <label className="form-label">Remarks:</label></div>
-                        <div className="col-xl-8">
-                          <input
-                            className="form-control"
-                            value={remarks}
-                            onChange={(e) =>
-                              setRemarks(e.target.value)
-                            }
-                          />
-                        </div></div>
-                      <div className="col-lg-3 row">
-                        <div className="col-xl-6">
-                          <label className="form-label">Prepared By:</label></div>
-                        <div className="col-xl-6">
-                          <input
-                            className="form-control"
-                            value={preparedby}
-                            onChange={(e) =>
-                              setPreparedby(e.target.value)
-                            }
-                          /></div>
-                      </div>
-                      <div className="col-lg-3 row">
-                        <div className="col-xl-6">
-                          <label className="form-label">Approved By:</label>
-                        </div>
-                        <div className="col-xl-6">
-                          <input
-                            className="form-control"
-                            value={approvedby}
-                            onChange={(e) =>
-                              setApprovedby(e.target.value)
-                            }
-                          /></div>
-                      </div>
-                      <div className="col-lg-3 row">
-                        <div className="col-xl-5">
-                          <label className="form-label">PO Number:</label>
-                        </div>
-                        <div className="col-xl-7">
-                          <input
-                            className="form-control form-control-sm"
-                            value={poNumber}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-                      <div className="col-lg-3 row">
-                        <div className="col-xl-6">
-                          <label className="form-label">
-                            PO Creating date:
-                          </label></div>
-                        <div className="col-xl-6">
-                          <input
-                            type="date"
-                            className="form-control form-control-sm"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                          /></div>
-                      </div>
                       <div className="col-lg-3 row">
                         <div className="col-xl-3">
                           <label className="form-label">Vendor:</label></div>
@@ -3288,6 +3213,34 @@ function PurchaseOrderForm() {
                             </button>
                           </div></div>
                       </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">PO Number:</label>
+                        </div>
+                        <div className="col-xl-7">
+                          <input
+                            className="form-control form-control-sm"
+                            value={poNumber}
+                            readOnly
+                          />
+                        </div>
+                      </div>
+
+
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">
+                            PO Creating date:
+                          </label></div>
+                        <div className="col-xl-6">
+                          <input
+                            type="date"
+                            className="form-control form-control-sm"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                          /></div>
+                      </div>
+
 
                       <div className="col-lg-3 row">
                         <div className="col-xl-5">
@@ -3353,7 +3306,7 @@ function PurchaseOrderForm() {
                             }
                           />
                         </div></div>
- <div className="col-xl-3 row">
+                      <div className="col-xl-3 row">
                         <div className="col-xl-5">
                           <label className="form-label">Select General Conditions</label>
                         </div>
@@ -3421,7 +3374,56 @@ function PurchaseOrderForm() {
                           </div>
                         </div>
                       </div>
-                      
+                      <div className="col-lg-3  row">
+                        <div className="col-xl-4">
+                          <label className="form-label">Header Note:</label></div>
+                        <div className="col-xl-8">
+                          <textarea
+                            className="form-control form-control-sm"
+                            value={payTerms}
+                            onChange={(e) => setPayTerms(e.target.value)}
+                            maxLength="250"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-4">
+                          <label className="form-label">Remarks:</label></div>
+                        <div className="col-xl-8">
+                          <input
+                            className="form-control"
+                            value={remarks}
+                            onChange={(e) =>
+                              setRemarks(e.target.value)
+                            }
+                          />
+                        </div></div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">Prepared By:</label></div>
+                        <div className="col-xl-6">
+                          <input
+                            className="form-control"
+                            value={preparedby}
+                            onChange={(e) =>
+                              setPreparedby(e.target.value)
+                            }
+                          /></div>
+                      </div>
+                      <div className="col-lg-3 row">
+                        <div className="col-xl-6">
+                          <label className="form-label">Approved By:</label>
+                        </div>
+                        <div className="col-xl-6">
+                          <input
+                            className="form-control"
+                            value={approvedby}
+                            onChange={(e) =>
+                              setApprovedby(e.target.value)
+                            }
+                          /></div>
+                      </div>
                     </div>
                   </div>
                 </div>

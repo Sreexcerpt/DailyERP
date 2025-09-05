@@ -23,6 +23,7 @@ import SalesQuotationForm from './pages/sales/salesQuotation/SalesQuotationForm'
 import SalesQuotationListPage from './pages/sales/salesQuotation/SalesQuotationList';
 import SalesOrderForm from './pages/sales/salesOrder/SalesOrderForm';
 import SalesOrderDisplay from './pages/sales/salesOrder/SalesOrderDisplay'
+import SalesDeliveryForm from './pages/sales/salesDelivery/salesDelivery';
 import CompanyForm from './components/Company/Company';
 
 import CustomerForm from "./pages/masterdata/CustomerForm";
@@ -94,7 +95,7 @@ import TimeTracking from './pages/Projects/TimeTracking';
 import Projects from './pages/Projects/Projects';
 import Campaigns from './pages/Campaigns/Campaigns';
 import Analytics from './pages/Campaigns/Analytics';
-
+import SalesDeliveryDisplay from './pages/sales/salesDelivery/salesDeliveryDisplay';
 
 import Employee from './pages/EmployeeandHRMS/Employee';
 import DepartmentForm from './pages/EmployeeandHRMS/Departments/Department';
@@ -638,11 +639,16 @@ function App() {
             </ProtectedLayout>
           } />
 
-
-
-
-
-
+          <Route path='/SalesDelivery' element={
+            <ProtectedLayout>
+              <SalesDeliveryForm />
+            </ProtectedLayout>
+          } />
+      <Route path='/SalesDeliveryList' element={
+        <ProtectedLayout>
+          <SalesDeliveryDisplay />
+        </ProtectedLayout>
+      } />
           {/* HRMS */}
           <Route path='/employee' element={<ProtectedLayout><Employee /></ProtectedLayout>} />
           <Route path='/leaverequest' element={<ProtectedLayout><LeaveRequests /></ProtectedLayout>} />

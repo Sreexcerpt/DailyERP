@@ -1144,13 +1144,14 @@ const CustomerModal = () => {
                                   <input
                                     className="form-control form-control-sm"
                                     value={item.price}
-                                    onChange={(e) =>
+                                    onChange={(e) =>{
+                                      e.target.value = e.target.value.replace(/[^0-9.]/g, '');
                                       updateItemField(
                                         idx,
                                         "price",
                                         e.target.value
                                       )
-                                    }
+                                    }}
                                   />
                                 </td>
                               </tr>

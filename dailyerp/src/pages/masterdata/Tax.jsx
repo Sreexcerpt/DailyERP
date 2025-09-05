@@ -154,7 +154,7 @@ const TaxForm = () => {
         if (value.length > 25) return 'Max 25 characters';
         break;
       case 'cgst':
-      case 'igst':
+      case 'sgst':
         if (!value) return 'Required';
         if (value.length > 2) return 'Max 2 digits';
         break;
@@ -173,7 +173,7 @@ const TaxForm = () => {
         cleaned = value.replace(/[^A-Za-z0-9 ]/g, '').slice(0, 4);
         break;
       case 'taxName':
-        cleaned = value.replace(/[^A-Za-z0-9 ]/g, '').slice(0, 25);
+        cleaned = value.slice(0, 25);
         break;
       case 'cgst':
       case 'sgst':
@@ -511,7 +511,7 @@ const TaxForm = () => {
                     <button
                       className="btn btn-primary"
                       type="submit"
-                      disabled={!isFormValid()}
+                      // disabled={!isFormValid()}
                     >
                       {editId ? 'Update Tax' : 'Save Tax'}
                     </button>

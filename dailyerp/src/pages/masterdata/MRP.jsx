@@ -153,10 +153,10 @@ function MRP() {
 
         const inventoryStock = stockItem?.quantityAvailable || 0;
         const safetyStock = material.safetyStock || 0;
-
+        const maxstock = material.maxstock || 0;
         // Calculate reorder point based on safety stock
-        const reorderPoint = Math.abs(safetyStock - inventoryStock);
-        const reorderQuantity = Math.abs(safetyStock - inventoryStock);
+        const reorderPoint = Math.abs(maxstock - inventoryStock);
+        const reorderQuantity = Math.abs(maxstock - inventoryStock);
 
         return {
             ...material,
@@ -349,9 +349,7 @@ function MRP() {
                 finalTotal: finalTotalAmount,
                 processes: selectedProcesses || [], // Add if you have this data
                 generalConditions: selectedConditions || [], // Add if you have this data
-                poGenerationType: indentIdType, // Backend expects 'poGenerationType', not 'indentIdType'
-                companyId,
-                financialYear
+                poGenerationType: indentIdType
             };
 
             // Add external PO number if needed
@@ -720,7 +718,7 @@ function MRP() {
                                         <td>{material.inventoryStock}</td>
                                         <td
                                             style={{
-                                                color:
+                                                backgroundColor:
                                                     material.inventoryStock < material.safetyStock
                                                         ? material.inventoryStock < material.minstock
                                                             ? "red"
@@ -1364,3 +1362,4 @@ function MRP() {
 }
 
 export default MRP;
+

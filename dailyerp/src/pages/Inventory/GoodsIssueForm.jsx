@@ -367,85 +367,209 @@ function GoodsIssue() {
   const isDisplayCategory = formData.category.trim().toLowerCase() === "display";
   return (
     <div className="content p-3">
-      <h6>Goods Issue</h6>
-
+      <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Material Issue</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Inventory
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Material Issue</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="card-header p-2">
             <div className="row mb-2">
               <div className="col-xl-3">
-                <label>Category</label>
-                <select
-                  name="category"
-                  className="form-select"
-                  value={formData.category}
-                  onChange={handleCategoryChange}
-                >
-                  <option value="">Select</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat.categoryName}>{cat.categoryName}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-xl-3">
-                <label>Description</label>
-                <input type="text" name="catdesc" className="form-control" value={formData.catdesc} readOnly />
-              </div>
-              <div className="col-xl-3">
-                <label>Sales Order</label>
-                <div className="input-group">
-                  <input type="text" name="so" value={selectedSO?.soNumber || ""} className="form-control form-control-sm" readOnly />
-                  <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setShowModal(true)}>Search</button>
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Category</label>
+                  </div>
+                  <div className="col-8">
+                    <select
+                      name="category"
+                      className="form-select form-select-sm"
+                      value={formData.category}
+                      onChange={handleCategoryChange}
+                    >
+                      <option value="">Select</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat.categoryName}>{cat.categoryName}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
+
               <div className="col-xl-3">
-                <label>Document Number</label>
-                <div className="input-group">
-                  <input
-                    type="text"
-                    name="docnumber"
-                    className="form-control"
-                    value={formData.docnumber}
-                    onChange={handleDocumentNumberChange}
-                    readOnly={!isDocumentNumberEnabled}
-                    placeholder={isDocumentNumberEnabled ? "Enter document number..." : ""}
-                  />
-                  {isDocumentNumberEnabled && (
-                    <button
-                      type="button"
-                      className="btn btn-outline-primary"
-                      onClick={() => setShowDocumentModal(true)}
-                    >
-                      Search
-                    </button>
-                  )}
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Description</label>
+                  </div>
+                  <div className="col-8">
+                    <input
+                      type="text"
+                      name="catdesc"
+                      className="form-control form-control-sm"
+                      value={formData.catdesc}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Sales Order</label>
+                  </div>
+                  <div className="col-8">
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        name="so"
+                        value={selectedSO?.soNumber || ""}
+                        className="form-control form-control-sm"
+                        readOnly
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => setShowModal(true)}
+                      >
+                        Search
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Doc Number</label>
+                  </div>
+                  <div className="col-8">
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        name="docnumber"
+                        className="form-control form-control-sm"
+                        value={formData.docnumber}
+                        onChange={handleDocumentNumberChange}
+                        readOnly={!isDocumentNumberEnabled}
+                        placeholder={isDocumentNumberEnabled ? "Enter document number..." : ""}
+                      />
+                      {isDocumentNumberEnabled && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => setShowDocumentModal(true)}
+                        >
+                          Search
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="row mb-2">
               <div className="col-xl-2">
-                <label>Document Date</label>
-                <input type="date" className="form-control" value={formData.documentDate} onChange={(e) => setFormData(prev => ({ ...prev, documentDate: e.target.value }))} />
-              </div>
-              <div className="col-xl-2">
-                <label>Posting Date</label>
-                <input type="date" className="form-control" value={formData.postingDate} onChange={(e) => setFormData(prev => ({ ...prev, postingDate: e.target.value }))} />
-              </div>
-              <div className="col-xl-2">
-                <label>DC/LLR/REF</label>
-                <input type="text" className="form-control" value={formData.reference} onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))} />
-              </div>
-              <div className="col-xl-3">
-                <label>Customer</label>
-                <div className="input-group">
-                  <input type="text" className="form-control form-control-sm  " value={formData.customer} readOnly />
-                  <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setShowCustomerModal(true)}>Search</button>
+                <div className="row g-1 align-items-center">
+                  <div className="col-5">
+                    <label className="form-label mb-0">Doc Date</label>
+                  </div>
+                  <div className="col-7">
+                    <input
+                      type="date"
+                      className="form-control form-control-sm"
+                      value={formData.documentDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, documentDate: e.target.value }))}
+                    />
+                  </div>
                 </div>
               </div>
+
+              <div className="col-xl-2">
+                <div className="row g-1 align-items-center">
+                  <div className="col-5">
+                    <label className="form-label mb-0">Post Date</label>
+                  </div>
+                  <div className="col-7">
+                    <input
+                      type="date"
+                      className="form-control form-control-sm"
+                      value={formData.postingDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, postingDate: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-2">
+                <div className="row g-1 align-items-center">
+                  <div className="col-5">
+                    <label className="form-label mb-0">DC/LLR/REF</label>
+                  </div>
+                  <div className="col-7">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      value={formData.reference}
+                      onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="col-xl-3">
-                <label>Location</label>
-                <input type="text" className="form-control" value={formData.location} readOnly />
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Customer</label>
+                  </div>
+                  <div className="col-8">
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        value={formData.customer}
+                        readOnly
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => setShowCustomerModal(true)}
+                      >
+                        Search
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Location</label>
+                  </div>
+                  <div className="col-8">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      value={formData.location}
+                      readOnly
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

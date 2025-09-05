@@ -26,8 +26,8 @@ function organizePermissions(permissions) {
       "Purchase Indent List", "Purchase Quotations List", "Purchase Contract List", "Purchase Order List"
     ],
     "Sales": [
-      "Sales Indent", "Sales Quotation Form", "Sales Contract", "Sales Order",
-      "Sales Indent List", "Sales Quotations List", "Sales Contract List", "Sales Order List"
+      "Sales Indent", "Sales Quotation Form", "Sales Contract", "Sales Order", "Sales Delivery",
+      "Sales Indent List", "Sales Quotations List", "Sales Contract List", "Sales Order List", "Sales Delivery List"
     ],
     "Inventory": [
       "Material Receipt", "Material Receipt List", "Material Issue",
@@ -54,8 +54,8 @@ function organizePermissions(permissions) {
       "LeaveRequestManagement",
       "Payroll",
       "AttendanceRegister",
-            "AttendanceReports",
-            "AttendanceTaking"
+      "AttendanceReports",
+      "AttendanceTaking"
 
     ]
 

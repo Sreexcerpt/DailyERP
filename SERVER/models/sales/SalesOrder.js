@@ -7,18 +7,23 @@ const ItemSchema = new mongoose.Schema({
   baseUnit: String,
   unit: String,
   orderUnit: String,
+  materialGroup: String,
   price: Number,
   priceUnit: String,
   deliveryDate: String,
+  note: String,
 });
 
 const SalesOrderSchema = new mongoose.Schema({
   soNumber: String,
+  salesGroup: String,
+  contactPerson: String,
   quotationId: { type: mongoose.Schema.Types.ObjectId, ref: 'SalesQuotation' },
   quotationNumber: String,
   categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'SalesOrderCategory' },
   category: String,
   date: String,
+  generalCondition: [],
   customerName: String,
   deliveryLocation: String,
   deliveryAddress: String,

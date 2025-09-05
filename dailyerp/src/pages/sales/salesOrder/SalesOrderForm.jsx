@@ -35,7 +35,7 @@ function SalesOrderForm() {
   const [cgstAmount, setCgstAmount] = useState(0);
   const [sgstAmount, setSgstAmount] = useState(0);
   const [igstAmount, setIgstAmount] = useState(0);
-
+  const [generalConditions, setGeneralConditions] = useState([]);
 
   // Tax States
   const [taxes, setTaxes] = useState([]);
@@ -45,7 +45,7 @@ function SalesOrderForm() {
   const [igst, setIgst] = useState(0);
   const [taxDiscount, setTaxDiscount] = useState(0);
   const [finalTotal, setFinalTotal] = useState(0);
-
+  const [generalCondition, setgeneralCondition] = useState([]);
   // Material Modal States
   const [materials, setMaterials] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -58,7 +58,17 @@ function SalesOrderForm() {
     axios.get('http://localhost:8080/api/sales-order-categories', { params: { companyId, financialYear } }).then(res => setCategories(res.data));
     axios.get('http://localhost:8080/api/salesquotations', { params: { companyId, financialYear }, }).then(res => {
       setQuotations(res.data);
-
+      axios.get('http://localhost:8080/api/general-conditions', { params: { companyId, financialYear } })
+        .then(res => {
+          const filteredConditions = res.data
+            .filter(gc => !gc.isDeleted)
+            .map(gc => ({
+              _id: gc._id,
+              name: gc.name,
+              description: gc.description
+            }));
+          setGeneralConditions(filteredConditions);
+        });
       // Extract unique buyer groups from all quotation items
       const allsalesGroups = [];
       res.data.forEach(quotation => {
@@ -149,7 +159,13 @@ function SalesOrderForm() {
     setQuotationSearchQuery('');
     setQuotationSearchResults([]);
   };
-
+  const toggleSelection = (id, selectedList, setSelectedList) => {
+    if (selectedList.includes(id)) {
+      setSelectedList(selectedList.filter(item => item !== id));
+    } else {
+      setSelectedList([...selectedList, id]);
+    }
+  };
   // Vendor Search Handlers
   const handleVendorSearch = (query) => {
     setVendorSearchQuery(query);
@@ -198,6 +214,7 @@ function SalesOrderForm() {
         priceUnit: item.priceUnit,
         materialgroup: item.materialgroup,
         deliveryDate: item.deliveryDate ? String(item.deliveryDate).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        note: item.note || '',  // ✅ NEW - Individual note field
       }));
 
       setItems(mappedItems);
@@ -300,8 +317,10 @@ function SalesOrderForm() {
         price: 0,
         priceUnit: '',
         salesGroup: '',
-        materialgroup: '',
+        materialGroup: '',
+        note: '',
         deliveryDate: new Date().toISOString().slice(0, 10),
+
       }
     ]);
   };
@@ -332,34 +351,6 @@ function SalesOrderForm() {
     setShowSONumberModal(true);
   };
 
-  // 3. ADD THIS NEW FUNCTION (add after your existing functions)
-  const handleSONumberGeneration = async (type) => {
-    try {
-      if (type === 'external') {
-        if (!externalSONumber.trim()) {
-          return alert('Please enter external SO number');
-        }
-        if (externalSONumber.length > 50) {
-          return alert('SO number cannot exceed 50 characters');
-        }
-        setGeneratedSONumber(externalSONumber);
-      } else {
-        // Generate internal SO number
-        const response = await axios.post('http://localhost:8080/api/generate-so-number', {
-          categoryId: selectedCategory._id
-        });
-        setGeneratedSONumber(response.data.soNumber);
-      }
-
-      // Proceed with form submission
-      await submitSalesOrder(type === 'external' ? externalSONumber : null);
-
-    } catch (error) {
-      console.error('Error generating SO number:', error);
-      alert('Failed to generate SO number');
-    }
-  };
-
   // 4. ADD THIS NEW FUNCTION (add after handleSONumberGeneration)
   const submitSalesOrder = async (customSONumber = null) => {
     const selectedQuotation = quotations.find(
@@ -381,6 +372,7 @@ function SalesOrderForm() {
       deliveryLocation,
       deliveryAddress,
       items,
+      generalCondition,
       companyId: selectedCompanyId,
       financialYear: financialYear,
       total: parseFloat(total) || 0,
@@ -550,6 +542,7 @@ function SalesOrderForm() {
         price: material.price,
         salesGroup: material.salesGroup,
         materialgroup: material.materialgroup,
+        
       };
       setItems(updatedItems);
       recalculateTotal(updatedItems);
@@ -908,7 +901,7 @@ function SalesOrderForm() {
                       <div className="row gap-2">
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>Reference Number:</label></div>
+                            <label className='form-label'>Reference No:</label></div>
                           <div className="col-xl-6">
                             <div className="input-group">
                               <input
@@ -937,7 +930,7 @@ function SalesOrderForm() {
 
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>SO Category:</label></div>
+                            <label className='form-label' >SO Category:</label></div>
                           <div className="col-xl-6">
                             <select className='form-select' onChange={(e) => {
                               const cat = categories.find(c => c._id === e.target.value);
@@ -952,12 +945,12 @@ function SalesOrderForm() {
 
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>SO Number:</label></div>
+                            <label className='form-label'>SO Number:</label></div>
                           <div className="col-xl-6">
                             <input className='form-control form-control-sm' value={soNumber} readOnly /></div></div>
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>SO Creating date:</label></div>
+                            <label className='form-label'>SO Creating date:</label></div>
                           <div className="col-xl-6">
                             <input
                               type='date'
@@ -969,7 +962,7 @@ function SalesOrderForm() {
 
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>Customer:</label></div>
+                            <label className='form-label'>Customer:</label></div>
                           <div className="col-xl-6">
                             <div className="input-group">
                               <input
@@ -1014,28 +1007,64 @@ function SalesOrderForm() {
                         </div>
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>Sales Group:</label></div>
+                            <label className='form-label'>Sales Group:</label></div>
                           <div className="col-xl-6">
                             <input className='form-control form-control-sm' value={salesGroup} onChange={(e) => setsalesGroup(e.target.value)} /></div>
                         </div>
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>Contact Person:</label></div>
+                            <label className='form-label'>Contact Person:</label></div>
                           <div className="col-xl-6">
                             <input className='form-control form-control-sm' value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
                           </div></div>
                         <div className='col-xl-3 row'>
                           <div className="col-xl-6">
-                            <label>Payment Terms:</label></div>
+                            <label className='form-label'>Payment Terms:</label></div>
                           <div className="col-xl-6">
                             <textarea className='form-control form-control-sm' value={payTerms} onChange={(e) => setPayTerms(e.target.value)} maxLength="250" />
                           </div></div>
                         <div className='col-xl-3 row' >
                           <div className="col-xl-6">
-                            <label>Validity Date:</label></div>
+                            <label className='form-label'>Validity Date:</label></div>
                           <div className="col-xl-6">
                             <input type="date" className='form-control form-control-sm' value={validityDate} onChange={(e) => setValidityDate(e.target.value)} />
-                          </div></div>
+                          </div>
+                          </div>
+                           <div className="col-xl-3 row">
+                        <div className="col-xl-5">
+                          <label className="form-label">Select General Conditions</label>
+                        </div>
+                        <div className="col-xl-6">
+                          <div className="dropdown">
+                            <button
+                              className="btn btn-outline-secondary btn-sm w-100 text-start"
+                              type="button"
+                              data-bs-toggle="dropdown"
+                            >
+                              {generalCondition.length === 0
+                                ? 'Select...'
+                                : `${generalCondition.length} selected`}
+                            </button>
+                            <div className="dropdown-menu w-200" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                              {generalConditions.map((gc) => (
+                                <div key={gc._id} className="dropdown-item-text">
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="checkbox"
+                                      checked={generalCondition.includes(gc._id)}
+                                      onChange={() => toggleSelection(gc._id, generalCondition, setgeneralCondition)}
+                                    />
+                                    <label className="form-check-label ms-1">
+                                      {gc.name}
+                                    </label>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       </div>
                     </div>
                   </div>

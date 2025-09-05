@@ -528,7 +528,9 @@ const Sidebar = () => {
                                                 {hasSubPermission("Sales", "Sales Order") && (
                                                     <li><a href="/SalesOrder" className={isActive("/SalesOrder") ? "active" : ""}>Sales Order</a></li>
                                                 )}
-
+                                                {hasSubPermission("Sales", "Sales Delivery") && (
+                                                    <li><a href="/SalesDelivery" className={isActive("/SalesDelivery") ? "active" : ""}>Sales Delivery</a></li>
+                                                )}
                                                 <li className="submenu submenu-two">
                                                     <a
                                                         style={{ cursor: "pointer" }}
@@ -561,6 +563,9 @@ const Sidebar = () => {
                                                         )}
                                                         {hasSubPermission("Sales", "Sales Order List") && (
                                                             <li><a href="/SalesOrderList" className={isActive("/SalesOrderList") ? "active" : ""}>Sales Order List</a></li>
+                                                        )}
+                                                        {hasSubPermission("Sales", "Sales Delivery List") && (
+                                                            <li><a href="/SalesDeliveryList" className={isActive("/SalesDeliveryList") ? "active" : ""}>Sales Delivery List</a></li>
                                                         )}
                                                     </ul>
                                                 </li>

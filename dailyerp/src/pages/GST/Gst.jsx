@@ -29,7 +29,7 @@ function GST() {
         // Get financial year from localStorage
 
 
-        axios.get("http://localhost:8080/api/locations" ,{params: { companyId, financialYear }})
+        axios.get("http://localhost:8080/api/locations", { params: { companyId, financialYear } })
             .then((res) => setLocations(res.data))
             .catch((err) => console.error("Error fetching locations", err));
 
@@ -216,188 +216,187 @@ function GST() {
     const taxStatus = taxBalance > 0 ? 'You need to pay GST' : taxBalance < 0 ? 'You will get a GST refund' : 'No GST to pay or refund';
 
     return (
-       
-            <div className="content">
-                <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
-                    <div className="my-auto">
-                        <h2 className="mb-1">GST List</h2>
-                        <nav>
-                            <ol className="breadcrumb mb-0">
-                                <li className="breadcrumb-item">
-                                    <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
-                                </li>
-                                <li className="breadcrumb-item">Accounts</li>
-                                <li className="breadcrumb-item active" aria-current="page">GST List</li>
-                            </ol>
-                        </nav>
-                    </div>
 
+        <div className="content">
+            <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+                <div className="my-auto">
+                    <h2 className="mb-1">GST List</h2>
+                    <nav>
+                        <ol className="breadcrumb mb-0">
+                            <li className="breadcrumb-item">
+                                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+                            </li>
+                            <li className="breadcrumb-item">Accounts</li>
+                            <li className="breadcrumb-item active" aria-current="page">GST List</li>
+                        </ol>
+                    </nav>
                 </div>
-                <div className="row">
-                    <div className="col-xl-12">
-                        <div className="card">
-                            <div className="card-header">
-                                <div className="row">
-                                    <div className="col-xl-3 row">
-                                        <div className="col-xl-5">Month</div>
-                                        <div className="col-xl-7">
-                                            <select
-                                                name="month"
-                                                className="form-select"
-                                                id="month-select"
-                                                onChange={(e) => setSelectedMonth(e.target.value)}
-                                            >
-                                                <option value="">Select Month</option>
-                                                {monthYearOptions.map((opt, idx) => (
-                                                    <option key={idx} value={opt.label}>{opt.label}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="col-xl-3 row">
-                                        <div className="col-xl-4">Location</div>
-                                        <div className="col-xl-8">
-                                            <select name="location" className="form-select" id="location-select" onChange={(e) => setSelectedLocation(e.target.value)}>
-                                                <option value="">Select Location</option>
-                                                {locations.map((loc, idx) => (
-                                                    <option key={idx} value={loc.name}>{loc.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div className="col-xl-3 ms-auto ">
-                                        {activeTab === 'input' && (
-                                            <h5 style={{ color: 'blue' }}>
-                                                Total Input GST: ₹{totalInputTax.toFixed(2)}
-                                            </h5>
-                                        )}
-                                        {activeTab === 'output' && (
-                                            <h5 style={{ color: 'orange' }}>
-                                                Total Output GST: ₹{totalOutputTax.toFixed(2)}
-                                            </h5>
-                                        )}
-                                        {activeTab === 'gstr' && (
-                                            <h5 style={{ color: taxBalance > 0 ? 'red' : taxBalance < 0 ? 'green' : 'black' }}>
-                                                {taxStatus} — ₹{Math.abs(taxBalance).toFixed(2)}
-                                            </h5>
-                                        )}
+
+            </div>
+            <div className="row">
+                <div className="col-xl-12">
+                    <div className="card">
+                        <div className="card-header">
+                            <div className="row">
+                                <div className="col-xl-3 row">
+                                    <div className="col-xl-5">Month</div>
+                                    <div className="col-xl-7">
+                                        <select
+                                            name="month"
+                                            className="form-select"
+                                            id="month-select"
+                                            onChange={(e) => setSelectedMonth(e.target.value)}
+                                        >
+                                            <option value="">Select Month</option>
+                                            {monthYearOptions.map((opt, idx) => (
+                                                <option key={idx} value={opt.label}>{opt.label}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
+                                <div className="col-xl-3 row">
+                                    <div className="col-xl-4">Location</div>
+                                    <div className="col-xl-8">
+                                        <select name="location" className="form-select" id="location-select" onChange={(e) => setSelectedLocation(e.target.value)}>
+                                            <option value="">Select Location</option>
+                                            {locations.map((loc, idx) => (
+                                                <option key={idx} value={loc.name}>{loc.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="col-xl-3 ms-auto ">
+                                    {activeTab === 'input' && (
+                                        <h5 style={{ color: 'blue' }}>
+                                            Total Input GST: ₹{totalInputTax.toFixed(2)}
+                                        </h5>
+                                    )}
+                                    {activeTab === 'output' && (
+                                        <h5 style={{ color: 'orange' }}>
+                                            Total Output GST: ₹{totalOutputTax.toFixed(2)}
+                                        </h5>
+                                    )}
+                                    {activeTab === 'gstr' && (
+                                        <h5 style={{ color: taxBalance > 0 ? 'red' : taxBalance < 0 ? 'green' : 'black' }}>
+                                            {taxStatus} — ₹{Math.abs(taxBalance).toFixed(2)}
+                                        </h5>
+                                    )}
+                                </div>
                             </div>
-                            <div className="card-body">
-                                <ul className="nav nav-tabs tab-style-6" id="myTab-3" role="tablist">
-                                    <li className="nav-item" role="presentation">
-                                        <button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} id="products-tab" data-bs-toggle="tab"
-                                            data-bs-target="#products-tab-pane" type="button" role="tab"
-                                            aria-controls="products-tab-pane" aria-selected={activeTab === 'input'}
-                                            onClick={() => setActiveTab('input')}>
-                                            <i className="feather-gift me-1 align-middle d-inline-block"></i>Input Tax
-                                        </button>
-                                    </li>
-                                    <li className="nav-item" role="presentation">
-                                        <button className={`nav-link ${activeTab === 'output' ? 'active' : ''}`} id="sales-tab" data-bs-toggle="tab"
-                                            data-bs-target="#sales-tab-pane" type="button" role="tab"
-                                            aria-controls="sales-tab-pane" aria-selected={activeTab === 'output'}
-                                            onClick={() => setActiveTab('output')}>
-                                            <i className="feather-file me-1 align-middle d-inline-block"></i>Output Tax
-                                        </button>
-                                    </li>
-                                    <li className="nav-item" role="presentation">
-                                        <button className={`nav-link ${activeTab === 'gstr' ? 'active' : ''}`} id="profit-tab" data-bs-toggle="tab"
-                                            data-bs-target="#profit-tab-pane" type="button" role="tab"
-                                            aria-controls="profit-tab-pane" aria-selected={activeTab === 'gstr'}
-                                            onClick={() => setActiveTab('gstr')}>
-                                            <i className="feather-file-text me-1 align-middle d-inline-block"></i>GSTR
-                                        </button>
-                                    </li>
-                                </ul>
-                                <div className="tab-content" id="myTabContent2">
-                                    <div className={`tab-pane fade ${activeTab === 'input' ? 'show active' : ''} p-0 border-bottom-0`} id="products-tab-pane"
-                                        role="tabpanel" aria-labelledby="products-tab" tabIndex="0">
-                                        <div className="table-responsive">
-                                            <table className="table mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">Invoice No</th>
-                                                        <th scope="col">Date</th>
-                                                        <th scope="col">Amount</th>
-                                                        <th scope="col">CGST</th>
-                                                        <th scope="col">SGST/UTGST</th>
-                                                        <th scope="col">IGST</th>
-                                                        <th scope="col">Total GST</th>
+                        </div>
+                        <div className="card-body">
+                            <ul className="nav nav-tabs tab-style-6" id="myTab-3" role="tablist">
+                                <li className="nav-item" role="presentation">
+                                    <button className={`nav-link ${activeTab === 'input' ? 'active' : ''} btn-outline-primary`} id="products-tab" data-bs-toggle="tab"
+                                        data-bs-target="#products-tab-pane" type="button" role="tab"
+                                        aria-controls="products-tab-pane" aria-selected={activeTab === 'input'}
+                                        onClick={() => setActiveTab('input')}>
+                                        <i className="feather-gift me-1 align-middle d-inline-block"></i>Input Tax
+                                    </button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button className={`nav-link ${activeTab === 'output' ? 'active' : ''} btn-outline-primary`} id="sales-tab" data-bs-toggle="tab"
+                                        data-bs-target="#sales-tab-pane" type="button" role="tab"
+                                        aria-controls="sales-tab-pane" aria-selected={activeTab === 'output'}
+                                        onClick={() => setActiveTab('output')}>
+                                        <i className="feather-file me-1 align-middle d-inline-block"></i>Output Tax
+                                    </button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button className={`nav-link ${activeTab === 'gstr' ? 'active' : ''} btn-outline-primary`} id="profit-tab" data-bs-toggle="tab"
+                                        data-bs-target="#profit-tab-pane" type="button" role="tab"
+                                        aria-controls="profit-tab-pane" aria-selected={activeTab === 'gstr'}
+                                        onClick={() => setActiveTab('gstr')}>
+                                        <i className="feather-file-text me-1 align-middle d-inline-block"></i>GSTR
+                                    </button>
+                                </li>
+                            </ul>
+                            <div className="tab-content" id="myTabContent2">
+                                <div className={`tab-pane fade ${activeTab === 'input' ? 'show active' : ''} p-0 border-bottom-0`} id="products-tab-pane"
+                                    role="tabpanel" aria-labelledby="products-tab" tabIndex="0">
+                                    <div className="table-responsive">
+                                        <table className="table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Invoice No</th>
+                                                    <th scope="col">Date</th>
+                                                    <th scope="col">Amount</th>
+                                                    <th scope="col">CGST</th>
+                                                    <th scope="col">SGST/UTGST</th>
+                                                    <th scope="col">IGST</th>
+                                                    <th scope="col">Total GST</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredvendorinvoices.map((invoice, idx) => (
+                                                    <tr key={idx}>
+                                                        <td>{invoice.docnumber}</td>
+                                                        <td>{new Date(invoice.createdAt).toLocaleDateString()}</td>
+                                                        <td>{invoice.finalTotal}</td>
+                                                        <td>{invoice.cgst}</td>
+                                                        <td>{invoice.sgst}</td>
+                                                        <td>{invoice.igst}</td>
+                                                        <td>{(invoice.cgst || 0) + (invoice.sgst || 0) + (invoice.igst || 0)}</td>
                                                     </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {filteredvendorinvoices.map((invoice, idx) => (
-                                                        <tr key={idx}>
-                                                            <td>{invoice.docnumber}</td>
-                                                            <td>{new Date(invoice.createdAt).toLocaleDateString()}</td>
-                                                            <td>{invoice.finalTotal}</td>
-                                                            <td>{invoice.cgst}</td>
-                                                            <td>{invoice.sgst}</td>
-                                                            <td>{invoice.igst}</td>
-                                                            <td>{(invoice.cgst || 0) + (invoice.sgst || 0) + (invoice.igst || 0)}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div className={`tab-pane fade ${activeTab === 'output' ? 'show active' : ''}`} id="sales-tab-pane" role="tabpanel"
-                                        aria-labelledby="sales-tab" tabIndex="0">
-                                        <div className="table-responsive">
-                                            <table className="table mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">Invoice No</th>
-                                                        <th scope="col">Date</th>
-                                                        <th scope="col">Amount</th>
-                                                        <th scope="col">CGST</th>
-                                                        <th scope="col">SGST/UTGST</th>
-                                                        <th scope="col">IGST</th>
-                                                        <th scope="col">Total GST</th>
+                                </div>
+                                <div className={`tab-pane fade ${activeTab === 'output' ? 'show active' : ''}`} id="sales-tab-pane" role="tabpanel"
+                                    aria-labelledby="sales-tab" tabIndex="0">
+                                    <div className="table-responsive">
+                                        <table className="table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Invoice No</th>
+                                                    <th scope="col">Date</th>
+                                                    <th scope="col">Amount</th>
+                                                    <th scope="col">CGST</th>
+                                                    <th scope="col">SGST/UTGST</th>
+                                                    <th scope="col">IGST</th>
+                                                    <th scope="col">Total GST</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredcustomerInvoices.map((invoice, idx) => (
+                                                    <tr key={idx}>
+                                                        <td>{invoice.docnumber}</td>
+                                                        <td>{new Date(invoice.createdAt).toLocaleDateString()}</td>
+                                                        <td>{invoice.finalTotal}</td>
+                                                        <td>{invoice.cgst}</td>
+                                                        <td>{invoice.sgst}</td>
+                                                        <td>{invoice.igst}</td>
+                                                        <td>{((invoice.cgst || 0) + (invoice.sgst || 0) + (invoice.igst || 0)).toFixed(2)}</td>
                                                     </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {filteredcustomerInvoices.map((invoice, idx) => (
-                                                        <tr key={idx}>
-                                                            <td>{invoice.docnumber}</td>
-                                                            <td>{new Date(invoice.createdAt).toLocaleDateString()}</td>
-                                                            <td>{invoice.finalTotal}</td>
-                                                            <td>{invoice.cgst}</td>
-                                                            <td>{invoice.sgst}</td>
-                                                            <td>{invoice.igst}</td>
-                                                            <td>{((invoice.cgst || 0) + (invoice.sgst || 0) + (invoice.igst || 0)).toFixed(2)}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div className={`tab-pane fade ${activeTab === 'gstr' ? 'show active' : ''}`} id="profit-tab-pane" role="tabpanel"
-                                        aria-labelledby="profit-tab" tabIndex="0">
-                                        <div className="table-responsive">
-                                            <table className="table mb-0">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">Month</th>
-                                                        <th scope="col">Input</th>
-                                                        <th scope="col">Output</th>
-                                                        <th scope="col">Balance</th>
+                                </div>
+                                <div className={`tab-pane fade ${activeTab === 'gstr' ? 'show active' : ''}`} id="profit-tab-pane" role="tabpanel"
+                                    aria-labelledby="profit-tab" tabIndex="0">
+                                    <div className="table-responsive">
+                                        <table className="table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Month</th>
+                                                    <th scope="col">Input</th>
+                                                    <th scope="col">Output</th>
+                                                    <th scope="col">Balance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {monthlyGSTSummary.map((row, idx) => (
+                                                    <tr key={idx}>
+                                                        <td>{row.month}</td>
+                                                        <td>{row.input.toFixed(2)}</td>
+                                                        <td>{row.output.toFixed(2)}</td>
+                                                        <td>{row.balance.toFixed(2)}</td>
                                                     </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {monthlyGSTSummary.map((row, idx) => (
-                                                        <tr key={idx}>
-                                                            <td>{row.month}</td>
-                                                            <td>{row.input.toFixed(2)}</td>
-                                                            <td>{row.output.toFixed(2)}</td>
-                                                            <td>{row.balance.toFixed(2)}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -405,7 +404,8 @@ function GST() {
                     </div>
                 </div>
             </div>
-       
+        </div>
+
     );
 };
 

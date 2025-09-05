@@ -45,10 +45,10 @@ function GoodsTransfer() {
 
   // Check if category is Display (case insensitive)
   const isDisplayCategory = formData.category.trim().toLowerCase() === "display";
- const companyId = localStorage.getItem("selectedCompanyId");
-    const financialYear = localStorage.getItem("financialYear");
+  const companyId = localStorage.getItem("selectedCompanyId");
+  const financialYear = localStorage.getItem("financialYear");
   useEffect(() => {
-   
+
     axios.get("http://localhost:8080/api/material", {
       params: { companyId, financialYear }
     })
@@ -307,213 +307,281 @@ function GoodsTransfer() {
 
   return (
     <div className="container p-3">
-      <h6>Matrial Transfer</h6>
+          <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Delivery Challan</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Inventory
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Delivery Challan</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
       <form onSubmit={handleSubmit}>
         {/* Header */}
-        <div className="row mb-2">
-          <div className="col-md-3">
-            <label>Category</label>
-            <select
-              className="form-select"
-              value={formData.category}
-              onChange={handleCategoryChange}
-            >
-              <option value="">Select</option>
-              {categories.map((cat, idx) => (
-                <option key={idx} value={cat.categoryName}>{cat.categoryName}</option>
-              ))}
-            </select>
-          </div>
-          <div className="col-md-3">
-            <label>Description</label>
-            <input className="form-control" value={formData.catdesc} readOnly />
-          </div>
-          <div className="col-md-3">
-            <label>Document No</label>
-            <div className="input-group">
-              <input
-                className="form-control"
-                value={formData.docnumber}
-                onChange={handleDocumentNumberChange}
-                onClick={handleDocumentNumberClick}
-                readOnly={!isDocumentNumberEnabled}
-                placeholder={isDocumentNumberEnabled ? "Enter document number..." : ""}
-              />
-              {isDocumentNumberEnabled && (
-                <button
-                  type="button"
-                  className="btn btn-outline-primary"
-                  onClick={() => {
-                    if (documents.length === 0) {
-                      fetchDocuments();
-                    }
-                    setShowDocumentModal(true);
-                  }}
-                >
-                  Search
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="col-md-3">
-            <label>Document Date</label>
-            <input
-              type="date"
-              className="form-control"
-              value={formData.docDate}
-              onChange={(e) => handleInputChange("docDate", e.target.value)}
-            />
-          </div>
-        </div>
+        <div className="card">
+          <div className="card-header">
+            <div className="row mb-2">
+              <div className="col-md-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Category</label>
+                  </div>
+                  <div className="col-8">
+                    <select
+                      className="form-select form-select-sm"
+                      value={formData.category}
+                      onChange={handleCategoryChange}
+                    >
+                      <option value="">Select</option>
+                      {categories.map((cat, idx) => (
+                        <option key={idx} value={cat.categoryName}>{cat.categoryName}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
 
-        <div className="row mb-2">
-          <div className="col-md-3">
-            <label>Posting Date</label>
-            <input
-              type="date"
-              className="form-control"
-              value={formData.postDate}
-              onChange={(e) => handleInputChange("postDate", e.target.value)}
-            />
-          </div>
-          <div className="col-md-3">
-            <label>REF</label>
-            <input
-              className="form-control"
-              value={formData.reference}
-              onChange={(e) => handleInputChange("reference", e.target.value)}
-            />
-          </div>
-          <div className="col-lg-3">
+              <div className="col-md-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Description</label>
+                  </div>
+                  <div className="col-8">
+                    <input
+                      className="form-control form-control-sm"
+                      value={formData.catdesc}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <label >Location:</label>
-            <select
-              className="form-select"
-              value={formData.location}
-              onChange={(e) => handleInputChange("location", e.target.value)}
-            >
-              <option value="">-- Select Location --</option>
-              {locations.map((loc) => (
-                <option
-                  key={loc._id || loc.id || loc.name}
-                  value={
-                    loc.name || loc.locationName || loc._id
-                  }
-                >
-                  {loc.name || loc.locationName || loc._id}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Item Table */}
-        <div className="table-responsive">
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Material ID</th>
-                <th>Description</th>
-                <th>Qty</th>
-                <th>UOM</th>
-                <th>Del Date</th>
-                <th>Lot No</th>
-                <th>Price</th>
-                <th>Text</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, i) => (
-                <tr key={i}>
-                  <td>{i + 1}</td>
-                  <td>
+              <div className="col-md-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Document No</label>
+                  </div>
+                  <div className="col-8">
                     <div className="input-group">
-                      <input className="form-control form-control-sm" value={item.materialId} readOnly />
-                      {!isDisplayCategory && (
+                      <input
+                        className="form-control form-control-sm"
+                        value={formData.docnumber}
+                        onChange={handleDocumentNumberChange}
+                        onClick={handleDocumentNumberClick}
+                        readOnly={!isDocumentNumberEnabled}
+                        placeholder={isDocumentNumberEnabled ? "Enter document number..." : ""}
+                      />
+                      {isDocumentNumberEnabled && (
                         <button
                           type="button"
-                          className="btn btn-outline-secondary btn-sm"
+                          className="btn btn-outline-primary btn-sm"
                           onClick={() => {
-                            setSearchRowIndex(i);
-                            setShowSearchModal(true);
+                            if (documents.length === 0) {
+                              fetchDocuments();
+                            }
+                            setShowDocumentModal(true);
                           }}
                         >
-                          🔍
+                          Search
                         </button>
                       )}
                     </div>
-                  </td>
-                  <td>
-                    <input
-                      className="form-control"
-                      value={item.description}
-                      readOnly
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                      value={item.quantity}
-                      onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "quantity", e.target.value)}
-                      readOnly={isDisplayCategory}
-                      disabled={isDisplayCategory}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className="form-control"
-                      value={item.baseUnit}
-                      readOnly
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                      type="date"
-                      value={item.deliveryDate}
-                      onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "deliveryDate", e.target.value)}
-                      readOnly={isDisplayCategory}
-                      disabled={isDisplayCategory}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                      value={item.lotNo}
-                      onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "lotNo", e.target.value)}
-                      readOnly={isDisplayCategory}
-                      disabled={isDisplayCategory}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                      value={item.price}
-                      onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "price", e.target.value)}
-                      readOnly={isDisplayCategory}
-                      disabled={isDisplayCategory}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
-                      value={item.text}
-                      onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "text", e.target.value)}
-                      readOnly={isDisplayCategory}
-                      disabled={isDisplayCategory}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </div>
+              </div>
 
-        {/* Hide Add Row button for Display category */}
-        {!isDisplayCategory && (
-          <button type="button" className="btn btn-sm btn-secondary mb-2" onClick={handleAddRow}>+ Add Row</button>
-        )}
+              <div className="col-md-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Doc Date</label>
+                  </div>
+                  <div className="col-8">
+                    <input
+                      type="date"
+                      className="form-control form-control-sm"
+                      value={formData.docDate}
+                      onChange={(e) => handleInputChange("docDate", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="row mb-2">
+              <div className="col-md-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Posting Date</label>
+                  </div>
+                  <div className="col-8">
+                    <input
+                      type="date"
+                      className="form-control form-control-sm"
+                      value={formData.postDate}
+                      onChange={(e) => handleInputChange("postDate", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">REF</label>
+                  </div>
+                  <div className="col-8">
+                    <input
+                      className="form-control form-control-sm"
+                      value={formData.reference}
+                      onChange={(e) => handleInputChange("reference", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-3">
+                <div className="row g-1 align-items-center">
+                  <div className="col-4">
+                    <label className="form-label mb-0">Location</label>
+                  </div>
+                  <div className="col-8">
+                    <select
+                      className="form-select form-select-sm"
+                      value={formData.location}
+                      onChange={(e) => handleInputChange("location", e.target.value)}
+                    >
+                      <option value="">-- Select Location --</option>
+                      {locations.map((loc) => (
+                        <option
+                          key={loc._id || loc.id || loc.name}
+                          value={
+                            loc.name || loc.locationName || loc._id
+                          }
+                        >
+                          {loc.name || loc.locationName || loc._id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="card-body">
+            {/* Item Table */}
+            <div className="table-responsive">
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Material ID</th>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>UOM</th>
+                    <th>Del Date</th>
+                    <th>Lot No</th>
+                    <th>Price</th>
+                    <th>Text</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item, i) => (
+                    <tr key={i}>
+                      <td>{i + 1}</td>
+                      <td>
+                        <div className="input-group">
+                          <input className="form-control form-control-sm" value={item.materialId} readOnly />
+                          {!isDisplayCategory && (
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary btn-sm"
+                              onClick={() => {
+                                setSearchRowIndex(i);
+                                setShowSearchModal(true);
+                              }}
+                            >
+                              🔍
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <input
+                          className="form-control"
+                          value={item.description}
+                          readOnly
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.quantity}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "quantity", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className="form-control"
+                          value={item.baseUnit}
+                          readOnly
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          type="date"
+                          value={item.deliveryDate}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "deliveryDate", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.lotNo}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "lotNo", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.price}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "price", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={`form-control ${isDisplayCategory ? 'bg-light' : ''}`}
+                          value={item.text}
+                          onChange={isDisplayCategory ? undefined : (e) => handleItemChange(i, "text", e.target.value)}
+                          readOnly={isDisplayCategory}
+                          disabled={isDisplayCategory}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {!isDisplayCategory && (
+              <button type="button" className="btn btn-sm btn-secondary mb-2 mt-2" onClick={handleAddRow}>+ Add Row</button>
+            )}
+          </div>
+        </div>
 
         {/* Hide Save button for Display category */}
         {!isDisplayCategory && (

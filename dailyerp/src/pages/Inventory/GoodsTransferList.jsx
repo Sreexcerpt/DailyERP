@@ -56,7 +56,7 @@ function GoodsTransferList() {
     try {
       // Fetch categories
       const categoriesResponse = await axios.get("http://localhost:8080/api/goodsTransferCategory", {
-        params: { companyId, financialYear },
+        params: { companyId},
       });
       setCategories(categoriesResponse.data);
 
@@ -74,31 +74,31 @@ function GoodsTransferList() {
     let filtered = [...transfers];
 
     if (filters.category) {
-      filtered = filtered.filter(transfer => 
+      filtered = filtered.filter(transfer =>
         transfer.category.toLowerCase().includes(filters.category.toLowerCase())
       );
     }
 
     if (filters.location) {
-      filtered = filtered.filter(transfer => 
+      filtered = filtered.filter(transfer =>
         transfer.location.toLowerCase().includes(filters.location.toLowerCase())
       );
     }
 
     if (filters.docnumber) {
-      filtered = filtered.filter(transfer => 
+      filtered = filtered.filter(transfer =>
         transfer.docnumber.toLowerCase().includes(filters.docnumber.toLowerCase())
       );
     }
 
     if (filters.dateFrom) {
-      filtered = filtered.filter(transfer => 
+      filtered = filtered.filter(transfer =>
         new Date(transfer.docDate) >= new Date(filters.dateFrom)
       );
     }
 
     if (filters.dateTo) {
-      filtered = filtered.filter(transfer => 
+      filtered = filtered.filter(transfer =>
         new Date(transfer.docDate) <= new Date(filters.dateTo)
       );
     }
@@ -131,12 +131,12 @@ function GoodsTransferList() {
   const handlePrint = (transfer) => {
     // Create a new window for printing
     const printWindow = window.open('', '_blank', 'width=800,height=600');
-    
+
     const printContent = generatePrintContent(transfer);
-    
+
     printWindow.document.write(printContent);
     printWindow.document.close();
-    
+
     // Wait for content to load, then print
     printWindow.onload = () => {
       printWindow.print();
@@ -146,7 +146,7 @@ function GoodsTransferList() {
   const generatePrintContent = (transfer) => {
     const currentDate = new Date().toLocaleString();
     const totalValue = calculateTotal(transfer.items);
-    
+
     return `
       <!DOCTYPE html>
       <html>
@@ -388,7 +388,7 @@ function GoodsTransferList() {
     <div className="container-fluid p-3">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4><i className="fas fa-truck me-2"></i>Goods Transfer List</h4>
-     
+
       </div>
 
       {error && (
@@ -400,74 +400,110 @@ function GoodsTransferList() {
 
       {/* Filter Section */}
       <div className="card mb-3">
-        <div className="card-header">
-          <h6 className="mb-0"><i className="fas fa-filter me-2"></i>Filters</h6>
-        </div>
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-2">
-              <label className="form-label">Category</label>
-              <select 
-                className="form-select"
-                value={filters.category}
-                onChange={(e) => handleFilterChange("category", e.target.value)}
-              >
-                <option value="">All Categories</option>
-                {categories.map((cat, idx) => (
-                  <option key={idx} value={cat.categoryName}>{cat.categoryName}</option>
-                ))}
-              </select>
+              <div className="row g-1 align-items-center">
+                <div className="col-5">
+                  <label className="form-label mb-0">Category</label>
+                </div>
+                <div className="col-7">
+                  <select
+                    className="form-select form-select-sm"
+                    value={filters.category}
+                    onChange={(e) => handleFilterChange("category", e.target.value)}
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((cat, idx) => (
+                      <option key={idx} value={cat.categoryName}>{cat.categoryName}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
+
             <div className="col-md-2">
-              <label className="form-label">Location</label>
-              <select 
-                className="form-select"
-                value={filters.location}
-                onChange={(e) => handleFilterChange("location", e.target.value)}
-              >
-                <option value="">All Locations</option>
-                {locations.map((loc, idx) => (
-                  <option key={idx} value={loc.name || loc.locationName}>{loc.name || loc.locationName}</option>
-                ))}
-              </select>
+              <div className="row g-1 align-items-center">
+                <div className="col-5">
+                  <label className="form-label mb-0">Location</label>
+                </div>
+                <div className="col-7">
+                  <select
+                    className="form-select form-select-sm"
+                    value={filters.location}
+                    onChange={(e) => handleFilterChange("location", e.target.value)}
+                  >
+                    <option value="">All Locations</option>
+                    {locations.map((loc, idx) => (
+                      <option key={idx} value={loc.name || loc.locationName}>{loc.name || loc.locationName}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
+
             <div className="col-md-2">
-              <label className="form-label">Document No</label>
-              <input 
-                type="text"
-                className="form-control"
-                placeholder="Search document..."
-                value={filters.docnumber}
-                onChange={(e) => handleFilterChange("docnumber", e.target.value)}
-              />
+              <div className="row g-1 align-items-center">
+                <div className="col-5">
+                  <label className="form-label mb-0">Doc No</label>
+                </div>
+                <div className="col-7">
+                  <input
+                    type="text"
+                    className="form-control form-control-sm"
+                    placeholder="Search..."
+                    value={filters.docnumber}
+                    onChange={(e) => handleFilterChange("docnumber", e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
+
             <div className="col-md-2">
-              <label className="form-label">Date From</label>
-              <input 
-                type="date"
-                className="form-control"
-                value={filters.dateFrom}
-                onChange={(e) => handleFilterChange("dateFrom", e.target.value)}
-              />
+              <div className="row g-1 align-items-center">
+                <div className="col-5">
+                  <label className="form-label mb-0">From</label>
+                </div>
+                <div className="col-7">
+                  <input
+                    type="date"
+                    className="form-control form-control-sm"
+                    value={filters.dateFrom}
+                    onChange={(e) => handleFilterChange("dateFrom", e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
+
             <div className="col-md-2">
-              <label className="form-label">Date To</label>
-              <input 
-                type="date"
-                className="form-control"
-                value={filters.dateTo}
-                onChange={(e) => handleFilterChange("dateTo", e.target.value)}
-              />
+              <div className="row g-1 align-items-center">
+                <div className="col-5">
+                  <label className="form-label mb-0">To</label>
+                </div>
+                <div className="col-7">
+                  <input
+                    type="date"
+                    className="form-control form-control-sm"
+                    value={filters.dateTo}
+                    onChange={(e) => handleFilterChange("dateTo", e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
+
             <div className="col-md-2">
-              <label className="form-label">&nbsp;</label>
-              <div className="d-grid">
-                <button 
-                  className="btn btn-outline-secondary"
-                  onClick={clearFilters}
-                >
-                  <i className="fas fa-times me-1"></i>Clear
-                </button>
+              <div className="row g-1 align-items-center">
+                <div className="col-5">
+                  <label className="form-label mb-0">&nbsp;</label>
+                </div>
+                <div className="col-7">
+                  <button
+                    className="btn btn-outline-secondary btn-sm w-100"
+                    onClick={clearFilters}
+                  >
+                    <i className="fas fa-times me-1"></i>Clear
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -475,11 +511,7 @@ function GoodsTransferList() {
       </div>
 
       {/* Results Summary */}
-      <div className="mb-3">
-        <small className="text-muted">
-          Showing {filteredTransfers.length} of {transfers.length} records
-        </small>
-      </div>
+      
 
       {/* Data Table */}
       <div className="card">
@@ -562,9 +594,9 @@ function GoodsTransferList() {
                   <i className="fas fa-file-alt me-2"></i>
                   Goods Transfer Details - {selectedTransfer.docnumber}
                 </h5>
-                <button 
-                  type="button" 
-                  className="btn-close btn-close-white" 
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
                   onClick={() => setShowViewModal(false)}
                 ></button>
               </div>
@@ -635,7 +667,7 @@ function GoodsTransferList() {
                 <div className="card">
                   <div className="card-header d-flex justify-content-between align-items-center">
                     <h6 className="mb-0">Items Details</h6>
-                    <button 
+                    <button
                       className="btn btn-sm btn-outline-success"
                       onClick={() => handlePrint(selectedTransfer)}
                     >
@@ -695,16 +727,16 @@ function GoodsTransferList() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-success" 
+                <button
+                  type="button"
+                  className="btn btn-success"
                   onClick={() => handlePrint(selectedTransfer)}
                 >
                   <i className="fas fa-print me-1"></i>Print Document
                 </button>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => setShowViewModal(false)}
                 >
                   <i className="fas fa-times me-1"></i>Close

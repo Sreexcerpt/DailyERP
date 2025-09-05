@@ -18,7 +18,7 @@ function InvoiceForm() {
   const [showPOModal, setShowPOModal] = useState(false);
   const [showVendorModal, setShowVendorModal] = useState(false);
   const [searchRowIndex, setSearchRowIndex] = useState(null);
-  
+
   // New state for invoice type
   const [invoiceType, setInvoiceType] = useState("po"); // "po" or "misc"
   const [miscItems, setMiscItems] = useState([{
@@ -29,11 +29,11 @@ function InvoiceForm() {
     price: 0,
     amount: 0
   }]);
-  
+
   const companyId = localStorage.getItem("selectedCompanyId");
   const financialYear = localStorage.getItem("financialYear");
   const selectedCompanyId = localStorage.getItem('selectedCompanyId');
-  
+
   const [formData, setFormData] = useState({
     category: "",
     catdesc: "",
@@ -149,14 +149,14 @@ function InvoiceForm() {
   const handleMiscItemChange = (index, field, value) => {
     const updatedItems = [...miscItems];
     updatedItems[index][field] = value;
-    
+
     // Auto-calculate amount when quantity or price changes
     if (field === 'quantity' || field === 'price') {
       const quantity = parseFloat(updatedItems[index].quantity || 0);
       const price = parseFloat(updatedItems[index].price || 0);
       updatedItems[index].amount = quantity * price;
     }
-    
+
     setMiscItems(updatedItems);
   };
 
@@ -190,11 +190,11 @@ function InvoiceForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (invoiceType === "po" && !selectedPO) {
       return alert("Please select a Purchase Order.");
     }
-    
+
     if (invoiceType === "misc" && !formData.vendor) {
       return alert("Please select a vendor for miscellaneous invoice.");
     }
@@ -275,13 +275,13 @@ function InvoiceForm() {
   });
 
   // Calculate totals based on invoice type
-  const totalAmount = invoiceType === "po" 
+  const totalAmount = invoiceType === "po"
     ? (selectedPO?.items?.reduce((sum, item) => {
-        return sum + parseFloat(item.quantity || 0) * parseFloat(item.price || 0);
-      }, 0) || 0)
+      return sum + parseFloat(item.quantity || 0) * parseFloat(item.price || 0);
+    }, 0) || 0)
     : (miscItems.reduce((sum, item) => {
-        return sum + parseFloat(item.amount || 0);
-      }, 0) || 0);
+      return sum + parseFloat(item.amount || 0);
+    }, 0) || 0);
 
   const discountAmount = parseFloat(discount || 0);
   const netAmount = totalAmount - discountAmount;
@@ -360,15 +360,15 @@ function InvoiceForm() {
               </div>
             </div>
 
-            <div className="row mb-2">
+            <div className="row">
               {/* Left Column */}
-              <div className="col-md-6">
+              <div className="col-md-2">
                 {/* Category */}
                 <div className="row mb-2">
-                  <div className="col-md-2">
-                    <label className="form-label">Category :</label>
+                  <div className="col-md-4">
+                    <label className="form-label">Category:</label>
                   </div>
-                  <div className="col-md-7">
+                  <div className="col-md-8">
                     <select
                       className="form-select"
                       value={formData.category}
@@ -383,14 +383,15 @@ function InvoiceForm() {
                     </select>
                   </div>
                 </div>
-
-                {/* PO Number - Only show for PO invoices */}
-                {invoiceType === "po" && (
-                  <div className="row mb-2">
-                    <div className="col-md-2">
+              </div>
+              {/* PO Number - Only show for PO invoices */}
+              {invoiceType === "po" && (
+              <div className="col-md-3">
+                  <div className="row">
+                    <div className="col-md-4">
                       <label className="form-label">PO Number:</label>
                     </div>
-                    <div className="col-md-7">
+                    <div className="col-md-8">
                       <div className="input-group">
                         <input
                           type="text"
@@ -409,14 +410,14 @@ function InvoiceForm() {
                       </div>
                     </div>
                   </div>
-                )}
-
+               </div> )}
+              <div className="col-md-3">
                 {/* Vendor */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
+                <div className="row">
+                  <div className="col-md-3">
                     <label className="form-label">Vendor :</label>
                   </div>
-                  <div className="col-md-7">
+                  <div className="col-md-9">
                     <div className="input-group">
                       <input
                         type="text"
@@ -434,14 +435,14 @@ function InvoiceForm() {
                       </button>
                     </div>
                   </div>
-                </div>
-
+                </div></div>
+              <div className="col-md-3">
                 {/* Tax Code */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
+                <div className="row">
+                  <div className="col-md-4">
                     <label className="form-label">Tax Code :</label>
                   </div>
-                  <div className="col-md-7">
+                  <div className="col-md-8">
                     <select
                       className="form-select"
                       value={selectedTax.taxCode || ""}
@@ -460,11 +461,11 @@ function InvoiceForm() {
                       ))}
                     </select>
                   </div>
-                </div>
+                </div></div>
 
-                {/* Tax Name */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
+              {/* Tax Name */} <div className="col-md-3">
+                <div className="row">
+                  <div className="col-md-4">
                     <label className="form-label">Tax Name :</label>
                   </div>
                   <div className="col-md-7">
@@ -481,14 +482,14 @@ function InvoiceForm() {
                       }
                     />
                   </div>
-                </div>
-              </div>
+                </div></div>
+
 
               {/* Right Column */}
-              <div className="col-md-6">
+              <div className="col-md-3">
                 {/* Document Date */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
+                <div className="row">
+                  <div className="col-md-5">
                     <label className="form-label">Document Date :</label>
                   </div>
                   <div className="col-md-7">
@@ -505,11 +506,12 @@ function InvoiceForm() {
                     />
                   </div>
                 </div>
-
+              </div>
+              <div className="col-md-3">
                 {/* Posting Date */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
-                    <label className="form-label">Posting Date :</label>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label className="form-label">Posting_Date:</label>
                   </div>
                   <div className="col-md-7">
                     <input
@@ -525,11 +527,12 @@ function InvoiceForm() {
                     />
                   </div>
                 </div>
-
+              </div>
+              <div className="col-md-3">
                 {/* Reference */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
-                    <label className="form-label">Reference :</label>
+                <div className="row">
+                  <div className="col-md-3">
+                    <label className="form-label">Reference:</label>
                   </div>
                   <div className="col-md-7">
                     <input
@@ -545,12 +548,12 @@ function InvoiceForm() {
                       }
                     />
                   </div>
-                </div>
-
+                </div>       </div>
+              <div className="col-md-3">
                 {/* Location */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
-                    <label className="form-label">Location :</label>
+                <div className="row">
+                  <div className="col-md-3">
+                    <label className="form-label">Location:</label>
                   </div>
                   <div className="col-md-7">
                     <input
@@ -568,10 +571,10 @@ function InvoiceForm() {
                     />
                   </div>
                 </div>
-
+              </div> <div className="col-md-3">
                 {/* Invoice Ref */}
-                <div className="row mb-2">
-                  <div className="col-md-2">
+                <div className="row">
+                  <div className="col-md-4">
                     <label className="form-label">Invoice Ref :</label>
                   </div>
                   <div className="col-md-7">
@@ -592,6 +595,7 @@ function InvoiceForm() {
               </div>
             </div>
           </div>
+
 
           <div className="card-body">
             <div className="table-responsive">
@@ -833,87 +837,87 @@ function InvoiceForm() {
             {/* Summary Section */}
             <div className="row justify-content-end mt-3">
               <div className="col-md-4">
-                <div className="card p-3">
+                <div className="card  p-3">
                   <h6 className="mb-3">Billing Summary</h6>
+                  <div className="row">
+                    <div className="col-6 mb-2">
+                      <label className="form-label">Total Amount</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={totalAmount.toFixed(2)}
+                        readOnly
+                      />
+                    </div>
 
-                  <div className="mb-2">
-                    <label className="form-label">Total Amount</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={totalAmount.toFixed(2)}
-                      readOnly
-                    />
+                    <div className="col-6 mb-2">
+                      <label className="form-label">Discount</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={discount}
+                        onChange={(e) =>
+                          setDiscount(parseFloat(e.target.value) || 0)
+                        }
+                      />
+                    </div>
+
+                    <div className="col-6 mb-2">
+                      <label className="form-label">Net Amount</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={netAmount.toFixed(2)}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="col-6 mb-2">
+                      <label className="form-label">CGST (%)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={selectedTax.cgst || ""}
+                        onChange={(e) =>
+                          setSelectedTax((prev) => ({
+                            ...prev,
+                            cgst: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div className="col-6 mb-2">
+                      <label className="form-label">SGST (%)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={selectedTax.sgst || ""}
+                        onChange={(e) =>
+                          setSelectedTax((prev) => ({
+                            ...prev,
+                            sgst: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+
+                    <div className="col-6 mb-2">
+                      <label className="form-label">IGST (%)</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={selectedTax.igst || ""}
+                        onChange={(e) =>
+                          setSelectedTax((prev) => ({
+                            ...prev,
+                            igst: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
                   </div>
 
-                  <div className="mb-2">
-                    <label className="form-label">Discount</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={discount}
-                      onChange={(e) =>
-                        setDiscount(parseFloat(e.target.value) || 0)
-                      }
-                    />
-                  </div>
-
-                  <div className="mb-2">
-                    <label className="form-label">Net Amount</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={netAmount.toFixed(2)}
-                      readOnly
-                    />
-                  </div>
-
-                  <div className="mb-2">
-                    <label className="form-label">CGST (%)</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={selectedTax.cgst || ""}
-                      onChange={(e) =>
-                        setSelectedTax((prev) => ({
-                          ...prev,
-                          cgst: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <div className="mb-2">
-                    <label className="form-label">SGST (%)</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={selectedTax.sgst || ""}
-                      onChange={(e) =>
-                        setSelectedTax((prev) => ({
-                          ...prev,
-                          sgst: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <div className="mb-2">
-                    <label className="form-label">IGST (%)</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={selectedTax.igst || ""}
-                      onChange={(e) =>
-                        setSelectedTax((prev) => ({
-                          ...prev,
-                          igst: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-
-                  <hr />
 
                   <div className="mb-0 fw-bold">
                     <label className="form-label">Final Total</label>

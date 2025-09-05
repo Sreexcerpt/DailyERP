@@ -264,12 +264,12 @@ function BillingForm() {
       <form onSubmit={handleSubmit}>
         <div className="card">
           <div className="card-header">
-            <div className="row mb-3">
+            <div className="row ">
               {/* LEFT GRID */}
-              <div className="col-md-6">
-                <div className="row g-3">
+              
+                <div className="row">
                   {/* Category */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Category :
@@ -290,7 +290,7 @@ function BillingForm() {
                   </div>
 
                   {/* Sales Order */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Sales Order :
@@ -317,7 +317,7 @@ function BillingForm() {
                   </div>
 
                   {/* Customer */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Customer :
@@ -343,7 +343,7 @@ function BillingForm() {
                   </div>
 
                   {/* Tax Code */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Tax Code :
@@ -369,7 +369,7 @@ function BillingForm() {
                   </div>
 
                   {/* Tax Name */}
-                  <div className="col-md-8">
+                  {/* <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Tax Name :
@@ -387,17 +387,13 @@ function BillingForm() {
                         }
                       />
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* RIGHT GRID */}
-              <div className="col-md-6">
-                <div className="row g-3">
+                  </div> */}
+                
+             
                   {/* Document Date */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
-                      <label className="form-label" style={{ width: "120px" }}>
+                      <label className="form-label" style={{ width: "180px" }}>
                         Document Date :
                       </label>
                       <input
@@ -415,9 +411,9 @@ function BillingForm() {
                   </div>
 
                   {/* Posting Date */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
-                      <label className="form-label" style={{ width: "120px" }}>
+                      <label className="form-label" style={{ width: "180px" }}>
                         Posting Date:
                       </label>
                       <input
@@ -435,7 +431,7 @@ function BillingForm() {
                   </div>
 
                   {/* Reference */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Reference :
@@ -456,7 +452,7 @@ function BillingForm() {
                   </div>
 
                   {/* Location */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Location :
@@ -472,7 +468,7 @@ function BillingForm() {
                   </div>
 
                   {/* Billing Ref */}
-                  <div className="col-md-8">
+                  <div className="col-md-3">
                     <div className="d-flex align-items-center">
                       <label className="form-label" style={{ width: "120px" }}>
                         Billing Ref :
@@ -491,7 +487,7 @@ function BillingForm() {
                       />
                     </div>
                   </div>
-                </div>
+              
               </div>
             </div>
           </div>
@@ -550,7 +546,7 @@ function BillingForm() {
                         </td>
                         <td>
                           <input
-                            type="number"
+                            type="text"
                             className="form-control"
                             value={item.hsnNo || ""}
                             onChange={(e) =>
@@ -631,18 +627,18 @@ function BillingForm() {
               <div className="col-md-4">
                 <div className="card p-3">
                   <h6 className="mb-3">Billing Summary</h6>
-
-                  <div className="mb-2">
-                    <label>Total Amount</label>
-                    <input
-                      type="number"
-                      className="form-control"
+                  <div className="row">
+                    <div className="col-md-6 mb-2">
+                      <label>Total Amount</label>
+                      <input
+                        type="number"
+                        className="form-control"
                       value={totalAmount.toFixed(2)}
                       readOnly
                     />
                   </div>
 
-                  <div className="mb-2">
+                  <div className=" col-xl-6 mb-2">
                     <label>Discount</label>
                     <input
                       type="number"
@@ -654,7 +650,7 @@ function BillingForm() {
                     />
                   </div>
 
-                  <div className="mb-2">
+                  <div className=" col-xl-6 mb-2">
                     <label>Net Amount</label>
                     <input
                       type="number"
@@ -664,7 +660,7 @@ function BillingForm() {
                     />
                   </div>
 
-                  <div className="mb-2">
+                  <div className=" col-xl-6 mb-2">
                     <label>CGST (%)</label>
                     <input
                       type="number"
@@ -679,7 +675,7 @@ function BillingForm() {
                     />
                   </div>
 
-                  <div className="mb-2">
+                  <div className="col-xl-6 mb-2">
                     <label>SGST (%)</label>
                     <input
                       type="number"
@@ -694,7 +690,7 @@ function BillingForm() {
                     />
                   </div>
 
-                  <div className="mb-2">
+                  <div className="col-xl-6 mb-2">
                     <label>IGST (%)</label>
                     <input
                       type="number"
@@ -708,8 +704,8 @@ function BillingForm() {
                       }
                     />
                   </div>
-
-                  <hr />
+</div>
+             
 
                   <div className="mb-0 fw-bold">
                     <label>Final Total</label>

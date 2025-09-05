@@ -14,7 +14,7 @@ async function generateQTNRNumber(categoryId) {
 
     // Find all quotations for this category, select only quotationNumber
     const existingQuotations = await Quotation.find({
-      rfqCategoryId: categoryId,
+      rfqCategoryId: categoryId, quotationNumberType: 'internal'
     }).select('quotationNumber');
 
     let nextNumber = category.rangeFrom;

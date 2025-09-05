@@ -52,10 +52,26 @@ function StockListERP() {
 
   return (
     <div className="content">
-      <h3 className="mb-3">Stock Inventory</h3>
-
+    <div className="d-md-flex d-block align-items-center justify-content-between page-breadcrumb">
+        <div className="my-auto">
+          <h2 className="mb-1">Stock Inventory</h2>
+          <nav>
+            <ol className="breadcrumb mb-0">
+              <li className="breadcrumb-item">
+                <a href="/dashboard"><i className="ti ti-smart-home"></i></a>
+              </li>
+              <li className="breadcrumb-item">
+                Inventory
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">Stock Inventory</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
       {/* Filters */}
-      <div className="row mb-4 ">
+      <div className="card">
+        <div className="card-header">
+      <div className="row">
         <div className="col-md-4">
           <input
             type="text"
@@ -80,7 +96,8 @@ function StockListERP() {
           </select>
         </div>
       </div>
-
+</div>
+<div className="card-body">
       {/* Stock Table */}
       <div className="table-responsive">
         <table className="table table-bordered table-hover table-sm align-middle">
@@ -149,6 +166,7 @@ function StockListERP() {
             )}
           </tbody>
         </table>
+      </div></div>
       </div>
     </div>
   );

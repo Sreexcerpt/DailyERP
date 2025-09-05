@@ -11,7 +11,7 @@ async function generateCTNRNumber(categoryId) {
     
     // Find ALL contracts for this category to determine the highest number
     const existingContracts = await Contract.find({ 
-      contractCategoryId: categoryId,
+      contractCategoryId: categoryId, contractNumberType: 'internal'
     }).select('contractNumber');
     
     let nextNumber = category.rangeFrom;

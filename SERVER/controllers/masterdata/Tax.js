@@ -5,11 +5,11 @@ exports.createTax = async (req, res) => {
   try {
     const { taxCode, taxName, cgst, sgst, igst, companyId, financialYear } = req.body;
     console.log("Creating tax entry:", req.body);
-    if (!taxCode || !taxName || !cgst || !sgst || !igst || !companyId || !financialYear) {
+    if (!taxCode || !taxName || !cgst || !sgst  || !companyId || !financialYear) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const tax = new Tax({ taxCode, taxName, cgst, sgst, igst, companyId, financialYear });
+    const tax = new Tax(req.body);
     await tax.save();
     res.status(201).json({ message: 'Tax added successfully', tax });
   } catch (err) {
