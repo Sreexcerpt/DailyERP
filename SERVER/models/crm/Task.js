@@ -1,3 +1,71 @@
+// const mongoose = require('mongoose');
+
+// const taskSchema = new mongoose.Schema({
+//   taskName: {
+//     type: String,
+//     required: true,
+//     trim: true
+//   },
+//   description: {
+//     type: String,
+//     trim: true,
+//     default: ''
+//   },
+//   projectId: {
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: 'Project',
+//     required: true
+//   },
+//   assignedTo: {
+//     type: String,
+//     trim: true
+//   },
+//   status: {
+//     type: String,
+//     enum: ['To Do', 'In Progress', 'Review', 'Testing', 'Done', 'Blocked'],
+//     default: 'To Do'
+//   },
+//   priority: {
+//     type: String,
+//     enum: ['Low', 'Medium', 'High', 'Critical'],
+//     default: 'Medium'
+//   },
+//   dueDate: {
+//     type: Date
+//   },
+//   estimatedHours: {
+//     type: Number,
+//     default: 0
+//   },
+//   actualHours: {
+//     type: Number,
+//     default: 0
+//   },
+//   category: {
+//     type: String,
+//     enum: ['Development', 'Testing', 'Design', 'Documentation', 'Bug Fix', 'Research', 'Other']
+//   },
+//   companyId: {
+//     type: String,
+//     required: true
+//   },
+//   financialYear: {
+//     type: String,
+//     required: true
+//   },
+//   isActive: {
+//     type: Boolean,
+//     default: true
+//   }
+// }, {
+//   timestamps: true
+// });
+
+// taskSchema.index({ companyId: 1, financialYear: 1 });
+// taskSchema.index({ projectId: 1 });
+
+// module.exports = mongoose.model('Task', taskSchema);
+
 const mongoose = require('mongoose');
 
 const taskSchema = new mongoose.Schema({
@@ -8,18 +76,18 @@ const taskSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    trim: true,
-    default: ''
+    trim: true
   },
   projectId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
     required: true
   },
-  assignedTo: {
-    type: String,
-    trim: true
-  },
+  // Changed from String to Array of ObjectIds to support multiple assignees
+  assignedTo: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee' // Assuming you have an Employee model
+  }],
   status: {
     type: String,
     enum: ['To Do', 'In Progress', 'Review', 'Testing', 'Done', 'Blocked'],
@@ -30,20 +98,20 @@ const taskSchema = new mongoose.Schema({
     enum: ['Low', 'Medium', 'High', 'Critical'],
     default: 'Medium'
   },
+  category: {
+    type: String,
+    enum: ['Development', 'Testing', 'Design', 'Documentation', 'Bug Fix', 'Research', 'Other']
+  },
   dueDate: {
     type: Date
   },
   estimatedHours: {
     type: Number,
-    default: 0
+    min: 0
   },
   actualHours: {
     type: Number,
-    default: 0
-  },
-  category: {
-    type: String,
-    enum: ['Development', 'Testing', 'Design', 'Documentation', 'Bug Fix', 'Research', 'Other']
+    min: 0
   },
   companyId: {
     type: String,
@@ -53,15 +121,23 @@ const taskSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  isActive: {
-    type: Boolean,
-    default: true
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee'
+  },
+  updatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee'
   }
 }, {
   timestamps: true
 });
 
+// Index for better query performance
 taskSchema.index({ companyId: 1, financialYear: 1 });
 taskSchema.index({ projectId: 1 });
+taskSchema.index({ assignedTo: 1 });
+taskSchema.index({ status: 1 });
+taskSchema.index({ dueDate: 1 });
 
 module.exports = mongoose.model('Task', taskSchema);

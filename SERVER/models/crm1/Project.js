@@ -36,15 +36,13 @@ const projectSchema = new mongoose.Schema({
     enum: ['Low', 'Medium', 'High', 'Critical'],
     default: 'Medium'
   },
-  projectManager: [{
-    type: mongoose.Schema.Types.ObjectId,
-       ref: "Employee",
-       required: true
-  }],
+  projectManager: {
+    type: String,
+    trim: true
+  },
   teamMembers: [{
-    type: mongoose.Schema.Types.ObjectId,
-       ref: "Employee",
-       required: true
+    type: String,
+    trim: true
   }],
   technologies: [{
     type: String,
